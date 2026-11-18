@@ -1,0 +1,11 @@
+# lenslate engine environment: screen OCR + CPU translators (installed by install.sh with uv into
+# ~/.local/share/lenslate/engine). The app itself runs on the system Python with the distro's PySide6,
+# because the KDE overlay layer (layer-shell-qt) only works with the distro's own Qt.
+rapidocr==3.10.0
+onnxruntime==1.31.1
+pillow==13.0.0
+numpy==2.5.4
+ctranslate2==4.8.5
+sentencepiece==0.2.2
+# Ultrafast reading (Japanese): meikiocr's code; its two models (~100 MB) download on first use
+meikiocr==0.3.5

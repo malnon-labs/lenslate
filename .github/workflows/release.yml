@@ -1,0 +1,39 @@
+# Release downloads: on a v* tag, check the tag matches version.py, run the offline tests, then build
+# lenslate-<version>.tar.gz (the source with install.sh, plus a COMMIT file so `lenslate --version` names the
+# exact commit) and its .sha256, and attach both to the GitHub release of that tag.
+name: release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: write   # attach files to the release
+jobs:
+  tarball:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Tag matches version.py
+        run: grep -q "^VERSION = \"${GITHUB_REF_NAME#v}\"" version.py
+      - name: Qt runtime libraries (offscreen)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libegl1 libgl1 libxkbcommon0 libfontconfig1 libdbus-1-3
+      - run: pip install PySide6-Essentials numpy
+      - run: python -m unittest discover -s tests -t .
+        env:
+          QT_QPA_PLATFORM: offscreen
+      - name: Build the tarball
+        run: |
+          V="${GITHUB_REF_NAME#v}"; N="lenslate-$V"
+          mkdir -p dist
+          git rev-parse --short=12 HEAD > COMMIT
+          git archive --format=tar --prefix="$N/" HEAD > "dist/$N.tar"
+          tar --append -f "dist/$N.tar" --transform "s,^,$N/," COMMIT
+          gzip -9n "dist/$N.tar"
+          (cd dist && sha256sum "$N.tar.gz" > "$N.tar.gz.sha256" && cat "$N.tar.gz.sha256")
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.tar.gz
+            dist/*.sha256

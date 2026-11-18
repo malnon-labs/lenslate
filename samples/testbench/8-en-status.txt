@@ -1,0 +1,32 @@
+Items
+Equipment
+Skills
+Status
+Quests
+Save
+Return to Title
+Elena   Lv 12   Apprentice Mage
+HP
+340 / 520
+MP
+45 / 90
+Attack
+88
+Defense
+61
+Agility
+73
+Luck
+19
+Equipped
+Weapon
+Oak Staff
+Shield
+None
+Head
+Traveler's Hat
+Body
+Novice Robe
+Accessory
+Starlight Pendant
+A strange pendant that slightly raises magic power. It glows faintly at night.

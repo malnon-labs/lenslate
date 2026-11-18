@@ -1,0 +1,28 @@
+Settings
+Master Volume
+80%
+Music Volume
+65%
+Sound Effects
+70%
+Voice Volume
+100%
+Text Speed
+Fast
+Auto-Advance Delay
+1.5 s
+Screen Mode
+Borderless Window
+Resolution
+1920 x 1080
+V-Sync
+On
+Subtitles
+On
+Language
+English
+Camera Shake
+Reduced
+Skip Unread Text
+Off
+Changes are saved automatically. Some options require a restart.

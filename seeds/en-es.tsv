@@ -1,0 +1,687 @@
+# lenslate seed pack: English -> Spanish
+# Common game menu / UI lines with their usual translation. Whole lines only.
+# Format: original<TAB>translation. Your own pack: ~/.local/share/lenslate/seeds/en-es.tsv (wins over this one).
+
+# Title screen and main menu
+New Game	Nueva partida
+Continue	Continuar
+Load Game	Cargar partida
+Load	Cargar
+Save Game	Guardar partida
+Save	Guardar
+Quick Save	Guardado rápido
+Quick Load	Carga rápida
+Quicksave	Guardado rápido
+Quickload	Carga rápida
+Autosave	Guardado automático
+Auto Save	Guardado automático
+Save Slot	Ranura de guardado
+Empty Slot	Ranura vacía
+Empty	Vacío
+No Data	Sin datos
+Delete Save	Borrar partida
+Overwrite	Sobrescribir
+Start	Empezar
+Start Game	Empezar partida
+Play	Jugar
+Resume	Reanudar
+Resume Game	Reanudar partida
+Options	Opciones
+Settings	Ajustes
+Preferences	Preferencias
+Config	Configuración
+Configuration	Configuración
+Extras	Extras
+Gallery	Galería
+CG Gallery	Galería de CG
+Music Room	Sala de música
+Scene Replay	Repetir escena
+Replay	Repetir
+Credits	Créditos
+Exit	Salir
+Quit	Salir
+Quit Game	Salir del juego
+Exit Game	Salir del juego
+Exit to Desktop	Salir al escritorio
+Quit to Desktop	Salir al escritorio
+Main Menu	Menú principal
+Return to Main Menu	Volver al menú principal
+Back to Main Menu	Volver al menú principal
+Return to Title	Volver a la pantalla de título
+Back to Title	Volver a la pantalla de título
+Title Screen	Pantalla de título
+To Title	Ir al título
+Title	Título
+Press Start	Pulsa Start
+Press Any Key	Pulsa cualquier tecla
+Press any key to continue	Pulsa cualquier tecla para continuar
+Press any button	Pulsa cualquier botón
+Click to continue	Haz clic para continuar
+Single Player	Un jugador
+Singleplayer	Un jugador
+Multiplayer	Multijugador
+Online	En línea
+Offline	Sin conexión
+Co-op	Cooperativo
+Campaign	Campaña
+Story	Historia
+Story Mode	Modo historia
+Free Play	Juego libre
+Arcade	Arcade
+Tutorial	Tutorial
+Training	Entrenamiento
+Practice	Práctica
+Challenge	Desafío
+Challenges	Desafíos
+Achievements	Logros
+Achievement Unlocked	Logro desbloqueado
+Leaderboard	Clasificación
+Leaderboards	Clasificaciones
+Statistics	Estadísticas
+Stats	Atributos
+Profile	Perfil
+Mods	Mods
+Help	Ayuda
+How to Play	Cómo jugar
+Controls	Controles
+Language	Idioma
+Version	Versión
+
+# Common buttons and dialogs
+OK	Aceptar
+Ok	Aceptar
+Cancel	Cancelar
+Yes	Sí
+No	No
+Confirm	Confirmar
+Accept	Aceptar
+Decline	Rechazar
+Apply	Aplicar
+Back	Volver
+Return	Volver
+Next	Siguiente
+Previous	Anterior
+Prev	Anterior
+Close	Cerrar
+Done	Hecho
+Finish	Terminar
+Skip	Saltar
+Retry	Reintentar
+Try Again	Intentar de nuevo
+Restart	Reiniciar
+Restart Level	Reiniciar nivel
+Reset	Restablecer
+Reset to Default	Restablecer valores predeterminados
+Reset to Defaults	Restablecer valores predeterminados
+Restore Defaults	Restaurar valores predeterminados
+Default	Predeterminado
+Defaults	Valores predeterminados
+Select	Seleccionar
+Choose	Elegir
+Change	Cambiar
+Edit	Editar
+Delete	Borrar
+Remove	Quitar
+Add	Añadir
+Create	Crear
+Rename	Renombrar
+Copy	Copiar
+Paste	Pegar
+Undo	Deshacer
+Redo	Rehacer
+Search	Buscar
+Filter	Filtrar
+Sort	Ordenar
+Sort by	Ordenar por
+All	Todos
+None	Ninguno
+Other	Otros
+More	Más
+Less	Menos
+Details	Detalles
+Info	Información
+Information	Información
+Warning	Advertencia
+Error	Error
+Notice	Aviso
+Loading	Cargando
+Now Loading	Cargando
+Saving	Guardando
+Please wait	Espera, por favor
+Connecting	Conectando
+Paused	En pausa
+Pause	Pausa
+Game Paused	Juego en pausa
+Unpause	Reanudar
+On	Activado
+Off	Desactivado
+Enabled	Activado
+Disabled	Desactivado
+Enable	Activar
+Disable	Desactivar
+Show	Mostrar
+Hide	Ocultar
+Open	Abrir
+Locked	Bloqueado
+Unlocked	Desbloqueado
+New	Nuevo
+Coming Soon	Próximamente
+Are you sure?	¿Estás seguro?
+Are you sure you want to quit?	¿Seguro que quieres salir?
+Are you sure you want to quit the game?	¿Seguro que quieres salir del juego?
+Are you sure you want to exit?	¿Seguro que quieres salir?
+Are you sure you want to delete this save?	¿Seguro que quieres borrar esta partida?
+Are you sure you want to overwrite this save?	¿Seguro que quieres sobrescribir esta partida?
+Return to the title screen?	¿Volver a la pantalla de título?
+Any unsaved progress will be lost.	Se perderá todo el progreso no guardado.
+Unsaved progress will be lost.	Se perderá el progreso no guardado.
+Game saved.	Partida guardada.
+Game Saved	Partida guardada
+Saved	Guardado
+Save complete.	Guardado completado.
+Load complete.	Carga completada.
+Save failed.	Error al guardar.
+Do you want to save?	¿Quieres guardar?
+Save changes?	¿Guardar los cambios?
+Apply changes?	¿Aplicar los cambios?
+Keep these settings?	¿Mantener esta configuración?
+
+# Settings: video
+Graphics	Gráficos
+Video	Vídeo
+Display	Pantalla
+Screen	Pantalla
+Resolution	Resolución
+Fullscreen	Pantalla completa
+Full Screen	Pantalla completa
+Windowed	Ventana
+Window Mode	Modo de ventana
+Borderless	Sin bordes
+Borderless Window	Ventana sin bordes
+Display Mode	Modo de pantalla
+Screen Mode	Modo de pantalla
+V-Sync	V-Sync
+VSync	V-Sync
+Vertical Sync	Sincronización vertical
+Frame Rate	Velocidad de fotogramas
+Framerate	Velocidad de fotogramas
+Frame Rate Limit	Límite de fotogramas
+Max FPS	FPS máximos
+Show FPS	Mostrar FPS
+Brightness	Brillo
+Contrast	Contraste
+Gamma	Gamma
+Quality	Calidad
+Graphics Quality	Calidad gráfica
+Texture Quality	Calidad de texturas
+Shadow Quality	Calidad de sombras
+Shadows	Sombras
+Textures	Texturas
+Anti-Aliasing	Antialiasing
+Antialiasing	Antialiasing
+Anisotropic Filtering	Filtrado anisotrópico
+Ambient Occlusion	Oclusión ambiental
+Motion Blur	Desenfoque de movimiento
+Depth of Field	Profundidad de campo
+Bloom	Resplandor
+Film Grain	Grano de película
+Chromatic Aberration	Aberración cromática
+Lens Flare	Destello de lente
+Field of View	Campo de visión
+FOV	Campo de visión
+Render Scale	Escala de renderizado
+Render Distance	Distancia de renderizado
+View Distance	Distancia de visión
+Draw Distance	Distancia de dibujado
+Effects	Efectos
+Effects Quality	Calidad de efectos
+Post Processing	Posprocesado
+Post-Processing	Posprocesado
+Lighting	Iluminación
+Lighting Quality	Calidad de iluminación
+Reflections	Reflejos
+Particles	Partículas
+Foliage	Vegetación
+Vegetation	Vegetación
+Low	Bajo
+Medium	Medio
+High	Alto
+Very High	Muy alto
+Ultra	Ultra
+Very Low	Muy bajo
+Epic	Épico
+Custom	Personalizado
+Auto	Automático
+Automatic	Automático
+Monitor	Monitor
+Aspect Ratio	Relación de aspecto
+Refresh Rate	Frecuencia de actualización
+HDR	HDR
+Subtitles	Subtítulos
+Subtitle Size	Tamaño de subtítulos
+Text Size	Tamaño del texto
+Font Size	Tamaño de fuente
+Colorblind Mode	Modo daltónico
+Accessibility	Accesibilidad
+Interface	Interfaz
+User Interface	Interfaz de usuario
+UI Scale	Escala de la interfaz
+HUD	HUD
+Show HUD	Mostrar HUD
+Camera Shake	Vibración de cámara
+Screen Shake	Vibración de pantalla
+
+# Settings: audio
+Audio	Audio
+Sound	Sonido
+Volume	Volumen
+Master Volume	Volumen general
+Music	Música
+Music Volume	Volumen de la música
+BGM	Música de fondo
+BGM Volume	Volumen de la música de fondo
+Sound Effects	Efectos de sonido
+SFX	Efectos de sonido
+SFX Volume	Volumen de efectos
+SE Volume	Volumen de efectos
+Voice	Voz
+Voices	Voces
+Voice Volume	Volumen de voces
+Dialogue Volume	Volumen de diálogos
+Ambient	Ambiente
+Ambience	Ambiente
+Mute	Silenciar
+Mute All	Silenciar todo
+Mute when unfocused	Silenciar en segundo plano
+Speaker	Altavoz
+Headphones	Auriculares
+Microphone	Micrófono
+Voice Chat	Chat de voz
+Audio Language	Idioma del audio
+Text Language	Idioma del texto
+
+# Settings: game, text, controls
+Gameplay	Jugabilidad
+Game	Juego
+General	General
+Difficulty	Dificultad
+Easy	Fácil
+Normal	Normal
+Hard	Difícil
+Very Hard	Muy difícil
+Nightmare	Pesadilla
+Casual	Casual
+Text Speed	Velocidad del texto
+Message Speed	Velocidad de los mensajes
+Auto Mode	Modo automático
+Auto Speed	Velocidad automática
+Auto-Forward	Avance automático
+Auto Forward Time	Tiempo de avance automático
+Skip Mode	Modo de salto
+Skip Unread Text	Saltar texto no leído
+Skip Read Text	Saltar texto leído
+Skip All	Saltar todo
+Unread Text	Texto no leído
+Window Opacity	Opacidad de la ventana
+Text Window	Ventana de texto
+Message Window	Ventana de mensajes
+Hide Window	Ocultar ventana
+Backlog	Historial
+Log	Registro
+History	Historial
+Rollback	Retroceder
+Fast Forward	Avance rápido
+Keyboard	Teclado
+Mouse	Ratón
+Gamepad	Mando
+Controller	Mando
+Keyboard and Mouse	Teclado y ratón
+Key Bindings	Asignación de teclas
+Keybindings	Asignación de teclas
+Key Config	Configurar teclas
+Mouse Sensitivity	Sensibilidad del ratón
+Sensitivity	Sensibilidad
+Invert Y Axis	Invertir eje Y
+Invert Mouse	Invertir ratón
+Vibration	Vibración
+Rumble	Vibración
+Dead Zone	Zona muerta
+Deadzone	Zona muerta
+Aim Assist	Asistencia de apuntado
+Toggle	Alternar
+Hold	Mantener
+Toggle Crouch	Alternar agacharse
+Toggle Sprint	Alternar esprint
+Press a key	Pulsa una tecla
+Unbound	Sin asignar
+
+# Gameplay menus
+Inventory	Inventario
+Items	Objetos
+Item	Objeto
+Key Items	Objetos clave
+Equipment	Equipo
+Equip	Equipar
+Unequip	Desequipar
+Equipped	Equipado
+Use	Usar
+Drop	Soltar
+Discard	Descartar
+Throw	Lanzar
+Pick Up	Recoger
+Take	Tomar
+Take All	Tomar todo
+Loot	Saquear
+Examine	Examinar
+Inspect	Inspeccionar
+Interact	Interactuar
+Talk	Hablar
+Skills	Habilidades
+Skill	Habilidad
+Abilities	Habilidades
+Magic	Magia
+Spells	Hechizos
+Status	Estado
+Character	Personaje
+Characters	Personajes
+Party	Grupo
+Formation	Formación
+Team	Equipo
+Map	Mapa
+World Map	Mapa del mundo
+Quests	Misiones
+Quest	Misión
+Quest Log	Diario de misiones
+Journal	Diario
+Missions	Misiones
+Mission	Misión
+Objectives	Objetivos
+Objective	Objetivo
+Main Quest	Misión principal
+Side Quest	Misión secundaria
+Side Quests	Misiones secundarias
+Quest Complete	Misión completada
+Quest Completed	Misión completada
+Quest Failed	Misión fallida
+Mission Complete	Misión completada
+Mission Failed	Misión fallida
+New Quest	Nueva misión
+Rewards	Recompensas
+Reward	Recompensa
+Crafting	Fabricación
+Craft	Fabricar
+Recipes	Recetas
+Materials	Materiales
+Shop	Tienda
+Store	Tienda
+Buy	Comprar
+Sell	Vender
+Trade	Comerciar
+Price	Precio
+Gold	Oro
+Money	Dinero
+Not enough money	No tienes suficiente dinero
+Not enough gold	No tienes suficiente oro
+Quantity	Cantidad
+Owned	En posesión
+Weapon	Arma
+Weapons	Armas
+Armor	Armadura
+Armour	Armadura
+Shield	Escudo
+Helmet	Casco
+Head	Cabeza
+Body	Cuerpo
+Hands	Manos
+Legs	Piernas
+Feet	Pies
+Accessory	Accesorio
+Accessories	Accesorios
+Consumables	Consumibles
+Potion	Poción
+Potions	Pociones
+Healing Potion	Poción curativa
+Health Potion	Poción de salud
+Mana Potion	Poción de maná
+Food	Comida
+Ammo	Munición
+Level	Nivel
+Level Up	Subes de nivel
+Level Up!	¡Subes de nivel!
+Experience	Experiencia
+EXP	EXP
+XP	PX
+HP	PV
+MP	PM
+Health	Salud
+Mana	Maná
+Stamina	Aguante
+Energy	Energía
+Hunger	Hambre
+Thirst	Sed
+Attack	Ataque
+Defense	Defensa
+Defence	Defensa
+Strength	Fuerza
+Dexterity	Destreza
+Agility	Agilidad
+Intelligence	Inteligencia
+Wisdom	Sabiduría
+Vitality	Vitalidad
+Constitution	Constitución
+Charisma	Carisma
+Luck	Suerte
+Speed	Velocidad
+Accuracy	Precisión
+Evasion	Evasión
+Critical	Crítico
+Critical Hit	Golpe crítico
+Critical Hit!	¡Golpe crítico!
+Damage	Daño
+Magic Attack	Ataque mágico
+Magic Defense	Defensa mágica
+Resistance	Resistencia
+Weight	Peso
+Durability	Durabilidad
+Rarity	Rareza
+Common	Común
+Uncommon	Poco común
+Rare	Raro
+Legendary	Legendario
+Unique	Único
+Skill Points	Puntos de habilidad
+Skill Tree	Árbol de habilidades
+Upgrade	Mejorar
+Upgrades	Mejoras
+Fight	Luchar
+Battle	Batalla
+Guard	Defender
+Defend	Defender
+Flee	Huir
+Wait	Esperar
+End Turn	Terminar turno
+Turn	Turno
+Your Turn	Tu turno
+Enemy Turn	Turno del enemigo
+Victory	Victoria
+Victory!	¡Victoria!
+Defeat	Derrota
+You Win	Has ganado
+You Win!	¡Has ganado!
+You Lose	Has perdido
+You Died	Has muerto
+Game Over	Fin del juego
+GAME OVER	FIN DEL JUEGO
+Continue?	¿Continuar?
+Stage Clear	Fase superada
+Stage Clear!	¡Fase superada!
+Level Complete	Nivel completado
+Level Select	Seleccionar nivel
+Stage Select	Seleccionar fase
+Chapter	Capítulo
+Chapter Select	Seleccionar capítulo
+Chapters	Capítulos
+Prologue	Prólogo
+Epilogue	Epílogo
+Ending	Final
+The End	Fin
+To be continued	Continuará
+Score	Puntuación
+High Score	Récord
+Best	Mejor
+Time	Tiempo
+Best Time	Mejor tiempo
+Total	Total
+Lives	Vidas
+Coins	Monedas
+Kills	Bajas
+Deaths	Muertes
+Round	Ronda
+Wave	Oleada
+Boss	Jefe
+Enemy	Enemigo
+Enemies	Enemigos
+Player	Jugador
+Player 1	Jugador 1
+Player 2	Jugador 2
+Ready	Listo
+Ready?	¿Listo?
+Go!	¡Ya!
+Checkpoint	Punto de control
+Checkpoint Reached	Punto de control alcanzado
+Respawn	Reaparecer
+Rest	Descansar
+Sleep	Dormir
+Travel	Viajar
+Fast Travel	Viaje rápido
+Day	Día
+Night	Noche
+Morning	Mañana
+Afternoon	Tarde
+Evening	Atardecer
+Calendar	Calendario
+Tips	Consejos
+Tip	Consejo
+Hint	Pista
+Hints	Pistas
+Encyclopedia	Enciclopedia
+Bestiary	Bestiario
+Codex	Códice
+Database	Base de datos
+Notes	Notas
+Letters	Cartas
+Messages	Mensajes
+Mail	Correo
+Phone	Teléfono
+Relationship	Relación
+Affection	Afecto
+Friendship	Amistad
+Gift	Regalo
+Give	Dar
+Leave	Salir
+Go	Ir
+Move	Mover
+Jump	Saltar
+Crouch	Agacharse
+Sprint	Esprintar
+Walk	Caminar
+Dodge	Esquivar
+Block	Bloquear
+Reload	Recargar
+Aim	Apuntar
+Shoot	Disparar
+Melee	Cuerpo a cuerpo
+Interact with	Interactuar con
+Hold to skip	Mantén pulsado para saltar
+Hold to Skip	Mantén pulsado para saltar
+
+# Online / multiplayer
+Host	Crear partida
+Host Game	Crear partida
+Join	Unirse
+Join Game	Unirse a la partida
+Server	Servidor
+Servers	Servidores
+Server Browser	Lista de servidores
+Lobby	Sala
+Invite	Invitar
+Invite Friends	Invitar a amigos
+Friends	Amigos
+Chat	Chat
+Kick	Expulsar
+Ban	Banear
+Disconnect	Desconectar
+Disconnected	Desconectado
+Connection lost	Conexión perdida
+Reconnect	Reconectar
+Matchmaking	Emparejamiento
+Searching for players	Buscando jugadores
+Ping	Ping
+Password	Contraseña
+Username	Nombre de usuario
+Name	Nombre
+Enter your name	Introduce tu nombre
+Enter name	Introduce el nombre
+Character Creation	Creación de personaje
+Customize	Personalizar
+Customization	Personalización
+Appearance	Apariencia
+Random	Aleatorio
+Randomize	Aleatorio
+Male	Masculino
+Female	Femenino
+Age	Edad
+Class	Clase
+Race	Raza
+World	Mundo
+Worlds	Mundos
+Create World	Crear mundo
+New World	Nuevo mundo
+Seed	Semilla
+
+# Store / DLC / misc
+DLC	DLC
+Purchase	Comprar
+Free	Gratis
+Sold Out	Agotado
+Out of stock	Agotado
+Owned!	¡Adquirido!
+News	Noticias
+Feedback	Comentarios
+Report Bug	Informar de un error
+Terms of Service	Condiciones del servicio
+Privacy Policy	Política de privacidad
+Account	Cuenta
+Log In	Iniciar sesión
+Login	Iniciar sesión
+Log Out	Cerrar sesión
+Logout	Cerrar sesión
+Sign In	Iniciar sesión
+Sign Up	Registrarse
+Register	Registrarse
+Update	Actualizar
+Download	Descargar
+Downloading	Descargando
+Install	Instalar
+Installing	Instalando
+Processing	Procesando
+Complete	Completado
+Completed	Completado
+Failed	Error
+Success	Éxito
+Unknown	Desconocido
+???	???
+Page	Página
+Day 1	Día 1
+Chapter 1	Capítulo 1
+Click	Haz clic
+Tap	Toca
+Left Click	Clic izquierdo
+Right Click	Clic derecho
+Scroll	Desplazar
+Zoom	Zoom
+Zoom In	Acercar
+Zoom Out	Alejar
+Rotate	Girar
+Screenshot	Captura de pantalla
+Photo Mode	Modo foto

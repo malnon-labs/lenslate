@@ -1,0 +1,687 @@
+# lenslate seed pack: English -> Chinese (Simplified)
+# Common game menu / UI lines with their usual translation. Whole lines only.
+# Format: original<TAB>translation. Your own pack: ~/.local/share/lenslate/seeds/en-zh.tsv (wins over this one).
+
+# Title screen and main menu
+New Game	新游戏
+Continue	继续
+Load Game	读取游戏
+Load	读取
+Save Game	保存游戏
+Save	保存
+Quick Save	快速保存
+Quick Load	快速读取
+Quicksave	快速保存
+Quickload	快速读取
+Autosave	自动保存
+Auto Save	自动保存
+Save Slot	存档位
+Empty Slot	空存档位
+Empty	空
+No Data	无数据
+Delete Save	删除存档
+Overwrite	覆盖
+Start	开始
+Start Game	开始游戏
+Play	开始游戏
+Resume	继续游戏
+Resume Game	继续游戏
+Options	选项
+Settings	设置
+Preferences	偏好设置
+Config	设置
+Configuration	设置
+Extras	额外内容
+Gallery	画廊
+CG Gallery	CG鉴赏
+Music Room	音乐鉴赏
+Scene Replay	场景回放
+Replay	回放
+Credits	制作人员
+Exit	退出
+Quit	退出
+Quit Game	退出游戏
+Exit Game	退出游戏
+Exit to Desktop	退出到桌面
+Quit to Desktop	退出到桌面
+Main Menu	主菜单
+Return to Main Menu	返回主菜单
+Back to Main Menu	返回主菜单
+Return to Title	返回标题画面
+Back to Title	返回标题画面
+Title Screen	标题画面
+To Title	返回标题
+Title	标题
+Press Start	按开始键
+Press Any Key	按任意键
+Press any key to continue	按任意键继续
+Press any button	按任意按钮
+Click to continue	点击继续
+Single Player	单人游戏
+Singleplayer	单人游戏
+Multiplayer	多人游戏
+Online	在线
+Offline	离线
+Co-op	合作
+Campaign	战役
+Story	剧情
+Story Mode	剧情模式
+Free Play	自由模式
+Arcade	街机模式
+Tutorial	教程
+Training	训练
+Practice	练习
+Challenge	挑战
+Challenges	挑战
+Achievements	成就
+Achievement Unlocked	成就已解锁
+Leaderboard	排行榜
+Leaderboards	排行榜
+Statistics	统计
+Stats	属性
+Profile	个人资料
+Mods	模组
+Help	帮助
+How to Play	游戏说明
+Controls	操作
+Language	语言
+Version	版本
+
+# Common buttons and dialogs
+OK	确定
+Ok	确定
+Cancel	取消
+Yes	是
+No	否
+Confirm	确认
+Accept	接受
+Decline	拒绝
+Apply	应用
+Back	返回
+Return	返回
+Next	下一步
+Previous	上一步
+Prev	上一个
+Close	关闭
+Done	完成
+Finish	完成
+Skip	跳过
+Retry	重试
+Try Again	再试一次
+Restart	重新开始
+Restart Level	重新开始关卡
+Reset	重置
+Reset to Default	恢复默认
+Reset to Defaults	恢复默认
+Restore Defaults	恢复默认
+Default	默认
+Defaults	默认
+Select	选择
+Choose	选择
+Change	更改
+Edit	编辑
+Delete	删除
+Remove	移除
+Add	添加
+Create	创建
+Rename	重命名
+Copy	复制
+Paste	粘贴
+Undo	撤销
+Redo	重做
+Search	搜索
+Filter	筛选
+Sort	排序
+Sort by	排序方式
+All	全部
+None	无
+Other	其他
+More	更多
+Less	更少
+Details	详情
+Info	信息
+Information	信息
+Warning	警告
+Error	错误
+Notice	提示
+Loading	加载中
+Now Loading	加载中
+Saving	保存中
+Please wait	请稍候
+Connecting	连接中
+Paused	已暂停
+Pause	暂停
+Game Paused	游戏已暂停
+Unpause	继续
+On	开
+Off	关
+Enabled	已启用
+Disabled	已禁用
+Enable	启用
+Disable	禁用
+Show	显示
+Hide	隐藏
+Open	打开
+Locked	未解锁
+Unlocked	已解锁
+New	新
+Coming Soon	敬请期待
+Are you sure?	确定吗？
+Are you sure you want to quit?	确定要退出吗？
+Are you sure you want to quit the game?	确定要退出游戏吗？
+Are you sure you want to exit?	确定要退出吗？
+Are you sure you want to delete this save?	确定要删除这个存档吗？
+Are you sure you want to overwrite this save?	确定要覆盖这个存档吗？
+Return to the title screen?	返回标题画面？
+Any unsaved progress will be lost.	未保存的进度将会丢失。
+Unsaved progress will be lost.	未保存的进度将会丢失。
+Game saved.	游戏已保存。
+Game Saved	游戏已保存
+Saved	已保存
+Save complete.	保存完成。
+Load complete.	读取完成。
+Save failed.	保存失败。
+Do you want to save?	要保存吗？
+Save changes?	保存更改？
+Apply changes?	应用更改？
+Keep these settings?	保留这些设置？
+
+# Settings: video
+Graphics	图形
+Video	视频
+Display	显示
+Screen	画面
+Resolution	分辨率
+Fullscreen	全屏
+Full Screen	全屏
+Windowed	窗口化
+Window Mode	窗口模式
+Borderless	无边框
+Borderless Window	无边框窗口
+Display Mode	显示模式
+Screen Mode	画面模式
+V-Sync	垂直同步
+VSync	垂直同步
+Vertical Sync	垂直同步
+Frame Rate	帧率
+Framerate	帧率
+Frame Rate Limit	帧率上限
+Max FPS	最大帧率
+Show FPS	显示帧率
+Brightness	亮度
+Contrast	对比度
+Gamma	伽马
+Quality	画质
+Graphics Quality	画质
+Texture Quality	纹理质量
+Shadow Quality	阴影质量
+Shadows	阴影
+Textures	纹理
+Anti-Aliasing	抗锯齿
+Antialiasing	抗锯齿
+Anisotropic Filtering	各向异性过滤
+Ambient Occlusion	环境光遮蔽
+Motion Blur	动态模糊
+Depth of Field	景深
+Bloom	泛光
+Film Grain	胶片颗粒
+Chromatic Aberration	色差
+Lens Flare	镜头光晕
+Field of View	视野
+FOV	视野
+Render Scale	渲染比例
+Render Distance	渲染距离
+View Distance	视距
+Draw Distance	视距
+Effects	特效
+Effects Quality	特效质量
+Post Processing	后期处理
+Post-Processing	后期处理
+Lighting	光照
+Lighting Quality	光照质量
+Reflections	反射
+Particles	粒子
+Foliage	植被
+Vegetation	植被
+Low	低
+Medium	中
+High	高
+Very High	很高
+Ultra	极高
+Very Low	很低
+Epic	史诗
+Custom	自定义
+Auto	自动
+Automatic	自动
+Monitor	显示器
+Aspect Ratio	宽高比
+Refresh Rate	刷新率
+HDR	HDR
+Subtitles	字幕
+Subtitle Size	字幕大小
+Text Size	文字大小
+Font Size	字体大小
+Colorblind Mode	色盲模式
+Accessibility	辅助功能
+Interface	界面
+User Interface	用户界面
+UI Scale	界面缩放
+HUD	HUD
+Show HUD	显示HUD
+Camera Shake	镜头晃动
+Screen Shake	屏幕震动
+
+# Settings: audio
+Audio	音频
+Sound	声音
+Volume	音量
+Master Volume	主音量
+Music	音乐
+Music Volume	音乐音量
+BGM	背景音乐
+BGM Volume	背景音乐音量
+Sound Effects	音效
+SFX	音效
+SFX Volume	音效音量
+SE Volume	音效音量
+Voice	语音
+Voices	语音
+Voice Volume	语音音量
+Dialogue Volume	对话音量
+Ambient	环境音
+Ambience	环境音
+Mute	静音
+Mute All	全部静音
+Mute when unfocused	失去焦点时静音
+Speaker	扬声器
+Headphones	耳机
+Microphone	麦克风
+Voice Chat	语音聊天
+Audio Language	音频语言
+Text Language	文字语言
+
+# Settings: game, text, controls
+Gameplay	游戏性
+Game	游戏
+General	常规
+Difficulty	难度
+Easy	简单
+Normal	普通
+Hard	困难
+Very Hard	非常困难
+Nightmare	噩梦
+Casual	休闲
+Text Speed	文字速度
+Message Speed	文字速度
+Auto Mode	自动模式
+Auto Speed	自动速度
+Auto-Forward	自动前进
+Auto Forward Time	自动前进时间
+Skip Mode	快进模式
+Skip Unread Text	跳过未读文本
+Skip Read Text	跳过已读文本
+Skip All	全部跳过
+Unread Text	未读文本
+Window Opacity	窗口透明度
+Text Window	文本框
+Message Window	文本框
+Hide Window	隐藏文本框
+Backlog	历史记录
+Log	记录
+History	历史记录
+Rollback	回退
+Fast Forward	快进
+Keyboard	键盘
+Mouse	鼠标
+Gamepad	手柄
+Controller	手柄
+Keyboard and Mouse	键盘和鼠标
+Key Bindings	按键绑定
+Keybindings	按键绑定
+Key Config	按键设置
+Mouse Sensitivity	鼠标灵敏度
+Sensitivity	灵敏度
+Invert Y Axis	反转Y轴
+Invert Mouse	反转鼠标
+Vibration	振动
+Rumble	振动
+Dead Zone	死区
+Deadzone	死区
+Aim Assist	辅助瞄准
+Toggle	切换
+Hold	按住
+Toggle Crouch	切换蹲伏
+Toggle Sprint	切换冲刺
+Press a key	请按一个键
+Unbound	未绑定
+
+# Gameplay menus
+Inventory	物品栏
+Items	物品
+Item	物品
+Key Items	重要物品
+Equipment	装备
+Equip	装备
+Unequip	卸下
+Equipped	已装备
+Use	使用
+Drop	丢弃
+Discard	丢弃
+Throw	投掷
+Pick Up	拾取
+Take	拿取
+Take All	全部拿取
+Loot	搜刮
+Examine	检查
+Inspect	检查
+Interact	互动
+Talk	交谈
+Skills	技能
+Skill	技能
+Abilities	能力
+Magic	魔法
+Spells	法术
+Status	状态
+Character	角色
+Characters	角色
+Party	队伍
+Formation	队形
+Team	队伍
+Map	地图
+World Map	世界地图
+Quests	任务
+Quest	任务
+Quest Log	任务日志
+Journal	日志
+Missions	任务
+Mission	任务
+Objectives	目标
+Objective	目标
+Main Quest	主线任务
+Side Quest	支线任务
+Side Quests	支线任务
+Quest Complete	任务完成
+Quest Completed	任务完成
+Quest Failed	任务失败
+Mission Complete	任务完成
+Mission Failed	任务失败
+New Quest	新任务
+Rewards	奖励
+Reward	奖励
+Crafting	制作
+Craft	制作
+Recipes	配方
+Materials	材料
+Shop	商店
+Store	商店
+Buy	购买
+Sell	出售
+Trade	交易
+Price	价格
+Gold	金币
+Money	金钱
+Not enough money	钱不够
+Not enough gold	金币不足
+Quantity	数量
+Owned	持有
+Weapon	武器
+Weapons	武器
+Armor	防具
+Armour	防具
+Shield	盾牌
+Helmet	头盔
+Head	头部
+Body	身体
+Hands	手部
+Legs	腿部
+Feet	脚部
+Accessory	饰品
+Accessories	饰品
+Consumables	消耗品
+Potion	药水
+Potions	药水
+Healing Potion	治疗药水
+Health Potion	生命药水
+Mana Potion	法力药水
+Food	食物
+Ammo	弹药
+Level	等级
+Level Up	升级
+Level Up!	升级！
+Experience	经验值
+EXP	经验值
+XP	经验值
+HP	HP
+MP	MP
+Health	生命值
+Mana	法力
+Stamina	耐力
+Energy	能量
+Hunger	饥饿
+Thirst	口渴
+Attack	攻击
+Defense	防御
+Defence	防御
+Strength	力量
+Dexterity	敏捷
+Agility	敏捷
+Intelligence	智力
+Wisdom	感知
+Vitality	体力
+Constitution	体质
+Charisma	魅力
+Luck	幸运
+Speed	速度
+Accuracy	命中
+Evasion	闪避
+Critical	暴击
+Critical Hit	暴击
+Critical Hit!	暴击！
+Damage	伤害
+Magic Attack	魔法攻击
+Magic Defense	魔法防御
+Resistance	抗性
+Weight	重量
+Durability	耐久度
+Rarity	稀有度
+Common	普通
+Uncommon	优秀
+Rare	稀有
+Legendary	传说
+Unique	独特
+Skill Points	技能点
+Skill Tree	技能树
+Upgrade	升级
+Upgrades	升级
+Fight	战斗
+Battle	战斗
+Guard	防御
+Defend	防御
+Flee	逃跑
+Wait	等待
+End Turn	结束回合
+Turn	回合
+Your Turn	你的回合
+Enemy Turn	敌人回合
+Victory	胜利
+Victory!	胜利！
+Defeat	失败
+You Win	你赢了
+You Win!	你赢了！
+You Lose	你输了
+You Died	你死了
+Game Over	游戏结束
+GAME OVER	游戏结束
+Continue?	继续？
+Stage Clear	关卡完成
+Stage Clear!	关卡完成！
+Level Complete	关卡完成
+Level Select	选择关卡
+Stage Select	选择关卡
+Chapter	章节
+Chapter Select	选择章节
+Chapters	章节
+Prologue	序章
+Epilogue	尾声
+Ending	结局
+The End	完
+To be continued	未完待续
+Score	分数
+High Score	最高分
+Best	最佳
+Time	时间
+Best Time	最佳时间
+Total	总计
+Lives	生命
+Coins	金币
+Kills	击杀
+Deaths	死亡
+Round	回合
+Wave	波次
+Boss	首领
+Enemy	敌人
+Enemies	敌人
+Player	玩家
+Player 1	玩家1
+Player 2	玩家2
+Ready	准备
+Ready?	准备好了吗？
+Go!	开始！
+Checkpoint	检查点
+Checkpoint Reached	已到达检查点
+Respawn	重生
+Rest	休息
+Sleep	睡觉
+Travel	旅行
+Fast Travel	快速旅行
+Day	天
+Night	夜晚
+Morning	早上
+Afternoon	下午
+Evening	傍晚
+Calendar	日历
+Tips	提示
+Tip	提示
+Hint	提示
+Hints	提示
+Encyclopedia	百科
+Bestiary	怪物图鉴
+Codex	典籍
+Database	数据库
+Notes	笔记
+Letters	信件
+Messages	消息
+Mail	邮件
+Phone	手机
+Relationship	关系
+Affection	好感度
+Friendship	友情
+Gift	礼物
+Give	给予
+Leave	离开
+Go	前往
+Move	移动
+Jump	跳跃
+Crouch	蹲伏
+Sprint	冲刺
+Walk	行走
+Dodge	闪避
+Block	格挡
+Reload	装弹
+Aim	瞄准
+Shoot	射击
+Melee	近战
+Interact with	互动
+Hold to skip	按住跳过
+Hold to Skip	按住跳过
+
+# Online / multiplayer
+Host	创建主机
+Host Game	创建游戏
+Join	加入
+Join Game	加入游戏
+Server	服务器
+Servers	服务器
+Server Browser	服务器列表
+Lobby	大厅
+Invite	邀请
+Invite Friends	邀请好友
+Friends	好友
+Chat	聊天
+Kick	踢出
+Ban	封禁
+Disconnect	断开连接
+Disconnected	已断开连接
+Connection lost	连接已断开
+Reconnect	重新连接
+Matchmaking	匹配
+Searching for players	正在寻找玩家
+Ping	延迟
+Password	密码
+Username	用户名
+Name	名字
+Enter your name	请输入你的名字
+Enter name	输入名字
+Character Creation	角色创建
+Customize	自定义
+Customization	自定义
+Appearance	外观
+Random	随机
+Randomize	随机
+Male	男
+Female	女
+Age	年龄
+Class	职业
+Race	种族
+World	世界
+Worlds	世界
+Create World	创建世界
+New World	新世界
+Seed	种子
+
+# Store / DLC / misc
+DLC	DLC
+Purchase	购买
+Free	免费
+Sold Out	已售罄
+Out of stock	缺货
+Owned!	已拥有！
+News	新闻
+Feedback	反馈
+Report Bug	报告错误
+Terms of Service	服务条款
+Privacy Policy	隐私政策
+Account	账号
+Log In	登录
+Login	登录
+Log Out	退出登录
+Logout	退出登录
+Sign In	登录
+Sign Up	注册
+Register	注册
+Update	更新
+Download	下载
+Downloading	下载中
+Install	安装
+Installing	安装中
+Processing	处理中
+Complete	完成
+Completed	已完成
+Failed	失败
+Success	成功
+Unknown	未知
+???	???
+Page	页
+Day 1	第1天
+Chapter 1	第1章
+Click	点击
+Tap	点击
+Left Click	鼠标左键
+Right Click	鼠标右键
+Scroll	滚动
+Zoom	缩放
+Zoom In	放大
+Zoom Out	缩小
+Rotate	旋转
+Screenshot	截图
+Photo Mode	拍照模式

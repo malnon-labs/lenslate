@@ -1,0 +1,10 @@
+# local environments and caches
+ocr-venv/
+mt-venv/
+engine/
+__pycache__/
+*.pyc
+# old hand-made backups (history is in git from now on)
+*.bak
+*.bak[0-9]*
+*.backup*

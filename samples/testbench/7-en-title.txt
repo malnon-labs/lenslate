@@ -1,0 +1,9 @@
+Ashes of the Silent Crown
+> New Game
+  Continue
+  Load Game
+  Options
+  Credits
+  Quit to Desktop
+v0.9.4 beta
+Press Enter to select, Esc to go back

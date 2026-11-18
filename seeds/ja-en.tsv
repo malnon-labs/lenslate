@@ -1,0 +1,323 @@
+# lenslate seed pack: Japanese -> English
+# Common game menu / UI lines with their usual translation. Whole lines only.
+# Format: original<TAB>translation. Your own pack: ~/.local/share/lenslate/seeds/ja-en.tsv (wins over this one).
+
+# Title screen and main menu
+ニューゲーム	New Game
+はじめから	New Game
+始めから	New Game
+最初から	From the Beginning
+つづきから	Continue
+続きから	Continue
+コンティニュー	Continue
+ロード	Load
+セーブ	Save
+クイックセーブ	Quick Save
+クイックロード	Quick Load
+オートセーブ	Autosave
+データなし	No Data
+NO DATA	No Data
+空きデータ	Empty Slot
+セーブデータ	Save Data
+セーブしました	Saved.
+セーブしました。	Saved.
+ロードしました	Loaded.
+ロードしました。	Loaded.
+セーブしますか？	Save?
+ロードしますか？	Load?
+上書きしますか？	Overwrite?
+このデータに上書きしますか？	Overwrite this save?
+削除しますか？	Delete?
+オプション	Options
+設定	Settings
+コンフィグ	Config
+環境設定	Settings
+システム	System
+おまけ	Extras
+エクストラ	Extras
+ギャラリー	Gallery
+CGギャラリー	CG Gallery
+CGモード	CG Mode
+回想	Recollection
+回想モード	Recollection Mode
+シーン回想	Scene Replay
+音楽鑑賞	Music Room
+サウンドモード	Sound Mode
+クレジット	Credits
+スタッフ	Staff
+スタッフロール	Staff Credits
+終了	Quit
+ゲーム終了	Quit Game
+ゲームを終了	Quit Game
+ゲームを終了する	Quit the game
+ゲームを終了しますか？	Quit the game?
+終了しますか？	Quit?
+やめる	Quit
+タイトル	Title
+タイトルへ	To Title
+タイトルに戻る	Return to Title
+タイトルへ戻る	Return to Title
+タイトル画面に戻る	Return to Title Screen
+タイトルに戻りますか？	Return to the title screen?
+メインメニュー	Main Menu
+メニュー	Menu
+ゲームに戻る	Back to Game
+ゲームを再開	Resume Game
+再開	Resume
+スタート	Start
+ゲームスタート	Game Start
+PRESS START	Press Start
+チュートリアル	Tutorial
+操作説明	Controls
+遊び方	How to Play
+ヘルプ	Help
+言語	Language
+バージョン	Version
+
+# Buttons and dialogs
+はい	Yes
+いいえ	No
+決定	OK
+キャンセル	Cancel
+戻る	Back
+閉じる	Close
+次へ	Next
+前へ	Previous
+確認	Confirm
+適用	Apply
+初期化	Reset
+初期設定に戻す	Restore Defaults
+デフォルト	Default
+リセット	Reset
+スキップ	Skip
+オート	Auto
+ログ	Log
+バックログ	Backlog
+履歴	History
+既読スキップ	Skip Read Text
+未読スキップ	Skip Unread Text
+全てスキップ	Skip All
+ウィンドウを消す	Hide Window
+画面	Screen
+フルスクリーン	Fullscreen
+ウィンドウ	Window
+ウィンドウモード	Windowed
+全画面	Fullscreen
+全画面表示	Fullscreen
+解像度	Resolution
+画質	Quality
+明るさ	Brightness
+音量	Volume
+全体音量	Master Volume
+マスター音量	Master Volume
+マスターボリューム	Master Volume
+BGM音量	BGM Volume
+SE音量	SE Volume
+ボイス音量	Voice Volume
+効果音	Sound Effects
+ボイス	Voice
+音声	Audio
+サウンド	Sound
+ミュート	Mute
+文字速度	Text Speed
+テキスト速度	Text Speed
+メッセージ速度	Message Speed
+オート速度	Auto Speed
+ウィンドウ透過度	Window Opacity
+ウィンドウの透明度	Window Opacity
+常時ダッシュ	Always Dash
+コマンド記憶	Command Memory
+キーコンフィグ	Key Config
+ゲームパッド	Gamepad
+キーボード	Keyboard
+マウス	Mouse
+振動	Vibration
+読み込み中	Loading
+読み込み中...	Loading...
+ロード中	Loading
+セーブ中	Saving
+しばらくお待ちください	Please wait
+ON	On
+OFF	Off
+オン	On
+オフ	Off
+有効	Enabled
+無効	Disabled
+表示	Show
+非表示	Hide
+なし	None
+すべて	All
+全て	All
+その他	Other
+詳細	Details
+情報	Info
+警告	Warning
+エラー	Error
+注意	Caution
+完了	Complete
+
+# RPG menus
+アイテム	Items
+道具	Items
+大事なもの	Key Items
+だいじなもの	Key Items
+装備	Equipment
+そうび	Equip
+最強装備	Optimize
+全て外す	Remove All
+外す	Remove
+スキル	Skills
+特技	Skills
+魔法	Magic
+呪文	Spells
+ステータス	Status
+つよさ	Status
+並び替え	Formation
+並べ替え	Sort
+隊列	Formation
+パーティ	Party
+パーティー	Party
+仲間	Party
+武器	Weapon
+防具	Armor
+盾	Shield
+頭	Head
+体	Body
+装飾品	Accessory
+アクセサリー	Accessory
+使う	Use
+使用	Use
+捨てる	Discard
+調べる	Examine
+話す	Talk
+買う	Buy
+売る	Sell
+購入	Buy
+売却	Sell
+ショップ	Shop
+お店	Shop
+所持数	Owned
+所持金	Money
+個数	Quantity
+お金が足りません	Not enough money.
+お金が足りません。	Not enough money.
+持ち物がいっぱいです	Your inventory is full.
+レベル	Level
+レベルアップ	Level Up
+レベルアップ！	Level Up!
+経験値	Experience
+次のレベルまで	To Next Level
+次のレベルまであと	To Next Level
+最大HP	Max HP
+最大MP	Max MP
+攻撃力	Attack
+防御力	Defense
+魔法力	Magic Attack
+魔力	Magic
+魔法防御	Magic Defense
+敏捷性	Agility
+素早さ	Agility
+すばやさ	Agility
+運	Luck
+命中率	Accuracy
+回避率	Evasion
+会心率	Critical Rate
+攻撃	Attack
+防御	Guard
+逃げる	Escape
+にげる	Escape
+たたかう	Fight
+戦う	Fight
+戦闘	Battle
+戦闘開始	Battle Start
+勝利	Victory
+勝利！	Victory!
+敗北	Defeat
+全滅	Party Wiped Out
+全滅しました	Your party was wiped out.
+ゲームオーバー	Game Over
+GAME OVER	Game Over
+コンティニューしますか？	Continue?
+クリア	Clear
+ステージクリア	Stage Clear
+ステージクリア！	Stage Clear!
+ステージ選択	Stage Select
+ステージセレクト	Stage Select
+チャプター	Chapter
+チャプター選択	Chapter Select
+プロローグ	Prologue
+エピローグ	Epilogue
+エンディング	Ending
+おわり	The End
+完	The End
+つづく	To be continued
+スコア	Score
+ハイスコア	High Score
+タイム	Time
+ランキング	Ranking
+難易度	Difficulty
+イージー	Easy
+ノーマル	Normal
+ハード	Hard
+かんたん	Easy
+ふつう	Normal
+むずかしい	Hard
+クエスト	Quest
+クエスト一覧	Quest List
+依頼	Requests
+任務	Mission
+目的	Objective
+報酬	Reward
+クエスト達成	Quest Complete
+クエストクリア	Quest Complete
+マップ	Map
+地図	Map
+ワールドマップ	World Map
+宿屋	Inn
+宿屋に泊まる	Stay at the inn
+休む	Rest
+休憩	Rest
+寝る	Sleep
+移動	Move
+ファストトラベル	Fast Travel
+図鑑	Encyclopedia
+モンスター図鑑	Bestiary
+用語集	Glossary
+実績	Achievements
+トロフィー	Trophies
+称号	Titles
+好感度	Affection
+手紙	Letters
+日記	Diary
+メモ	Notes
+ヒント	Hint
+合成	Synthesis
+調合	Mixing
+製作	Crafting
+強化	Upgrade
+素材	Materials
+朝	Morning
+昼	Afternoon
+夕方	Evening
+夜	Night
+????	????
+？？？	???
+
+# Settings, language names, card / deck-building games (seen in Slay the Spire 2, 2026-11-13)
+一般	General
+グラフィック	Graphics
+コントロール	Controls
+標準	Normal
+日本語	Japanese
+英語	English
+中国語	Chinese
+韓国語	Korean
+ロシア語	Russian
+検索	Search
+コモン	Common
+アンコモン	Uncommon
+レア	Rare
+アタック	Attack
+パワー	Power
+呪い	Curse
+状態異常	Status

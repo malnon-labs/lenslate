@@ -1,0 +1,10 @@
+Quest: The Silent Crown
+- Find the old key
+- Talk to the blacksmith
+- Gather herbs (2/5)
+- Return to the village elder
+[E] Examine chest
+You picked up a Healing Herb!
+You don't have enough gold.
+Game saved.
+HP 340/520   MP 45/90
