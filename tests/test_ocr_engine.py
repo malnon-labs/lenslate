@@ -36,6 +36,17 @@ class OcrEngine(unittest.TestCase):
         self.assertEqual(len(self.res["row_join"]), 1, self.res["row_join"])
         self.assertEqual(len(self.res["col_join"]), 1, self.res["col_join"])
 
+    def test_helper_runs_isolated_from_another_folder(self):
+        """lenslate starts the helper with `python -I` from anywhere: its own modules must still import."""
+        from PIL import Image
+        img = os.path.join(tempfile.mkdtemp(dir=SCRATCH), "blank.png")
+        Image.new("RGB", (64, 32), (0, 0, 0)).save(img)
+        r = subprocess.run([ENGINE_PY, "-I", os.path.join(ROOT, "ocr_server.py")], input=json.dumps({"path": img}) + "\n",
+                           capture_output=True, text=True, timeout=300, cwd=SCRATCH,
+                           env=dict(os.environ, LENSLATE_OCR_GPU="off", HF_HUB_OFFLINE="1"))
+        answers = [json.loads(ln) for ln in r.stdout.splitlines() if ln.startswith("{")]
+        self.assertTrue(answers and "lines" in answers[-1], r.stdout[-300:] + r.stderr[-300:])
+
 
 if __name__ == "__main__":
     unittest.main()

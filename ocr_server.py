@@ -16,6 +16,10 @@ import os
 import sys
 import time
 
+# `python -I` leaves the script's folder off the import path (so a file in the current folder can never be loaded by
+# mistake); lenslate's own folder is put back explicitly for the small pure helpers (kanaspace, gapsplit)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 # The protocol gets a private copy of stdout; file descriptor 1 (and sys.stdout) then point at stderr, so a library
 # that prints (model loaders, onnxruntime, CTranslate2 warnings) can never put a stray line between lenslate's answers.
 # (Same block in ocr_server.py and mt_server.py: helpers run with `python -I`, so they cannot share a module.)
