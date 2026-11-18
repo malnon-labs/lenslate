@@ -179,3 +179,26 @@
 대화하기	Talk
 골드가 부족합니다.	Not enough gold.
 아이템을 획득했습니다.	You got an item.
+
+# Found in a live test on Risk of Rain 2 (2026-11-18): menu and logbook labels
+신규	New
+새로움	New
+설명	Description
+정보	Information
+발견함	Found
+음악	Music
+생존자	Survivor
+드론	Drone
+몬스터	Monster
+환경	Environment
+도전	Challenge
+메모	Notes
+싱글 플레이어	Singleplayer
+멀티 플레이어	Multiplayer
+멀티플레이어	Multiplayer
+다른 게임 모드	Alternate Game Modes
+데스크톱으로 나가기	Quit to Desktop
+아이템과 장비	Items & Equipment
+로그북	Logbook
+프로필 통계	Profile Stats
+기록	Records

@@ -89,7 +89,7 @@ def pack(src, tgt):
 
 
 # a label followed by its value: "Playtime 6:57:43", "Discovered 539/596", "Ascensions 9/50", "Volume 80%"
-NUM_TAIL = re.compile(r"^(.*?[^\W\d_][^\d]*?)\s*[:：]?\s+([\d][\d\s:/.,%x×+\-]*)$")
+NUM_TAIL = re.compile(r"^(.*?[^\W\d_][^\d]*?)(?:\s*[:：]\s*|\s+)([x×]?[\d][\d\s:/.,%x×+\-]*)$")
 
 
 def lookup(text, src, tgt):
@@ -107,7 +107,9 @@ def lookup(text, src, tgt):
         if m:
             label = _lookup(m.group(1), src, tgt)
             if label is not None:
-                tr = label.rstrip(":： ") + " " + m.group(2).strip()
+                sep = ": " if re.search(r"[:：]\s*$", text[:len(text) - len(m.group(2))].rstrip() + " ") or \
+                    re.search(r"[:：]", m.string[len(m.group(1)):m.start(2)]) else " "
+                tr = label.rstrip(":： ") + sep + m.group(2).strip()
     return tr
 
 

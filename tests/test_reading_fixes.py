@@ -127,6 +127,17 @@ class CentredBlocks(unittest.TestCase):
                {"box": [58, 283, 400, 305], "text": "プレイちゅう システムから", "score": 0.9}]
         self.assertEqual([b["text"] for b in tf.group_blocks(box)], ["なんいどを えらんでください プレイちゅう システムから"])
 
+    def test_tabs_a_line_height_apart_stay_apart(self):
+        """Risk of Rain 2's logbook tabs, as read on 2026-11-18 (boxes from the debug recording)."""
+        got = [{"box": [102, 160, 280, 188], "text": "Item & Equipment", "score": 0.97},
+               {"box": [317, 158, 409, 191], "text": "Monster", "score": 1.0},
+               {"box": [535, 157, 687, 197], "text": "Окружение", "score": 1.0},
+               {"box": [754, 156, 902, 193], "text": "Выживший", "score": 1.0}]
+        self.assertEqual(len(tf.merge_rows(got)), 4)
+        cut = [{"box": [100, 160, 300, 188], "text": "Wait……", "score": 1.0},
+               {"box": [360, 160, 520, 188], "text": "is someone there?", "score": 1.0}]
+        self.assertEqual(len(tf.merge_rows(cut)), 1)          # a line cut at a long pause is still one line
+
     def test_centred_menu_stays_apart(self):
         self.assertEqual(len(tf.group_blocks(centred(["Start Game", "Options", "Quit"], [200, 140, 80], gap=18))), 3)
         self.assertEqual(len(tf.group_blocks(centred(["Start Game", "Options", "Quit"], [200, 140, 80], gap=6))), 3)

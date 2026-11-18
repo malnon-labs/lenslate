@@ -434,7 +434,12 @@ def merge_rows(lines):
             # a numbers/symbols-only piece (line number, icon, counter) only joins when directly adjacent.
             # Gaps are measured in the SMALLER line height: one huge bogus box must not pull in text far away.
             # (2.5 for text: OCR splits a line at a wide "……" or a gap left by text still being typed out)
-            reach = 0.5 if not (LETTER.search(ln["text"]) and LETTER.search(r["text"])) else 2.5
+            reach = 0.5 if not (LETTER.search(ln["text"]) and LETTER.search(r["text"])) else 1.0
+            # a wider gap only where the reader cut a line at a long pause ("……", "...", "—"); otherwise pieces more
+            # than a line height apart are separate items (Risk of Rain 2's logbook tabs, 1.3-1.8 heights apart,
+            # became "Item & Equipment Monster" and "Окружение Выживший Дрон", 2026-11-18)
+            if reach > 0.5 and (re.search(r"(…|\.\.\.|—|―|-)\s*$", r["text"]) or re.match(r"\s*(…|\.\.\.|—|―)", ln["text"])):
+                reach = 2.5
             # Chinese/Japanese have no spaces between words: a wide gap there separates menu items (设置  读取存档),
             # unless it is a pause written as "……" that the detector cut around
             # (also a Chinese/Japanese word next to a Latin one: separate map tiles "戦闘" "SHOP" "休憩" on one row)
@@ -612,7 +617,9 @@ def group_blocks(rows):
         text = ""
         for r in rs:
             # a line break inside kana-only text is a word break too (retro games without kanji)
-            kana = text and kanaspace.kana_only(text) and kanaspace.kana_only(r["text"])
+            # (only in text written with word spaces: a normal kana line may break in the middle of a word)
+            kana = (text and kanaspace.kana_only(text) and kanaspace.kana_only(r["text"])
+                    and (" " in text.strip() or " " in r["text"].strip()))
             text = text + " " + r["text"] if kana else _join(text, r["text"])
         heights = sorted(r["box"][3] - r["box"][1] for r in rs)
         out.append({
@@ -638,12 +645,16 @@ SENT_END = re.compile(r"[。！？!?…\.]\s*[」』）)]*$")
 # Silent", "饰 Ironclad", or the word twice ("减少减少", "埃琳娜·埃琳娜")
 _ZH_CRUMB = re.compile(r"^\s*(?:您的位置|当前位置|所在位置|位置)\s*[:：].*[>»]\s*")
 _ZH_LABEL = re.compile(r"^\s*(?:曲名|歌曲名|歌名|片名|标题|饰)\s*[:：]?\s+")
+# whole answers that are a web page's links, not a translation (quickmt en-zh in Risk of Rain 2, 2026-11-18:
+# "Mocha" -> 公司简介 "company profile", "CONCEPTS" -> 联系方式 "contact")
+_ZH_WEB = re.compile(r"^(?:联系方式|联系我们|公司简介|关于我们|首页|立即预订|立即购买|加入购物车|返回顶部|网站地图)[:：。.]?$")
 _TWICE = re.compile(r"^(.{2,}?)[·・\s]?\1$")
 # the same into English/Spanish/Portuguese (quickmt ko/ru -> en on lone menu words, 2026-11-18): web-page buttons
 # instead of a translation ("설정" -> "Get in touch", "인벤토리" -> "Skip to content"), and words said again and again
 # ("Да" -> "Yes Yes Yes Yes", "Снаряжение" -> "Equipment and equipment", "Журнал" -> "The magazine magazine")
 _WEB_EN = re.compile(r"^(?:get in touch|skip to (?:main )?content|scroll to (?:the )?top|back to top|read more|"
-                     r"click here|learn more|contact us|all rights reserved|home page)\W*$", re.I)
+                     r"click here|learn more|contact us|all rights reserved|home page|add to cart|go to top|"
+                     r"top of (?:the )?page|see also)(?:\W*$|\s*[:：])", re.I)   # (+ "See also: 1536", "Top of Page: x566")
 _REPEATS = re.compile(r"\b(\w+)(?:[\s,]+\1\b)+", re.I)
 _X_AND_X = re.compile(r"^(.+?) (?:and|of) \1$", re.I)
 
@@ -657,6 +668,8 @@ def tidy(src, tr):
     s = src.strip()
     t = tr.strip()
     if langs.HAN.search(t) and not langs.HAN.search(s):     # into Chinese from a language without Chinese characters
+        if _ZH_WEB.match(t.strip()):
+            return ""
         t = _ZH_CRUMB.sub("", t)
         t = _ZH_LABEL.sub("", t)
         m = _TWICE.match(t)
@@ -664,7 +677,8 @@ def tidy(src, tr):
             t = m.group(1)
         if not t.strip():
             return t
-    elif not langs.LATIN.search(s) and langs.LATIN.search(t):   # into a Latin-script language from another script
+    elif not re.search(r"[A-Za-z]{2}", s) and langs.LATIN.search(t):   # into a Latin-script language from another
+        # script (a lone Latin letter in the original, "x566", does not count)
         if _WEB_EN.match(t):
             return ""            # not a translation at all: the line stays untranslated (or a seed pack has it)
         t = _REPEATS.sub(lambda m: m.group(1), t)

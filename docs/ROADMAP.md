@@ -29,8 +29,6 @@ release is **0.1.0** (an early preview). Changes per version are in [CHANGELOG.m
   GNOME paths only against a fake settings store so far.
 - The longer hover texts of the windows in Japanese, Korean and Russian (buttons, titles and settings are done),
   and a native speaker's look at all five.
-- English → Chinese and Korean / Russian → English in a real game session (the tests so far were screenshots and
-  test lines).
 
 ### Languages
 - Brazilian Portuguese quality on real English games (OPUS on the processor, Gemma).
@@ -157,6 +155,12 @@ NDLOCR-Lite 89%, EasyOCR 87% (slow), Tesseract 80%, Manga OCR + comic detector 7
 | Hy-MT2 1.8B | 0.13 | 1.4 GB | literal, some wrong senses | pt-BR / zh good | experimental |
 | TranslateGemma 4B | 0.24 | 2.8 GB | changes the meaning, wrong names, adds content | pt-BR ok | rejected |
 | Hy-MT2 manga fine-tune | 0.10 | 1.4 GB | lively but drops text | – | rejected |
+
+**Live in Risk of Rain 2 with the processor translators** (2026-11-18; main menu, logbook, an item page; cards
+0.5-3.8 s after a new screen): English → Chinese, Korean → English and Russian → English all worked. Sentences and
+"Label: value" rows came out well in all three; lone labels were where quickmt failed, often with web-page phrases
+("Add to Cart", "Go to Top", 公司简介): those are rejected now and the seed packs got the game's labels. Tabs about a
+line height apart had become one card ("Item & Equipment Monster"): fixed.
 
 **English → Chinese on English game screens** (2026-11-18; 7 screens, ~60 lines): Gemma 4 E2B gave usable
 Chinese for nearly everything (one line answered like an assistant, now rejected). quickmt en-zh was right on

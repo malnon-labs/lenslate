@@ -285,3 +285,21 @@ class KoreanRussianProcessor(unittest.TestCase):
         self.assertEqual(seeds.lookup("Уровень 12", "ru", "en"), "Level 12")
         self.assertEqual(seeds.lookup("인벤토리", "ko", "pt"), seeds.lookup("Inventory", "en", "pt"))
         self.assertEqual(seeds.lookup("ニューゲーム", "ja", "zh"), seeds.lookup("New Game", "en", "zh"))
+
+
+class LiveRiskOfRain2(unittest.TestCase):
+    """What quickmt wrote on Risk of Rain 2's menus and logbook in the live test of 2026-11-18."""
+
+    def test_web_page_answers_are_no_translation(self):
+        import textflow as tf
+        for src, tr in (("Mocha", "公司简介"), ("CONCEPTS", "联系方式"), ("신규", "Add to Cart"), ("모카", "Go to Top"),
+                        ("발견함:1536", "See also: 1536"), ("최고 중첩:x566", "Top of Page: x566")):
+            self.assertEqual(tf.tidy(src, tr), "", src)
+        self.assertEqual(tf.tidy("Описание:", "Description:"), "Description:")
+
+    def test_labels_from_the_seed_packs(self):
+        import seeds
+        self.assertEqual(seeds.lookup("Logbook", "en", "zh"), "图鉴")
+        self.assertEqual(seeds.lookup("발견함:1536", "ko", "en"), "Found: 1536")
+        self.assertEqual(seeds.lookup("Найдено: 1536", "ru", "en"), "Found: 1536")
+        self.assertEqual(seeds.lookup("Предметы и снаряжение", "ru", "en"), "Items & Equipment")
