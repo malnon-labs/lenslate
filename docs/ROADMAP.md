@@ -18,52 +18,25 @@ release is **0.1.0** (an early preview). Changes per version are in [CHANGELOG.m
 
 ## Next
 
-### 0.1.x / 0.2: downloads
-- **AppImage** that downloads the reader and translators on first start, and an **offline AppImage** with the
-  reader plus the processor translators 🇯🇵→🇬🇧 (quickmt), 🇨🇳→🇬🇧 (quickmt) and 🇬🇧→🇧🇷 (OPUS). Each file must stay
-  under GitHub's 2 GB limit. First check: does the overlay still work on KDE Wayland from an AppImage (it needs
-  the system's layer-shell-qt).
+### 0.2: still to do before the release
+- **Build the AppImages for real and try them** on a clean KDE Wayland and an X11 system: the release workflow
+  builds both (packaging/build-appimage.sh); so far only the unpacked AppDir was tried (engine, read-only image,
+  first start, offline-pack import), not the packed file or the overlay from it.
 - A VirusTotal scan of each AppImage, linked in the release notes.
-- Bonus: **offline packs**, i.e. pack files with all processor translators on the release and a
-  "Load offline pack" button, for source installs and PCs without internet.
-
-### Reading and placement fixes (found while making the README screenshots)
-- **Kana-only retro text** (WOLF RPG games written without kanji, with spaces between words): the spaces are
-  dropped, the words run together and the translators guess wrong (なんいど, "difficulty", came out as "ID").
-  Keep the spaces in kana-only Japanese lines; they are word breaks there.
-- **Small pixel fonts:** in a 640x480 WOLF RPG game, Quick reading found 2 of ~8 lines; Ultrafast (meikiocr)
-  read them all. Try Ultrafast by itself when Quick finds little in a Japanese area.
-- **Text wrapped over several lines in a speech bubble or a centred panel** is translated line by line, which
-  hurts the translation (comics, Slay the Spire 2's Compendium). Join the lines of one centred block first.
-- **Tabs that stand apart** (General / Graphics / Sound / Input) are read as one line and become one wide card.
-  Split a row at wide gaps between separately boxed words.
-- **ー read for 一** between kanji (一緒 → ー緒, 一人 → ー人): PLaMo then invents names ("Oho", "Huntero"). Add it
-  to the look-alike repair (ー between two kanji → 一).
 - **Desktop notifications** that pop up inside the area are read and translated too, and they end up in debug
   recordings. Ignore notification surfaces, and warn about it in the debug-recording docs.
-- Menu rows merged into one card with Ultrafast (two choices in one card).
-- OPUS en→pt-BR: "Character Stats" → "Estatísticas de Caracteres" (letters). Add to the en-pt seed pack.
+- Changing hotkeys inside lenslate: tried on KDE (keys read, clash check, a key set and set back); the Cinnamon and
+  GNOME paths only against a fake settings store so far.
+- The longer hover texts of the windows in Japanese, Korean and Russian (buttons, titles and settings are done),
+  and a native speaker's look at all five.
+- English → Chinese and Korean / Russian → English in a real game session (the tests so far were screenshots and
+  test lines).
 
 ### Languages
-- **English → Chinese for Chinese players.** It works (quickmt en-zh on the processor; Gemma and online on any
-  setup) but has never had a real quality test in a game. Test it on English games (menus, item text,
-  dialogue), compare quickmt with Gemma, and grow the en-zh seed pack.
-- **Processor translators for Korean → English and Russian → English** (OPUS-MT candidates). Until then
-  Korean and Russian are read on any PC but translated only by a language model or online.
 - Brazilian Portuguese quality on real English games (OPUS on the processor, Gemma).
-- Seed packs (ready-made menu translations): review the wording, grow them from real game screens, per-pair
-  downloads instead of shipping all.
+- Seed packs: review the wording, grow them from real game screens, per-pair downloads instead of shipping all.
 - Real English game screenshots with answer keys for the testbench (only drawn screens so far).
 - Chinese text inside hooked games (the game's own fonts may lack Chinese glyphs): untested.
-
-### Interface
-- **Rebind the hotkeys inside lenslate:** a "Keyboard shortcuts" row in setup and on the Overlay page, written to
-  the desktop the way `lenslate hotkeys install` does. Defaults since 0.1.0: Ctrl+Alt+Z / X / C / V, free in the
-  default shortcuts of KDE, GNOME, Cinnamon, Xfce, MATE, Hyprland, Sway, niri and i3. Still to check live on
-  KDE and Cinnamon. The README points people to the buttons first.
-- **UI redesign** of the settings window and setup.
-- **lenslate's own interface in Portuguese (Brazil), Chinese, Japanese, Korean and Russian** (Qt translation
-  files), together with keeping the translated READMEs up to date.
 
 ### Other desktops
 - **niri / Sway:** the portal capture and the layer-shell overlay work in a nested niri (share dialog, overlay
@@ -131,6 +104,9 @@ release is **0.1.0** (an early preview). Changes per version are in [CHANGELOG.m
 | 2026-11-18 | Default hotkeys Ctrl+Alt+Z / X / C / V (the old Ctrl+Alt+arrows switch workspaces on GNOME, Cinnamon, MATE and Xfce). |
 | 2026-11-18 | Downloads: source tarball now; AppImage and offline AppImage next. |
 | 2026-11-18 | Icon: a magnifying glass whose glass turns the Japanese あ under it into an A. |
+| 2026-11-18 | AppImage on Wayland runs the app on the distro's Python Qt (the overlay layer only works with the system's Qt); its own Qt only on X11, or through XWayland with a notice. The engine and every OCR model are inside the image. |
+| 2026-11-18 | Korean and Russian get quickmt on the processor despite weak lone words: sentences are good, and the seed packs carry the menus. |
+| 2026-11-18 | The windows' translations are JSON catalogs keyed by the English text (a missing entry stays English). |
 
 ## Measured facts
 
@@ -182,8 +158,21 @@ NDLOCR-Lite 89%, EasyOCR 87% (slow), Tesseract 80%, Manga OCR + comic detector 7
 | TranslateGemma 4B | 0.24 | 2.8 GB | changes the meaning, wrong names, adds content | pt-BR ok | rejected |
 | Hy-MT2 manga fine-tune | 0.10 | 1.4 GB | lively but drops text | – | rejected |
 
+**English → Chinese on English game screens** (2026-11-18; 7 screens, ~60 lines): Gemma 4 E2B gave usable
+Chinese for nearly everything (one line answered like an assistant, now rejected). quickmt en-zh was right on
+sentences and settings, wrong on lone words (MSAA → 荣誉证书, Oak Staff → 橡树员工) and sometimes wrote web-page
+leftovers ("您的位置:电驴大全 > 电影 > …", "曲名 : …"): those are removed now, and the en-zh pack covers the common
+labels. **quickmt ko-en / ru-en**: good sentences, poor lone words ("설정" → "Get in touch"): the seed packs cover
+menus. ~0.03 s a line on the processor, 0.36 / 0.41 GB.
+
 ## Done
 
+- **0.2 (in progress, 2026-11-18):** reading fixes from the README screenshots (ー read for 一, word spaces in
+  kana-only lines, wrapped text in bubbles and centred panels joined, boxed tabs and far-apart words split, two
+  rows in one Ultrafast box split, Ultrafast as a second reader for sparse Japanese); English → Chinese tested on
+  English game screens (quickmt's web leftovers removed, en-zh pack grown); processor translators and seed packs
+  for Korean and Russian, seed packs through English; hotkeys changed inside lenslate; offline packs; the
+  AppImage build; lenslate's windows in five more languages; a readability pass on the settings window.
 - **0.1.0 (2026-11-18), first public version:** the source tarball with checksum on GitHub; README rewritten for
   new users with real screenshots (games, comics, video) and translated into Chinese and Brazilian Portuguese;
   FEATURES, PRIVACY, CONTRIBUTING and SECURITY pages; the app icon; colour icons in the settings window; new

@@ -175,9 +175,9 @@ even be translated ahead of time, so nothing runs while you play. The hooks back
   reads well.
 - **Some AI models are for personal use only.** PLaMo and Sugoi are free for personal and non-commercial use;
   lenslate always says which licence a model has before downloading it. All licences: [NOTICE.md](NOTICE.md).
-- **Planned:** lenslate's own windows in 🇧🇷 Portuguese, 🇨🇳 Chinese, 🇯🇵 Japanese, 🇰🇷 Korean and 🇷🇺 Russian; processor
-  translators for Korean and Russian; a redesigned settings window; translating pictures straight from the
-  browser.
+- **Coming in 0.2:** lenslate's own windows in 🇧🇷 Portuguese, 🇨🇳 Chinese, 🇯🇵 Japanese, 🇰🇷 Korean and 🇷🇺 Russian;
+  AppImages (also an offline one); keyboard shortcuts you can change inside lenslate. **Planned:** translating
+  pictures straight from the browser.
 
 ## Reporting problems
 

@@ -179,9 +179,9 @@ de cada arquivo que alteram, e `lenslate hook remove` devolve tudo como era. Vej
 - **Alguns modelos de IA são só para uso pessoal.** PLaMo e Sugoi são gratuitos para uso pessoal e não
   comercial; o lenslate sempre mostra a licença de um modelo antes de baixá-lo. Todas as licenças:
   [NOTICE.md](NOTICE.md) (em inglês).
-- **Planejado:** as janelas do lenslate em 🇧🇷 português, 🇨🇳 chinês, 🇯🇵 japonês, 🇰🇷 coreano e 🇷🇺 russo;
-  tradutores no processador para coreano e russo; uma janela de configurações redesenhada; traduzir imagens
-  direto do navegador.
+- **Na versão 0.2:** as janelas do lenslate em 🇧🇷 português, 🇨🇳 chinês, 🇯🇵 japonês, 🇰🇷 coreano e 🇷🇺 russo;
+  AppImages (inclusive uma offline); atalhos de teclado que você muda dentro do lenslate. **Planejado:** traduzir
+  imagens direto do navegador.
 
 ## Relatando problemas
 

@@ -16,7 +16,9 @@ Choosing your own keys inside lenslate is planned.
 | Ctrl+Alt+C | `lenslate auto` | toggle auto-refresh (every 1 s; only changed text is read) |
 | Ctrl+Alt+V | `lenslate toggle` | hide / show the overlay; hiding pauses auto-refresh, showing resumes it |
 
-The installer adds these hotkeys on KDE. On other desktops run `lenslate hotkeys`: it prints the lines to paste for Hyprland, Sway, i3, niri, Xfce and MATE, and `lenslate hotkeys install` writes the shortcuts on Cinnamon and GNOME (with keys that are still free there). Also: `lenslate gui`
+Change them in the settings window (Overlay page > Keyboard shortcuts…) or with
+`lenslate hotkeys set select=Ctrl+Alt+Z now=Ctrl+Alt+X auto=Ctrl+Alt+C toggle=Ctrl+Alt+V`: lenslate checks every
+key for clashes first and writes them to KDE, Cinnamon or GNOME itself. The installer adds these hotkeys on KDE. On other desktops run `lenslate hotkeys`: it prints the lines to paste for Hyprland, Sway, i3, niri, Xfce and MATE, and `lenslate hotkeys install` writes the shortcuts on Cinnamon and GNOME (with keys that are still free there). Also: `lenslate gui`
 (settings window and tray icon), `lenslate opacity [0.1-1]` (card background, default 1 = solid; below 0.95 the text gets
 a thin outline so it stays readable), `lenslate reset` (hide and forget the current screen; `clear` is an alias of
 `toggle`, because KDE keeps running a hotkey's old command until KWin restarts), `lenslate region X Y W H

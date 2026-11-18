@@ -3,6 +3,36 @@
 Newest first. The version is in `version.py` (`lenslate --version`). Dates are year-month-day.
 Lines marked *(cache)* make lenslate translate cached lines again: the old ones are kept in `<cache file>.old`.
 
+## Unreleased (0.2)
+
+### 2026-11-18
+- **Reading:** ー read for 一 before a kanji is repaired (ー緒 → 一緒, ー人 → 一人; translators made up names for
+  them). Kana-only Japanese lines (retro games written without kanji) keep their word spaces, taken from the
+  picture. Text wrapped inside a speech bubble or a centred panel becomes one card (comics, subtitles, centred
+  descriptions). Tabs in separate boxes and words far apart on one row become separate cards, and Ultrafast no
+  longer reads two menu rows in one box as one line. A Japanese area that comes back with only a few lines is
+  read again with Ultrafast and the fuller reading is kept ([ocr] ultrafast_fallback, on by default: small pixel
+  fonts).
+- **Languages:** processor translators for **Korean → English and Russian → English** (quickmt ko-en, ru-en),
+  with Korean and Russian seed packs for menus. Seed packs now also work through English (Korean → Portuguese,
+  Japanese → Chinese menus) and on "label + number" lines ("Playtime 6:57:43"). English → Chinese tested on
+  English game screens: quickmt's web-page leftovers ("您的位置:电驴大全 > …", "曲名 :", doubled words) are removed,
+  an assistant-style answer is never shown as a translation, and the en-zh/es/pt packs grew (stats, settings,
+  equipment).
+- **Keyboard shortcuts** can be changed inside lenslate (Overlay page and setup's last page, or
+  `lenslate hotkeys set select=Ctrl+Alt+Z ...`): checked for clashes, written to KDE (KGlobalAccel), Cinnamon or
+  GNOME; other desktops get the lines to paste.
+- **Offline packs:** `lenslate models pack` / `lenslate models import` and a "Load offline pack…" button: processor
+  translators from one file, every file checked against its checksum and the pinned model version.
+- **AppImages** (packaging/build-appimage.sh, built by the release workflow): one that downloads translators when
+  you pick them, and an offline one with quickmt Japanese → English, quickmt Chinese → English and OPUS English →
+  Portuguese (Brazil) inside. On Wayland they use the distro's Python Qt (the overlay layer needs it).
+- **lenslate's windows in Portuguese (Brazil), Chinese, Japanese, Korean and Russian** ([general] ui_language,
+  auto = the system language). All buttons, titles and setting names are translated; the longer hover texts are
+  translated in Portuguese and Chinese so far and stay English elsewhere for now.
+- Settings window: side links (Keyboard shortcuts, Load offline pack) sit quietly next to their section; the
+  Models page lists the processor translators first.
+
 ## 0.1.0 - 2026-11-18
 
 The first public version: everything built since 2026-11-04. Early and lightly tested - expect rough edges.
