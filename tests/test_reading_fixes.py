@@ -127,3 +127,70 @@ class CentredBlocks(unittest.TestCase):
         rows = centred(["Deal 8 damage to all enemies and", "apply 2 Vulnerable"], [420, 200])
         rows[1]["box"][0] += 300; rows[1]["box"][2] += 300
         self.assertEqual(len(tf.group_blocks(rows)), 2)
+
+
+import gapsplit  # noqa: E402
+
+
+def tab_row(words, boxed=True, h=30, margin=9, letter=12, space=6, pad=10, apart=6):
+    """A line picture (with margins) of words in separate boxes: words = letter counts per word."""
+    H = h + 2 * margin
+    width = sum(n * (letter + 2) for n in words) + len(words) * (2 * pad + apart + 4) + 20
+    img = np.full((H, width), 30, dtype=np.uint8)
+    x, spans = 10, []
+    for n in words:
+        if boxed:
+            img[2:H - 2, x] = 220; img[2:H - 2, x + 1] = 220
+        x0 = x + 2 + pad
+        for i in range(n):                       # a letter: two strokes and a bar (text is mostly background)
+            lx = x0 + i * (letter + 2)
+            img[margin + 4:margin + h - 4, lx:lx + 2] = 230
+            img[margin + 4:margin + h - 4, lx + letter - 2:lx + letter] = 230
+            img[margin + h // 2, lx:lx + letter] = 230
+        x1 = x0 + n * (letter + 2)
+        spans.append((x0, x1))
+        x = x1 + pad
+        if boxed:
+            img[2:H - 2, x] = 220; img[2:H - 2, x + 1] = 220
+        x += 2 + (apart if boxed else space * 7)
+    return img, spans
+
+
+class TabsApart(unittest.TestCase):
+    def test_boxed_tabs_are_split(self):
+        img, _ = tab_row([7, 8, 5, 5])
+        got = gapsplit.split("General Graphics Sound Input", img)
+        self.assertEqual([p[0] for p in got], ["General", "Graphics", "Sound", "Input"])
+
+    def test_far_apart_words_are_split(self):
+        img, _ = tab_row([7, 8], boxed=False)
+        self.assertEqual([p[0] for p in gapsplit.split("General Graphics", img)], ["General", "Graphics"])
+
+    def test_chinese_tabs(self):
+        img, _ = tab_row([2, 2, 2])
+        self.assertEqual([p[0] for p in gapsplit.split("常规图形声音", img)], ["常规", "图形", "声音"])
+
+    def test_a_sentence_stays_whole(self):
+        img = np.full((48, 400), 30, dtype=np.uint8)
+        x = 10
+        for n in (3, 5, 5, 3):                   # words with normal spaces, tall letters among them
+            for i in range(n):
+                top = 9 if i % 2 else 15          # ascenders and x-height letters
+                img[top:39, x:x + 2] = 230
+                img[15:39, x + 8:x + 10] = 230
+                img[27, x:x + 10] = 230
+                x += 12
+            x += 8
+        self.assertIsNone(gapsplit.split("The quick brown fox", img))
+
+    def test_two_rows_in_one_box(self):
+        img = np.full((80, 200), 30, dtype=np.uint8)
+        for x in range(10, 150, 8):
+            img[8:32, x:x + 2] = 230
+        for x in range(10, 120, 8):
+            img[48:72, x:x + 2] = 230
+        self.assertEqual(gapsplit.stacked_rows(img), [(8, 32), (48, 72)])
+        one = np.full((40, 200), 30, dtype=np.uint8)
+        for x in range(10, 150, 8):
+            one[8:32, x:x + 2] = 230
+        self.assertEqual(gapsplit.stacked_rows(one), [])

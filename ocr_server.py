@@ -518,6 +518,30 @@ def _merge_tiles(boxes, seams, seams_y=()):
     return out
 
 
+def split_stacked(img, boxes):
+    """A finder box around two text rows (two menu choices, one card) becomes one box per row (gapsplit)."""
+    import gapsplit
+    hs = sorted(b[3] - b[1] for b in boxes if not _is_column(b))
+    if not hs:
+        return boxes
+    usual = hs[len(hs) // 2]
+    gray = img.mean(axis=2) if img.ndim == 3 else img
+    H, W = gray.shape[:2]
+    out = []
+    for b in boxes:
+        x1, y1, x2, y2 = b
+        if _is_column(b) or (y2 - y1) < 1.7 * usual:
+            out.append(b)
+            continue
+        cx1, cy1, cx2, cy2 = max(0, int(x1)), max(0, int(y1)), min(W, int(x2 + 0.5)), min(H, int(y2 + 0.5))
+        rows = gapsplit.stacked_rows(gray[cy1:cy2, cx1:cx2], max(4, int(0.4 * usual))) if cx2 > cx1 and cy2 > cy1 else []
+        if not rows:
+            out.append(b)
+            continue
+        out.extend([float(x1), float(cy1 + a), float(x2), float(cy1 + c)] for a, c in rows)
+    return out
+
+
 def meiki_read_lines(path, boxes):
     """Read line boxes with meikiocr. Long lines are cut into pieces at gaps (it reads at most ~48 characters);
     lines that come back mostly Latin are read again by the PaddleOCR reader (meikiocr drops spaces)."""
@@ -525,6 +549,7 @@ def meiki_read_lines(path, boxes):
     img = _bgr(path)
     H, W = img.shape[:2]
     rgb = np.ascontiguousarray(img[:, :, ::-1])
+    boxes = split_stacked(img, boxes)
     pieces, owners, crops = [], [], []
     vert = []   # indexes (into pieces) of vertical columns: meikiocr's own vertical reader, no cutting
     for li, (x1, y1, x2, y2) in enumerate(boxes):
@@ -611,6 +636,33 @@ def kana_spaces(path, lines):
     return lines
 
 
+def split_gaps(path, lines):
+    """Lines whose picture shows separate items side by side (boxed tabs, far-apart words) become one line per
+    item (see gapsplit.py); the pieces are marked "apart" so they are not joined again."""
+    import gapsplit
+    todo = [ln for ln in lines if len(ln.get("text", "").strip()) >= 2 and not _is_column(ln["box"])]
+    if not todo:
+        return lines
+    gray = np.asarray(Image.open(path).convert("L"))
+    H, W = gray.shape
+    out = []
+    for ln in lines:
+        x1, y1, x2, y2 = ln["box"]
+        h = y2 - y1
+        if ln not in todo or h < 6 or x2 - x1 < 2 * h:
+            out.append(ln)
+            continue
+        m = gapsplit.MARGIN * h
+        cx1, cy1, cx2, cy2 = max(0, int(x1)), max(0, int(y1 - m)), min(W, int(x2 + 0.5)), min(H, int(y2 + m + 0.5))
+        parts = gapsplit.split(ln["text"], gray[cy1:cy2, cx1:cx2], h) if cx2 - cx1 > 8 and cy2 > cy1 else None
+        if not parts:
+            out.append(ln)
+            continue
+        for text, a, b in parts:
+            out.append(dict(ln, text=text, box=[float(cx1 + a), float(y1), float(cx1 + b), float(y2)], apart=True))
+    return out
+
+
 def main():
     send({"ready": True})
     for line in sys.stdin:
@@ -621,12 +673,12 @@ def main():
             if req.get("op") == "read_lines":
                 lines = (meiki_read_lines(req["path"], req["boxes"]) if READER == "meiki" else
                          read_lines(req["path"], req["boxes"], bool(req.get("latin_matters", True))))
-                resp = {"lines": kana_spaces(req["path"], lines), "secs": round(time.time() - t, 3)}
+                resp = {"lines": split_gaps(req["path"], kana_spaces(req["path"], lines)), "secs": round(time.time() - t, 3)}
             elif req.get("op") == "detect":
                 resp = {"boxes": detect(req["path"], int(req.get("side", 1280))), "secs": round(time.time() - t, 3)}
             else:
                 lines = read(req["path"], float(req.get("scale", 1.0)))
-                resp = {"lines": kana_spaces(req["path"], lines), "secs": round(time.time() - t, 3)}
+                resp = {"lines": split_gaps(req["path"], kana_spaces(req["path"], lines)), "secs": round(time.time() - t, 3)}
         except Exception as e:  # noqa: BLE001
             resp = {"error": "%s: %s" % (type(e).__name__, e)}
         send(resp, req if isinstance(req, dict) else None)
