@@ -1032,11 +1032,17 @@ class Window(QWidget):
         sec = section_label("Translate what is on screen")
         explain(sec, "Works on anything on screen: games, browsers, video players, PDF and image viewers, the "
                 "desktop. The buttons below have hotkeys for use inside a game: Keyboard shortcuts changes them.", f)
-        b_keys = explain(set_role(QPushButton(_("Keyboard shortcuts…")), "secondary"),
+        b_keys = explain(set_role(QPushButton(_("Keyboard shortcuts…")), "quiet"),
                          "See and change the hotkeys of Pick area, Translate now, Keep translating and Show / hide. "
                          "lenslate checks that a key is free before it uses it.", f)
         b_keys.clicked.connect(self.edit_shortcuts)
-        row2.addWidget(b_keys)
+        sec_row = QWidget()
+        sl = QHBoxLayout(sec_row)
+        sl.setContentsMargins(0, 0, 0, 0)
+        sl.addWidget(sec)
+        sl.addStretch(1)
+        sl.addWidget(b_keys, 0, Qt.AlignBottom)
+        sec_row.setMaximumWidth(CONTENT_W)
         # shown under the status bar while lenslate runs (the moment the player is about to use it), until "Got it"
         self.read_tip = QFrame()
         set_role(self.read_tip, "tip")
@@ -1055,7 +1061,7 @@ class Window(QWidget):
         self.read_tip.setVisible(False)
         look = form([("Card opacity", self._wrap(orow)),
                      ("Placeholder cards", setting_widget("overlay.placeholder", f, self.error))])
-        return page(self.status_card, self.read_tip, sec, row2, self.area_hint, self.auto_box,
+        return page(self.status_card, self.read_tip, sec_row, row2, self.area_hint, self.auto_box,
                     section_label("Cards"), look,
                     section_label("When to look again"), refresh,
                     *self._capture_section())
@@ -1840,7 +1846,7 @@ class Window(QWidget):
         explain(self.runtime_label, "lenslate runs language models itself with llama.cpp (Vulkan: NVIDIA, AMD and "
                 "Intel graphics). Nothing else needs to be installed. Ollama is used only if you choose it.", f)
         rows.append(self.runtime_label)
-        pack = explain(set_role(QPushButton(_("Load offline pack…")), "secondary"),
+        pack = explain(set_role(QPushButton(_("Load offline pack…")), "quiet"),
                        "Install processor translators from an offline pack file (lenslate-pack-*.tar from the "
                        "release page, or one made with `lenslate models pack`) - for a PC without internet. Every "
                        "file is checked before it is used.", f)
@@ -1848,12 +1854,21 @@ class Window(QWidget):
         pack.clicked.connect(self._load_pack)
         self.pack_bar = QProgressBar()
         self.pack_bar.setVisible(False)
-        rows += [pack, self.pack_bar]
         self.model_rows = {}
-        groups = (("llm", "Language models (graphics card)"), ("mt", "Processor translators (quickmt)"),
+        groups = (("mt", "Processor translators (quickmt)"), ("llm", "Language models (graphics card)"),
                   ("sugoi", "Visual novel translator (Sugoi, processor)"))
         for kind, title in groups:
-            rows.append(section_label(title))
+            if kind == "mt":        # the offline pack holds processor translators: its button sits with them
+                head = QWidget()
+                hl = QHBoxLayout(head)
+                hl.setContentsMargins(0, 0, 0, 0)
+                hl.addWidget(section_label(title))
+                hl.addStretch(1)
+                hl.addWidget(pack, 0, Qt.AlignBottom)
+                rows += [head, self.pack_bar]
+                continue_rows = True
+            else:
+                rows.append(section_label(title))
             for m in models.CATALOG:
                 if m.kind != kind:
                     continue
@@ -1868,8 +1883,10 @@ class Window(QWidget):
         lay.setSpacing(4)
         head = QHBoxLayout()
         head.setSpacing(8)
-        title = QLabel(_("<b>%s</b>") % m.title)
-        title.setWordWrap(True)
+        # the section header already says what kind of model it is
+        short = re.sub(r"\s*\((?:language|translation|language \+ image) model\)$", "", m.title)
+        title = QLabel("<b>%s</b>" % short)
+        title.setWordWrap(False)
         btn = QPushButton()
         btn.setMinimumWidth(150)
         tags = FlowLayout(hspacing=8, vspacing=4)     # title and chips wrap; the button stays on the right
