@@ -41,7 +41,11 @@ NO_SPACE_CHARS = re.compile(r"[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uff66-\uf
 # ------------------------------------------------------------------------------ OCR helper
 def engine_python(here, old_venv):
     """Python of the shared engine environment (OCR + CPU translators): the installed one in
-    ~/.local/share/lenslate/engine, a development one next to the code, or the older per-helper venvs."""
+    ~/.local/share/lenslate/engine, a development one next to the code, or the older per-helper venvs.
+    LENSLATE_ENGINE_PYTHON (set by the AppImage, whose engine is inside the image) wins over all of them."""
+    own = os.environ.get("LENSLATE_ENGINE_PYTHON")
+    if own and os.path.exists(own):
+        return own
     for d in (os.path.join(cfgmod.DATA_DIR, "engine"), os.path.join(here, "engine"), os.path.join(here, old_venv)):
         py = os.path.join(d, "bin", "python")
         if os.path.exists(py):

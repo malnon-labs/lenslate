@@ -333,6 +333,118 @@ def download(name, progress=None):
     return m
 
 
+# ------------------------------------------------------------------------------------------- offline packs
+# An offline pack is one .tar file of processor translators, for PCs without internet and for the offline AppImage:
+#   lenslate-pack.json        {"format": 1, "models": {name: {"repo", "revision", "files": {path: [size, sha256]}}}}
+#   models/<name>/<file>      the model files
+# Importing checks every file against the manifest's SHA-256 and the manifest against the catalog (the model must be
+# one lenslate knows, from the commit lenslate pins), so a pack cannot install anything else.
+PACK_MANIFEST = "lenslate-pack.json"
+PACK_MODELS = ("quickmt-ja-en", "quickmt-zh-en", "quickmt-ko-en", "quickmt-ru-en", "quickmt-en-es", "quickmt-en-zh",
+               "opus-en-ptbr")   # every processor translator lenslate uses (quickmt-en-pt is not: it writes pt-PT)
+
+
+def make_pack(out, names=None, progress=None):
+    """Write the installed processor translators `names` (default: all of PACK_MODELS) into one pack file."""
+    import tarfile
+    names = list(names or PACK_MODELS)
+    progress = progress or (lambda *a: None)
+    manifest = {"format": 1, "models": {}}
+    for n in names:
+        m = BY_NAME.get(n)
+        if m is None or m.kind not in ("mt", "sugoi") or not m.installed():
+            raise RuntimeError("%s is not an installed processor translator (lenslate models get %s)" % (n, n))
+        files = {}
+        for f in m.files:
+            p = os.path.join(m.path, f)
+            progress(0, 0, "checking " + n + "/" + f)
+            files[f] = [os.path.getsize(p), _sha256(p)]
+        manifest["models"][n] = {"repo": m.repo, "revision": revision(m.repo), "files": files}
+    tmp = out + ".part"
+    with tarfile.open(tmp, "w") as tar:
+        data = json.dumps(manifest, indent=1).encode()
+        info = tarfile.TarInfo(PACK_MANIFEST)
+        info.size, info.mtime = len(data), int(time.time())
+        import io
+        tar.addfile(info, io.BytesIO(data))
+        for n in names:
+            for f in manifest["models"][n]["files"]:
+                progress(0, 0, "adding " + n + "/" + f)
+                tar.add(os.path.join(BY_NAME[n].path, f), arcname="models/%s/%s" % (n, f))
+    os.replace(tmp, out)
+    return names
+
+
+def read_pack(path):
+    """The manifest of a pack file (raises RuntimeError when it is not one)."""
+    import tarfile
+    try:
+        with tarfile.open(path, "r:*") as tar:
+            f = tar.extractfile(PACK_MANIFEST)
+            manifest = json.load(f)
+    except (OSError, KeyError, ValueError, tarfile.TarError) as e:
+        raise RuntimeError("%s is not a lenslate offline pack (%s)" % (os.path.basename(path), e)) from None
+    if manifest.get("format") != 1:
+        raise RuntimeError("this offline pack is from a newer lenslate (format %r)" % manifest.get("format"))
+    return manifest
+
+
+def import_pack(path, progress=None, only_missing=True):
+    """Install the models of a pack file. Returns (installed, skipped) model names."""
+    import tarfile
+    progress = progress or (lambda *a: None)
+    manifest = read_pack(path)
+    plan = {}
+    for n, info in manifest["models"].items():
+        m = BY_NAME.get(n)
+        if m is None or m.kind not in ("mt", "sugoi"):
+            raise RuntimeError("the pack holds %r, which is not one of lenslate's processor translators" % n)
+        if info.get("repo") != m.repo or info.get("revision") != revision(m.repo):
+            raise RuntimeError("the pack's %s is from another version of the model (%s@%s); this lenslate uses %s@%s"
+                               % (n, info.get("repo"), str(info.get("revision"))[:10], m.repo, revision(m.repo)[:10]))
+        if set(info.get("files", {})) != set(m.files):
+            raise RuntimeError("the pack's %s does not hold the expected files" % n)
+        plan[n] = info
+    installed, skipped = [], []
+    total = sum(sz for info in plan.values() for sz, _sha in info["files"].values())
+    done = 0
+    with tarfile.open(path, "r:*") as tar:
+        for n, info in plan.items():
+            m = BY_NAME[n]
+            if only_missing and m.installed():
+                skipped.append(n)
+                done += sum(sz for sz, _sha in info["files"].values())
+                continue
+            os.makedirs(m.path, exist_ok=True)
+            for f, (size, sha) in info["files"].items():
+                member = tar.getmember("models/%s/%s" % (n, f))
+                if not member.isfile() or member.size != size:
+                    raise RuntimeError("the pack's %s/%s is damaged (size differs)" % (n, f))
+                dest = os.path.join(m.path, f)
+                os.makedirs(os.path.dirname(dest), exist_ok=True)
+                part = dest + ".part"
+                h = hashlib.sha256()
+                src = tar.extractfile(member)
+                with open(part, "wb") as out:
+                    while True:
+                        chunk = src.read(1 << 22)
+                        if not chunk:
+                            break
+                        h.update(chunk)
+                        out.write(chunk)
+                        done += len(chunk)
+                        progress(done, total, "%s/%s" % (n, f))
+                if h.hexdigest() != sha:
+                    os.remove(part)
+                    raise RuntimeError("the pack's %s/%s is damaged (checksum differs)" % (n, f))
+                os.replace(part, dest)
+            open(os.path.join(m.path, ".complete"), "w").write(json.dumps(
+                {"repo": m.repo, "revision": revision(m.repo), "files": m.files, "from_pack": os.path.basename(path)}))
+            installed.append(n)
+    progress(total, total, "done")
+    return installed, skipped
+
+
 def _ollama_blob(name):
     """Path of the GGUF file Ollama already has for this model, or None."""
     if not name or not shutil.which("ollama") or name not in ollama_models():
@@ -408,7 +520,8 @@ def cli(args):
         info = llm.runtime_info()
         print("built-in runner: %s" % ("llama.cpp %s (%s)" % (info["build"], info["flavor"]) if info else
                                        "not installed (installed with the first language model, or: lenslate models runtime)"))
-        print("usage: lenslate models get NAME | models get --needed | models pick | models use NAME | models remove NAME | models runtime")
+        print("usage: lenslate models get NAME | models get --needed | models pick | models use NAME | models remove NAME | models runtime\n"
+              "       lenslate models pack OUT.tar [NAME ...] | models import PACK.tar   (offline packs)")
         return 0
     if args[0] in ("get", "download") and args[1:] == ["--needed"]:
         # the processor translators the chosen languages need (the installer's base when no setup window opens)
@@ -443,6 +556,21 @@ def cli(args):
                       end="", flush=True)
         download(args[1], show)
         print("\n%s installed (%.0f s)" % (args[1], time.time() - t0[0]))
+        return 0
+    if args[0] == "pack" and len(args) > 1:     # lenslate models pack OUT.tar [NAME ...]
+        names = args[2:] or [n for n in PACK_MODELS if BY_NAME[n].installed()]
+        make_pack(args[1], names, lambda d, t, s: print("\r  %-60s" % s[:60], end="", flush=True))
+        print("\noffline pack written: %s (%s)" % (args[1], ", ".join(names)))
+        return 0
+    if args[0] == "import" and len(args) > 1:   # lenslate models import PACK.tar
+        try:
+            done, skipped = import_pack(args[1], lambda d, t, s: t and print(
+                "\r  %5.1f%%  %-40s" % (100 * d / t, s[:40]), end="", flush=True))
+        except RuntimeError as e:
+            print("\nnothing installed: %s" % e)
+            return 1
+        print("\ninstalled: %s%s" % (", ".join(done) or "nothing new",
+                                    ("; already there: " + ", ".join(skipped)) if skipped else ""))
         return 0
     if args[0] == "runtime":
         import llm

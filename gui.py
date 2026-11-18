@@ -1838,6 +1838,15 @@ class Window(QWidget):
         explain(self.runtime_label, "lenslate runs language models itself with llama.cpp (Vulkan: NVIDIA, AMD and "
                 "Intel graphics). Nothing else needs to be installed. Ollama is used only if you choose it.", f)
         rows.append(self.runtime_label)
+        pack = explain(set_role(QPushButton("Load offline pack…"), "secondary"),
+                       "Install processor translators from an offline pack file (lenslate-pack-*.tar from the "
+                       "release page, or one made with `lenslate models pack`) - for a PC without internet. Every "
+                       "file is checked before it is used.", f)
+        pack.setMaximumWidth(220)
+        pack.clicked.connect(self._load_pack)
+        self.pack_bar = QProgressBar()
+        self.pack_bar.setVisible(False)
+        rows += [pack, self.pack_bar]
         self.model_rows = {}
         groups = (("llm", "Language models (graphics card)"), ("mt", "Processor translators (quickmt)"),
                   ("sugoi", "Visual novel translator (Sugoi, processor)"))
@@ -1952,6 +1961,52 @@ class Window(QWidget):
         job.finished_ok.connect(lambda _r: end(None))
         job.failed.connect(lambda e: end(e, True))
         row()
+        job.start()
+
+    def _load_pack(self):
+        import models
+        path, _f = QFileDialog.getOpenFileName(self, "Load offline pack", os.path.expanduser("~/Downloads"),
+                                               "lenslate offline pack (*.tar);;All files (*)")
+        if not path:
+            return
+        try:
+            names = sorted(models.read_pack(path)["models"])
+        except RuntimeError as e:
+            self.error(str(e))
+            return
+        job = self.start_job(Job(lambda progress: models.import_pack(path, progress)), "pack")
+        bar = self.pack_bar
+
+        def prog(done, total, text):
+            try:
+                bar.setVisible(True)
+                bar.setRange(0, 1000)
+                bar.setValue(int(1000 * done / total) if total else 0)
+                bar.setFormat(text[:40])
+            except RuntimeError:
+                pass
+
+        def end(result, failed=False):
+            try:
+                bar.setVisible(False)
+            except RuntimeError:
+                pass
+            if failed:
+                self.error("Offline pack: %s" % result)
+                return
+            done, skipped = result
+            for m in models.CATALOG:
+                if m.name in getattr(self, "model_rows", {}):
+                    try:
+                        self._update_model_row(m)
+                    except RuntimeError:
+                        pass
+            self.say("Offline pack: installed %s%s." % (", ".join(done) or "nothing new",
+                                                      ("; already installed: " + ", ".join(skipped)) if skipped else ""))
+        job.progress.connect(prog)
+        job.finished_ok.connect(lambda r: end(r))
+        job.failed.connect(lambda e: end(e, True))
+        self.say("Loading %s (%s)…" % (os.path.basename(path), ", ".join(names)))
         job.start()
 
     # --------------------------------------------------------------------------------------------- games page
