@@ -514,6 +514,39 @@ SENTENCE_END = "。．！？!?」』）)…♪～〜"
 FIELD_ROW = re.compile(r"^\s*[^\W\d_](?:[^\W\d_]|[ '’&/\-]){0,23}[:：]")
 
 
+LIST_MARKS = "・•‐-*◦▪▸►"
+
+
+_KATAKANA_WORD = re.compile(r"^[\u30A0-\u30FF]+$")
+
+
+def _running_text(t, cjk=6, words=3):
+    """Long enough to be running text rather than a label: 3+ words, or 6+ Chinese/Japanese characters."""
+    t = t.strip()
+    return len(t.split()) >= words or len(langs.CJK.findall(t)) >= cjk
+
+
+def centred_wrap(rows, r):
+    """r continues the centred block rows (a speech bubble, a centred description): every row is centred on the
+    same axis, the row above is running text and r is not a lone capitalised label under it."""
+    last = rows[-1]
+    if r["text"].lstrip()[:1] in LIST_MARKS or last["text"].lstrip()[:1] in LIST_MARKS:
+        return False         # items of a list ("・find the old key"), each its own card
+    lx1, _, lx2, ly2 = last["box"]
+    x1, y1, x2, y2 = r["box"]
+    h = max(y2 - y1, ly2 - last["box"][1])
+    widest = max([q["box"][2] - q["box"][0] for q in rows] + [x2 - x1])
+    tol = max(0.8 * h, 0.05 * widest)
+    axis = sum((q["box"][0] + q["box"][2]) / 2 for q in rows) / len(rows)
+    if abs((x1 + x2) / 2 - axis) > tol or abs((lx1 + lx2) / 2 - axis) > tol:
+        return False
+    if abs(x1 - lx1) <= 0.5 * h and abs(x2 - lx2) <= 0.5 * h and not _running_text(last["text"], 8, 4):
+        return False         # rows of the same width and short: a centred list of buttons
+    if _KATAKANA_WORD.match(last["text"].strip()) or _KATAKANA_WORD.match(r["text"].strip()):
+        return False         # a katakana word alone on its row (オプション, クレジット) is a menu item
+    return _running_text(last["text"])
+
+
 def group_blocks(rows):
     """Stack rows into blocks, but only where the text really wraps: the row above must be full (at least ~8
     characters and nearly as wide as the block's widest row) and must not end a sentence. Menus, labels, separate
@@ -553,6 +586,13 @@ def group_blocks(rows):
                       and r["text"].strip()[:1].isupper())
             if similar and full and not ends and not heading and not field and not labels and aligned and same_lang \
                     and -0.4 * max(h, lh) <= gap <= 0.8 * min(h, lh):
+                target = b
+                break
+            # text wrapped inside a speech bubble or a centred panel: its rows are centred on one axis, not full.
+            # Centred menus look alike, so this needs rows set tight (menus space their items wider), a row above
+            # long enough to be running text, and no sentence ending in between
+            if similar and not ends and not heading and not field and not labels and same_lang \
+                    and centred_wrap(b["rows"], r) and -0.4 * max(h, lh) <= gap <= 0.3 * min(h, lh):
                 target = b
                 break
         if target is None:

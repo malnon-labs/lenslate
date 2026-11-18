@@ -93,3 +93,37 @@ class UltrafastFallback(unittest.TestCase):
         self.assertFalse(self.want(got, mem))                       # gave up after two misses
         tf.note_ultrafast(mem, True)
         self.assertTrue(self.want([ln("はじめから", i * 25) for i in range(6)], mem))   # it helped: always
+
+
+def centred(texts, widths, cx=500, h=24, gap=6):
+    rows, y = [], 100
+    for t, w in zip(texts, widths):
+        rows.append({"box": [cx - w / 2, y, cx + w / 2, y + h], "text": t, "score": 0.9})
+        y += h + gap
+    return rows
+
+
+class CentredBlocks(unittest.TestCase):
+    def test_wrapped_description_in_a_centred_panel_is_one_card(self):
+        rows = centred(["Deal 8 damage to all enemies and", "apply 2 Vulnerable to each of", "them."],
+                       [420, 360, 70])
+        self.assertEqual([b["text"] for b in tf.group_blocks(rows)],
+                         ["Deal 8 damage to all enemies and apply 2 Vulnerable to each of them."])
+
+    def test_speech_bubble_in_japanese(self):
+        rows = centred(["きょうはいいてんきだから", "いっしょにさんぽしよう"], [260, 240])
+        self.assertEqual(len(tf.group_blocks(rows)), 1)
+
+    def test_centred_menu_stays_apart(self):
+        self.assertEqual(len(tf.group_blocks(centred(["Start Game", "Options", "Quit"], [200, 140, 80], gap=18))), 3)
+        self.assertEqual(len(tf.group_blocks(centred(["Start Game", "Options", "Quit"], [200, 140, 80], gap=6))), 3)
+        self.assertEqual(len(tf.group_blocks(centred(["はじめから", "つづきから", "おわる"], [130, 130, 80]))), 3)
+
+    def test_sentences_stay_apart(self):
+        rows = centred(["とびらにはかぎがかかっている。", "かぎをさがそう"], [300, 210])
+        self.assertEqual(len(tf.group_blocks(rows)), 2)
+
+    def test_off_axis_rows_stay_apart(self):
+        rows = centred(["Deal 8 damage to all enemies and", "apply 2 Vulnerable"], [420, 200])
+        rows[1]["box"][0] += 300; rows[1]["box"][2] += 300
+        self.assertEqual(len(tf.group_blocks(rows)), 2)
