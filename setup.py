@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QFrame, QGrid
 import config as cfgmod
 import hwcheck
 import langs
+import shortcutsdialog
 import theme
 from theme import set_role
 
@@ -575,6 +576,11 @@ class DonePage(QWizardPage):
                     "Translation page can show real numbers for your processor and graphics card. The processor is busy "
                     "for a moment.")
         self.lay.addWidget(self.measure)
+        keys = set_role(QPushButton("Keyboard shortcuts…"), "secondary")
+        wiz.explain(keys, "See and change the four hotkeys. lenslate checks that a key is free before it uses it.")
+        keys.clicked.connect(lambda: (shortcutsdialog.ShortcutsDialog(self).exec(), self.initializePage()))
+        keys.setMaximumWidth(220)
+        self.lay.addWidget(keys)
         self.lay.addStretch(1)
         self.lay.addWidget(help_bar(self))
 
@@ -588,11 +594,12 @@ class DonePage(QWizardPage):
             "<li><b>Translate now</b>: translate that area again</li>"
             "<li><b>Keep translating automatically</b>: new text is translated as it appears</li>"
             "<li><b>Show / hide</b>: the translations</li></ul>"
-            "<p>The same four have keyboard shortcuts for use inside a game: Ctrl+Alt+Z, X, C and V. "
+            "<p>The same four have keyboard shortcuts for use inside a game: %s (the Keyboard shortcuts "
+            "button below changes them). "
             "Hover over anything in the settings window for an explanation. Run this setup again from the "
             "Translation page.</p>"
             % (p["label"], " / ".join(langs.ALL_SOURCES[c] for c in sorted(langs.sources(self.wiz.sources()))),
-               self.wiz.target()))
+               self.wiz.target(), ", ".join(k for k in shortcutsdialog.keys_now().values() if k) or "none set yet"))
         self.measure.setChecked(bench.load() is None)
 
 

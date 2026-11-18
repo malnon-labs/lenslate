@@ -966,6 +966,9 @@ class Window(QWidget):
     # ------------------------------------------------------------------------------------------- overlay page
     def page_overlay(self):
         f = self.flt
+        import shortcutsdialog
+        keys = shortcutsdialog.keys_now()
+        hot = lambda a: "Hotkey: %s." % shortcutsdialog.key_text(a, keys)   # noqa: E731
         # one indicator + one button: the button always says what it will do
         self.run_dot = QLabel()
         self.run_text = QLabel()
@@ -985,20 +988,20 @@ class Window(QWidget):
 
         b_select = explain(QPushButton("Pick area…"), "Drag a box around the text you want translated: a game's "
                            "dialogue box, a video's subtitles, part of a web page, a PDF, or the whole screen. "
-                           "Smaller areas are read faster. Hotkey: Ctrl+Alt+Z.", f)
+                           "Smaller areas are read faster. " + hot("select"), f)
         b_select.clicked.connect(lambda: send("select") or run_lenslate("select"))
         self.b_now = explain(QPushButton("Translate now"), "Read the whole chosen area again and translate it. "
-                             "Lines translated before come from the cache instantly. Hotkey: Ctrl+Alt+X.", f)
+                             "Lines translated before come from the cache instantly. " + hot("now"), f)
         self.b_now.clicked.connect(lambda: (send("now"), self.refresh_status()))
         self.b_toggle = explain(QPushButton("Show / hide"), "Hide the translation cards (automatic translation "
-                                "pauses while hidden), or show them again. Hotkey: Ctrl+Alt+V.", f)
+                                "pauses while hidden), or show them again. " + hot("toggle"), f)
         self.b_toggle.clicked.connect(lambda: (send("toggle"), self.refresh_status()))
         self.b_reset = explain(QPushButton("Forget area"), "Remove the cards and forget the chosen area.", f)
         self.b_reset.clicked.connect(lambda: (send("reset"), self.refresh_status()))
         self.auto_box = explain(QCheckBox("Keep translating automatically"),
                                 "Check the area again and again (every 'Auto-refresh interval' seconds) and translate "
                                 "new text as it appears. Only the parts that changed are read again, so it costs "
-                                "little while nothing changes. Pick an area first. Hotkey: Ctrl+Alt+C.", f)
+                                "little while nothing changes. Pick an area first. " + hot("auto"), f)
         self.auto_box.clicked.connect(self.toggle_auto)
         self.b_select = b_select
         row2 = FlowLayout(hspacing=8, vspacing=8)
@@ -1026,7 +1029,12 @@ class Window(QWidget):
                         for k in ("refresh.interval", "refresh.settle_step", "refresh.settle_max")])
         sec = section_label("Translate what is on screen")
         explain(sec, "Works on anything on screen: games, browsers, video players, PDF and image viewers, the "
-                "desktop. Hotkeys can be changed in System Settings › Keyboard › Shortcuts (search for lenslate).", f)
+                "desktop. The buttons below have hotkeys for use inside a game: Keyboard shortcuts changes them.", f)
+        b_keys = explain(set_role(QPushButton("Keyboard shortcuts…"), "secondary"),
+                         "See and change the hotkeys of Pick area, Translate now, Keep translating and Show / hide. "
+                         "lenslate checks that a key is free before it uses it.", f)
+        b_keys.clicked.connect(self.edit_shortcuts)
+        row2.addWidget(b_keys)
         # shown under the status bar while lenslate runs (the moment the player is about to use it), until "Got it"
         self.read_tip = QFrame()
         set_role(self.read_tip, "tip")
@@ -1084,6 +1092,11 @@ class Window(QWidget):
             send("quit")
             self.run_text.setText("Stopping…")
         QTimer.singleShot(1500, self.refresh_status)
+
+    def edit_shortcuts(self):
+        import shortcutsdialog
+        shortcutsdialog.ShortcutsDialog(self, on_saved=lambda keys: self.say(
+            "Hotkeys saved: " + ", ".join("%s %s" % (k, a) for a, k in keys.items() if k))).exec()
 
     def toggle_auto(self):
         send("auto")

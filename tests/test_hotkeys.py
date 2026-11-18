@@ -92,3 +92,60 @@ class StoreMismatch(unittest.TestCase):
             hk.remove("cinnamon", gs=split)
         self.assertEqual(real.v, before)
 
+
+
+class ChangeKeys(unittest.TestCase):
+    """The settings window's "Keyboard shortcuts" dialog: parse, check, apply (Cinnamon fake, KDE fake bus)."""
+
+    def test_parse_and_spellings(self):
+        self.assertEqual(hk.normal("<Primary><Alt>z"), "Ctrl+Alt+Z")
+        self.assertEqual(hk.normal("ctrl+shift+alt+f12"), "Ctrl+Alt+Shift+F12")
+        self.assertEqual(hk.gtk_key(*hk.parse("Super+PgUp")), "<Super>Page_Up")
+        self.assertEqual(hk.from_qt_code(hk.qt_code("Ctrl+Alt+Up")), "Ctrl+Alt+Up")
+        self.assertIsNotNone(hk.usable("Shift+Z"))
+        self.assertIsNone(hk.usable("F9"))
+        with self.assertRaises(ValueError):
+            hk.parse("Hyper+Q")
+
+    def test_cinnamon_set_and_read_back(self):
+        gs = FakeSettings({(CIN, "custom-list"): "['custom0']", (item(0), "name"): "'Terminal'",
+                           (item(0), "command"): "'xterm'", (item(0), "binding"): "['<Primary><Alt>t']",
+                           (CIN + ".wm", "x"): "['<Super>x']"})
+        gs.v[(CIN, "expo")] = "@as []"
+        hk.install("cinnamon", gs, cmd="/x/lenslate")
+        self.assertEqual(hk.current("cinnamon", gs), hk.DEFAULTS)
+        bad = hk.conflicts("cinnamon", {"select": "Ctrl+Alt+T", "now": "Ctrl+Alt+C"}, gs)
+        self.assertIn("Terminal", bad["select"])                    # someone else's key
+        self.assertIn("auto refresh", bad["now"])                   # lenslate's own "auto" keeps Ctrl+Alt+C
+        with self.assertRaises(RuntimeError):
+            hk.apply("cinnamon", {"select": "Ctrl+Alt+T"}, gs, cmd="/x/lenslate")
+        self.assertEqual(hk.current("cinnamon", gs)["select"], "Ctrl+Alt+Z")   # nothing changed
+        hk.apply("cinnamon", {"select": "Super+F9", "toggle": ""}, gs, cmd="/x/lenslate")
+        now = hk.current("cinnamon", gs)
+        self.assertEqual((now["select"], now["now"], now["toggle"]), ("Super+F9", "Ctrl+Alt+X", None))
+        self.assertIn("'xterm'", gs.v.values())                    # the user's own shortcut is untouched
+
+    def test_kde_through_a_fake_bus(self):
+        keys = {"net.local.lenslate-select.desktop": [hk.qt_code("Ctrl+Alt+Z")]}
+        owners = {hk.qt_code("Meta+E"): [("org.kde.dolphin.desktop", "Dolphin: Dolphin")]}
+
+        def bus(method, *args):
+            if method == "shortcut":
+                got = keys.get(args[2], [])
+                return ["ai", str(len(got))] + [str(c) for c in got]
+            if method == "setForeignShortcut":
+                keys[args[2]] = [int(c) for c in args[7:7 + int(args[6])]]
+                return []
+            if method == "owners":
+                return owners.get(args[0], [])
+            raise AssertionError(method)
+        self.assertEqual(hk.current("kde", bus=bus)["select"], "Ctrl+Alt+Z")
+        self.assertEqual(hk.conflicts("kde", {"auto": "Meta+E"}, bus=bus), {"auto": "Dolphin: Dolphin"})
+        import tempfile
+        old = hk.APPS
+        hk.APPS = tempfile.mkdtemp()
+        try:
+            hk.apply("kde", {"now": "Ctrl+Alt+X"}, bus=bus, cmd="/x/lenslate")
+        finally:
+            hk.APPS = old
+        self.assertEqual(hk.current("kde", bus=bus)["now"], "Ctrl+Alt+X")

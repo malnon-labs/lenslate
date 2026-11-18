@@ -8,6 +8,8 @@ and on Cinnamon and GNOME (which keep custom shortcuts in gsettings) it can writ
   lenslate hotkeys DESKTOP         the same for another one: kde, gnome, cinnamon, xfce, mate, hyprland, sway, i3, niri
   lenslate hotkeys install         Cinnamon / GNOME: add the four shortcuts (keys that are free; never replaces one)
   lenslate hotkeys remove          Cinnamon / GNOME: take lenslate's shortcuts out again
+  lenslate hotkeys set select=Ctrl+Alt+Z ...   KDE / Cinnamon / GNOME: change the keys (checked for clashes first;
+                                   also the "Keyboard shortcuts" button in the settings window)
 
 Tried on a real desktop: KDE Plasma 6 only (the installer's shortcuts). The Cinnamon and GNOME writer was run
 against those desktops' real settings schemas in a container (tests/scripts/hotkeys_containers.sh, 2026-11-12:
@@ -80,6 +82,7 @@ def command():
 def gtk_key(mods, key):
     """('Ctrl', 'Alt'), 'Up' -> '<Primary><Alt>Up' (the GTK spelling Cinnamon, GNOME, Xfce and MATE use)."""
     names = {"Ctrl": "<Primary>", "Alt": "<Alt>", "Super": "<Super>", "Shift": "<Shift>"}
+    key = {"PgUp": "Page_Up", "PgDown": "Page_Down", "Backspace": "BackSpace", "Space": "space"}.get(key, key)
     return "".join(names[m] for m in mods) + (key.lower() if len(key) == 1 else key)   # GTK: letters are lower case
 
 
@@ -91,45 +94,140 @@ def _same_key(a, b):
     return norm(a) == norm(b)
 
 
+def _pairs(keys):
+    """[(action, what, mods, key)] from a key set (mods, [key per action]) or a {action: "Ctrl+Alt+Z"} map."""
+    if isinstance(keys, dict):
+        out = []
+        for a, what in ACTIONS:
+            if keys.get(a):
+                mods, key = parse(keys[a])
+                out.append((a, what, mods, key))
+        return out
+    mods, names = keys
+    return [(a, what, tuple(mods), k) for (a, what), k in zip(ACTIONS, names)]
+
+
 def lines(desk, cmd=None, keys=None):
-    """Ready-to-paste text for a desktop: [(heading, [line, ...])]."""
+    """Ready-to-paste text for a desktop: [(heading, [line, ...])]. keys: a key set or a {action: combo} map."""
     cmd = cmd or command()
-    mods, names = keys or KEY_SETS[0]
-    plus = "+".join(mods)
-    pairs = list(zip(ACTIONS, names))
+    pairs = _pairs(keys or KEY_SETS[0])
     if desk == "hyprland":
-        m = " ".join(x.upper().replace("CTRL", "CTRL") for x in mods)
         return [("Add to ~/.config/hypr/hyprland.conf (applies when saved):",
-                 ["bind = %s, %s, exec, %s %s    # %s" % (m, k, cmd, a, what) for (a, what), k in pairs])]
+                 ["bind = %s, %s, exec, %s %s    # %s" % (" ".join(x.upper() for x in mods), k, cmd, a, what)
+                  for a, what, mods, k in pairs])]
     if desk in ("sway", "i3"):
-        sm = "+".join({"Ctrl": "Ctrl", "Alt": "Mod1", "Super": "Mod4", "Shift": "Shift"}[x] for x in mods)
         conf = "~/.config/sway/config (then: swaymsg reload)" if desk == "sway" else "~/.config/i3/config (then: i3-msg reload)"
         return [("Add to %s:" % conf,
-                 ["bindsym %s+%s exec %s %s    # %s" % (sm, k.lower() if len(k) == 1 else k, cmd, a, what)
-                  for (a, what), k in pairs])]
+                 ["bindsym %s+%s exec %s %s    # %s" % (
+                     "+".join({"Ctrl": "Ctrl", "Alt": "Mod1", "Super": "Mod4", "Shift": "Shift"}[x] for x in mods),
+                     k.lower() if len(k) == 1 else k, cmd, a, what) for a, what, mods, k in pairs])]
     if desk == "niri":
-        nm = "+".join({"Super": "Mod"}.get(x, x) for x in mods)
         return [("Add inside the  binds { ... }  block of ~/.config/niri/config.kdl (applies when saved):",
-                 ['%s+%s { spawn "%s" "%s"; }    // %s' % (nm, k, cmd, a, what) for (a, what), k in pairs])]
+                 ['%s+%s { spawn "%s" "%s"; }    // %s' % ("+".join({"Super": "Mod"}.get(x, x) for x in mods), k, cmd, a,
+                                                        what) for a, what, mods, k in pairs])]
     if desk == "xfce":
         return [("Run these (or use Settings > Keyboard > Application Shortcuts):",
                  ['xfconf-query -c xfce4-keyboard-shortcuts -n -t string -p "/commands/custom/%s" -s "%s %s"'
-                  % (gtk_key(mods, k), cmd, a) for (a, _what), k in pairs])]
+                  % (gtk_key(mods, k), cmd, a) for a, _what, mods, k in pairs])]
     if desk == "mate":
         out = []
-        for i, ((a, what), k) in enumerate(pairs):
+        for i, (a, what, mods, k) in enumerate(pairs):
             p = "org.mate.control-center.keybinding:/org/mate/desktop/keybindings/lenslate%d/" % i
             out += ['gsettings set %s name "%s%s"' % (p, MARK, what), 'gsettings set %s action "%s %s"' % (p, cmd, a),
                     'gsettings set %s binding "%s"' % (p, gtk_key(mods, k))]
         return [("Run these (or use Control Centre > Keyboard Shortcuts > Add):", out)]
+    rows = ["%-22s %s %s    (%s)" % (combo(mods, k), cmd, a, what) for a, what, mods, k in pairs]
     if desk in GS:
-        return [("Run  lenslate hotkeys install  - or add them by hand in %s:" % GS[desk]["where"],
-                 ["%-22s %s %s    (%s)" % (plus + "+" + k, cmd, a, what) for (a, what), k in pairs])]
+        return [("Run  lenslate hotkeys install  - or add them by hand in %s:" % GS[desk]["where"], rows)]
     if desk == "kde":
-        return [("The installer adds these (System Settings > Keyboard > Shortcuts shows and changes them):",
-                 ["%-22s %s %s    (%s)" % (plus + "+" + k, cmd, a, what) for (a, what), k in pairs])]
-    return [("Bind these commands to keys in your desktop's keyboard-shortcut settings (suggested keys shown):",
-             ["%-22s %s %s    (%s)" % (plus + "+" + k, cmd, a, what) for (a, what), k in pairs])]
+        return [("The installer adds these (System Settings > Keyboard > Shortcuts shows and changes them):", rows)]
+    return [("Bind these commands to keys in your desktop's keyboard-shortcut settings (suggested keys shown):", rows)]
+
+
+# ------------------------------------------------------------------------------------ key combinations
+MODS = ("Ctrl", "Alt", "Shift", "Super")
+_MOD_ALIASES = {"ctrl": "Ctrl", "control": "Ctrl", "primary": "Ctrl", "alt": "Alt", "mod1": "Alt", "shift": "Shift",
+                "super": "Super", "meta": "Super", "win": "Super", "mod4": "Super", "logo": "Super"}
+# Qt key codes (KDE's KGlobalAccel speaks them) for the keys a shortcut may end in
+_QT_NAMED = {"Escape": 0x01000000, "Tab": 0x01000001, "Backspace": 0x01000003, "Return": 0x01000004,
+             "Enter": 0x01000005, "Insert": 0x01000006, "Delete": 0x01000007, "Pause": 0x01000008, "Print": 0x01000009,
+             "Home": 0x01000010, "End": 0x01000011, "Left": 0x01000012, "Up": 0x01000013, "Right": 0x01000014,
+             "Down": 0x01000015, "PgUp": 0x01000016, "PgDown": 0x01000017, "Space": 0x20}
+_QT_NAMED.update({"F%d" % n: 0x01000030 + n - 1 for n in range(1, 36)})
+_KEY_ALIASES = {"pageup": "PgUp", "page_up": "PgUp", "prior": "PgUp", "pagedown": "PgDown", "page_down": "PgDown",
+                "next": "PgDown", "esc": "Escape", "del": "Delete", "ins": "Insert", "space": "Space"}
+_QT_MODS = {"Shift": 0x02000000, "Ctrl": 0x04000000, "Alt": 0x08000000, "Super": 0x10000000}
+
+
+def parse(text):
+    """"Ctrl+Alt+Z" / "<Primary><Alt>z" / "ctrl+alt+f9" -> (("Ctrl", "Alt"), "Z"). Raises ValueError."""
+    t = (text or "").strip()
+    if not t:
+        raise ValueError("empty shortcut")
+    if t.startswith("<"):
+        parts = [p for p in t.replace(">", ">\x00").split("\x00") if p]
+        mods_raw, key = [p.strip("<>") for p in parts[:-1]], parts[-1]
+    else:
+        bits = t.split("+")
+        if t.endswith("++"):
+            bits = bits[:-2] + ["+"]
+        mods_raw, key = bits[:-1], bits[-1]
+    mods = []
+    for m in mods_raw:
+        name = _MOD_ALIASES.get(m.strip().lower())
+        if name is None:
+            raise ValueError("unknown modifier %r in %r" % (m, text))
+        if name not in mods:
+            mods.append(name)
+    key = key.strip()
+    key = _KEY_ALIASES.get(key.lower(), key)
+    named = {k.lower(): k for k in _QT_NAMED}
+    if key.lower() in named:
+        key = named[key.lower()]
+    elif len(key) == 1:
+        key = key.upper()
+    else:
+        raise ValueError("unknown key %r in %r" % (key, text))
+    return tuple(m for m in MODS if m in mods), key
+
+
+def combo(mods, key):
+    return "+".join(list(mods) + [key])
+
+
+def normal(text):
+    """A shortcut in lenslate's spelling ("Ctrl+Alt+Z"), or raise ValueError."""
+    return combo(*parse(text))
+
+
+def usable(text):
+    """Why a shortcut cannot be used as a global hotkey, or None. A lone letter or Shift+letter would fire while
+    typing in the game; it needs Ctrl, Alt or Super (or an F-key)."""
+    try:
+        mods, key = parse(text)
+    except ValueError as e:
+        return str(e)
+    if not (set(mods) & {"Ctrl", "Alt", "Super"}) and not key.startswith("F"):
+        return "needs Ctrl, Alt or Super (a key alone would fire while you type)"
+    return None
+
+
+def qt_code(text):
+    mods, key = parse(text)
+    code = _QT_NAMED.get(key, ord(key) if len(key) == 1 else 0)
+    for m in mods:
+        code |= _QT_MODS[m]
+    return code
+
+
+def from_qt_code(code):
+    mods = tuple(m for m in MODS if code & _QT_MODS[m])
+    base = code & 0x01FFFFFF
+    key = next((k for k, v in _QT_NAMED.items() if v == base), None) or (chr(base).upper() if 0x20 < base < 0x110000 else None)
+    return combo(mods, key) if key else None
+
+
+DEFAULTS = {a: combo(KEY_SETS[0][0], k) for (a, _w), k in zip(ACTIONS, KEYS)}
 
 
 # ------------------------------------------------------------------------------------ gsettings desktops
@@ -282,8 +380,230 @@ def remove(desk, gs=_gs):
     return len(mine)
 
 
+# ------------------------------------------------------------------------ changing the keys (settings window)
+KDE_FILES = {a: ["net.local.lenslate-%s.desktop" % a] for a, _w in ACTIONS}
+KDE_FILES["toggle"].append("net.local.lenslate-clear.desktop")    # its name before 0.1.0
+APPS = os.path.join(os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share"), "applications")
+
+
+def writable(desk):
+    """Can lenslate change the keys on this desktop itself? (Otherwise it shows lines to paste.)"""
+    if desk == "kde":
+        return bool(shutil.which("busctl")) and _kde_up()
+    return desk in GS and bool(shutil.which("gsettings"))
+
+
+def _bus(*args):
+    r = subprocess.run(["busctl", "--user", "call", "org.kde.kglobalaccel", "/kglobalaccel", "org.kde.KGlobalAccel"]
+                       + [str(a) for a in args], capture_output=True, text=True, timeout=10)
+    if r.returncode != 0:
+        raise RuntimeError(r.stderr.strip() or "KGlobalAccel did not answer")
+    return r.stdout.split()
+
+
+def _kde_up():
+    try:
+        _bus("isGlobalShortcutAvailable", "is", 0, "")
+        return True
+    except (RuntimeError, OSError, subprocess.SubprocessError):
+        return False
+
+
+def _kde_file(action):
+    """The shortcut file KDE knows this action by (an older install may use the old name), or the new name."""
+    for f in KDE_FILES[action]:
+        if os.path.exists(os.path.join(APPS, f)):
+            return f
+    return KDE_FILES[action][0]
+
+
+def _kde_get(f, bus=_bus):
+    out = bus("shortcut", "as", 4, f, "_launch", "", "")      # "ai N code..."
+    codes = [int(x) for x in out[2:]] if len(out) > 2 else []
+    return from_qt_code(codes[0]) if codes else None
+
+
+def current(desk, gs=_gs, bus=_bus):
+    """{action: "Ctrl+Alt+Z" or None} as the desktop has them now, or None when lenslate cannot read them here."""
+    if desk == "kde":
+        try:
+            return {a: _kde_get(_kde_file(a), bus) for a, _w in ACTIONS}
+        except (RuntimeError, OSError, subprocess.SubprocessError, ValueError):
+            return None
+    if desk not in GS:
+        return None
+    spec, out = GS[desk], {a: None for a, _w in ACTIONS}
+    try:
+        for ident in _ours(spec, gs):
+            cmd = str(_parse(gs("get", _item(spec, ident), "command")))
+            action = cmd.rsplit(" ", 1)[-1]
+            b = _parse(gs("get", _item(spec, ident), "binding"))
+            b = b[0] if isinstance(b, list) and b else b
+            if action in out and isinstance(b, str) and b:
+                try:
+                    out[action] = normal(b)
+                except ValueError:
+                    pass
+    except RuntimeError:
+        return None
+    return out
+
+
+def conflicts(desk, keys, gs=_gs, bus=_bus):
+    """{action: what already uses its key} for keys used by something other than lenslate (and keys given to two
+    of lenslate's actions at once)."""
+    out, seen = {}, {}
+    for a, k in (current(desk, gs, bus) or {}).items():   # lenslate's other keys, kept as they are
+        if k and a not in keys:
+            seen.setdefault(k, a)
+    for a, k in keys.items():
+        if not k:
+            continue
+        why = usable(k)
+        if why:
+            out[a] = why
+            continue
+        n = normal(k)
+        if n in seen:
+            out[a] = "also given to \"%s\"" % dict(ACTIONS)[seen[n]]
+        seen.setdefault(n, a)
+    if desk == "kde":
+        ours = {f for fs in KDE_FILES.values() for f in fs}
+        for a, k in keys.items():
+            if not k or a in out:
+                continue
+            try:
+                rows = _kde_owners(qt_code(k), bus)
+            except (RuntimeError, OSError, subprocess.SubprocessError):
+                continue
+            other = [r for r in rows if r[0] not in ours]
+            if other:
+                out[a] = other[0][1]
+    elif desk in GS:
+        spec = GS[desk]
+        try:
+            vals = [_parse(gs("get", _item(spec, i), "binding")) for i in _ours(spec, gs)]
+            mine = {m for v in vals for m in (v if isinstance(v, list) else [v])}
+            used = {u: w for u, w in taken_keys(spec, gs).items() if u not in mine}
+        except RuntimeError:
+            used = {}
+        for a, k in keys.items():
+            if not k or a in out:
+                continue
+            hit = next((w for u, w in used.items() if _same_key(gtk_key(*parse(k)), u)), None)
+            if hit:
+                out[a] = hit
+    return out
+
+
+def _kde_owners(code, bus=_bus):
+    """[(component, "Friendly component: friendly action")] of KDE shortcuts on a key code."""
+    r = subprocess.run(["busctl", "--user", "--json=short", "call", "org.kde.kglobalaccel", "/kglobalaccel",
+                        "org.kde.KGlobalAccel", "getGlobalShortcutsByKey", "i", str(code)],
+                       capture_output=True, text=True, timeout=10) if bus is _bus else None
+    if r is None:
+        return bus("owners", code)
+    if r.returncode != 0:
+        raise RuntimeError(r.stderr.strip())
+    import json
+    data = json.loads(r.stdout).get("data", [[]])[0]
+    # each: [componentUnique, componentFriendly?, ...] - KGlobalShortcutInfo: (uniqueName, friendlyName,
+    # componentUniqueName, componentFriendlyName, contextUniqueName, contextFriendlyName, keys, defaultKeys)
+    return [(row[2], "%s: %s" % (row[3] or row[2], row[1] or row[0])) for row in data]
+
+
+def _kde_desktop_file(action, f, cmd, real=True):
+    path = os.path.join(APPS, f)
+    if os.path.exists(path):
+        return
+    os.makedirs(APPS, exist_ok=True)
+    with open(path, "w") as fh:
+        fh.write("[Desktop Entry]\nExec=%s %s\nName=%s%s\nNoDisplay=true\nStartupNotify=false\nType=Application\n"
+                 "X-KDE-GlobalAccel-CommandShortcut=true\n" % (cmd, action, MARK, dict(ACTIONS)[action]))
+    if real and shutil.which("kbuildsycoca6"):
+        subprocess.run(["kbuildsycoca6"], capture_output=True, timeout=60)
+
+
+def apply(desk, keys, gs=_gs, bus=_bus, cmd=None):
+    """Set lenslate's keys on the desktop: keys = {action: "Ctrl+Alt+Z" or "" (no key)}. Checks first; nothing is
+    changed when a key is unusable or taken (RuntimeError says which). Returns a short report."""
+    bad = conflicts(desk, keys, gs, bus)
+    if bad:
+        raise RuntimeError("; ".join("%s: %s is %s" % (dict(ACTIONS)[a], keys[a], w if w.startswith(("needs", "also", "unknown", "empty"))
+                                                       else "already used by " + w) for a, w in bad.items()))
+    cmd = cmd or command()
+    if desk == "kde":
+        for a, _w in ACTIONS:
+            if a not in keys:
+                continue
+            f = _kde_file(a)
+            _kde_desktop_file(a, f, cmd, real=bus is _bus)
+            codes = [qt_code(keys[a])] if keys[a] else []
+            bus("setForeignShortcut", "asai", 4, f, "_launch", "", "", len(codes), *codes)
+            if bus is _bus and shutil.which("kwriteconfig6"):   # (KGlobalAccel saves it too; this keeps the file in step)
+                subprocess.run(["kwriteconfig6", "--file", "kglobalshortcutsrc", "--group", "services", "--group", f,
+                                "--key", "_launch", normal(keys[a]) if keys[a] else "none"], capture_output=True,
+                               timeout=10)
+        got = current(desk, gs, bus) or {}
+        wrong = [a for a in keys if keys[a] and got.get(a) != normal(keys[a])]
+        if wrong:
+            raise RuntimeError("KDE did not take the new key for: %s" % ", ".join(dict(ACTIONS)[a] for a in wrong))
+        return "saved in KDE's shortcuts"
+    if desk not in GS:
+        raise RuntimeError("lenslate cannot change shortcuts on %s itself" % NAMES.get(desk, desk))
+    spec = GS[desk]
+    check_store(spec, gs)
+    have = current(desk, gs) or {}
+    want = {a: (normal(keys[a]) if keys.get(a) else None) if a in keys else have.get(a) for a, _w in ACTIONS}
+    remove(desk, gs)
+    ids = custom_ids(spec, gs)
+    for a, what in ACTIONS:
+        if not want[a]:
+            continue
+        if spec["ids"]:
+            n = 0
+            while "custom%d" % n in ids:
+                n += 1
+            ident = "custom%d" % n
+        else:
+            ident = spec["path"] % ("lenslate-" + a)
+        item = _item(spec, ident)
+        binding = gtk_key(*parse(want[a]))
+        gs("set", item, "name", MARK + what)
+        gs("set", item, "command", "%s %s" % (cmd, a))
+        gs("set", item, "binding", "['%s']" % binding if spec["array"] else binding)
+        ids.append(ident)
+    gs("set", spec["schema"], spec["list"], str(ids))
+    return "saved in %s" % spec["where"]
+
+
 def cli(args):
     desk = desktop()
+    if args and args[0] == "set":
+        # lenslate hotkeys set select=Ctrl+Alt+Z now=Ctrl+Alt+X ...  (an empty value removes that key)
+        keys = {}
+        for a in args[1:]:
+            name, _, key = a.partition("=")
+            if name not in dict(ACTIONS):
+                print("unknown command %r; one of: %s" % (name, ", ".join(x for x, _w in ACTIONS)))
+                return 1
+            keys[name] = key
+        if not keys:
+            print("usage: lenslate hotkeys set select=Ctrl+Alt+Z now=Ctrl+Alt+X auto=Ctrl+Alt+C toggle=Ctrl+Alt+V")
+            return 1
+        if not writable(desk):
+            print("lenslate cannot change shortcuts on %s itself; add these by hand:\n" % NAMES[desk])
+            for head, body in lines(desk, keys=dict(current(desk) or DEFAULTS, **{k: v for k, v in keys.items() if v})):
+                print(head)
+                for ln in body:
+                    print("  " + ln)
+            return 1
+        try:
+            print(apply(desk, keys))
+        except (RuntimeError, ValueError) as e:
+            print("nothing changed: %s" % e)
+            return 1
+        return 0
     if args and args[0] in ("install", "remove"):
         if desk not in GS:
             print("lenslate writes shortcuts itself only on Cinnamon and GNOME%s. Here:\n"

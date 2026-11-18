@@ -85,6 +85,7 @@ QLabel[role="message"][kind="error"]   { background: $danger_tint; color: $dange
 QLabel[role="helpbar"] { background: $surface_sunken; border: none; border-top: 1px solid $border_subtle;
                          padding: 8px 12px; color: $text; }
 QLabel[role="helpbar"][state="idle"]  { color: $text_muted; }
+QLabel[role="muted"][state="error"] { color: $danger_text; }
 QLabel[role="helpbar"][state="error"] { background: $danger_tint; color: $danger_text_on_tint;
                                         border-top: 2px solid $danger; }
 
