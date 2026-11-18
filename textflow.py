@@ -624,13 +624,30 @@ DECOR = "♪♫☆★♡♥※"
 SENT_END = re.compile(r"[。！？!?…\.]\s*[」』）)]*$")
 
 
+# quickmt en -> zh learnt from web pages: on short lines it sometimes writes their furniture (2026-11-18, English game
+# screens): a breadcrumb "您的位置:电驴大全 > 电影 > Ashes of the Silent Crown", a song or cast label "曲名 : The
+# Silent", "饰 Ironclad", or the word twice ("减少减少", "埃琳娜·埃琳娜")
+_ZH_CRUMB = re.compile(r"^\s*(?:您的位置|当前位置|所在位置|位置)\s*[:：].*[>»]\s*")
+_ZH_LABEL = re.compile(r"^\s*(?:曲名|歌曲名|歌名|片名|标题|饰)\s*[:：]?\s+")
+_TWICE = re.compile(r"^(.{2,}?)[·・\s]?\1$")
+
+
 def tidy(src, tr):
     """Remove what a translator added that the original does not have: Sugoi wraps labels in ♪ (game fonts often
-    lack it), adds a dialogue dash ("- Yes") or a full stop after a one-word menu label ("Save.")."""
+    lack it), adds a dialogue dash ("- Yes") or a full stop after a one-word menu label ("Save."); quickmt's web
+    furniture in Chinese (see _ZH_CRUMB)."""
     if not tr:
         return tr
     s = src.strip()
     t = tr.strip()
+    if langs.HAN.search(t) and not langs.HAN.search(s):     # into Chinese from a language without Chinese characters
+        t = _ZH_CRUMB.sub("", t)
+        t = _ZH_LABEL.sub("", t)
+        m = _TWICE.match(t)
+        if m and not re.match(_TWICE.pattern, s, re.I):
+            t = m.group(1)
+        if not t.strip():
+            return t
     if not any(c in s[:1] for c in DECOR):
         t = t.lstrip(DECOR + " ")
     if not any(c in s[-1:] for c in DECOR):
@@ -1021,7 +1038,11 @@ def translate_one(text, lang, model, url, stop=lambda: False, names="", on_parti
 
 def num_ctx():
     return cfgmod.get("translator.num_ctx")
-ECHO = re.compile(r"reply with|translation only|native speaker|sentence type|faithfully|on-screen text", re.I)
+ECHO = re.compile(r"reply with|translation only|native speaker|sentence type|faithfully|on-screen text"
+                  # an assistant's answer instead of a translation (Gemma, en -> zh, the lone word "English":
+                  # "请提供需要翻译的英文文本。" - "please give me the English text to translate")
+                  r"|请提供|请输入|需要翻译的|无法翻译|please provide|provide the text|i'?m sorry|"
+                  r"por favor,? (?:proporciona|forne[çc]a|envie|env[ií]a)", re.I)
 
 
 _THINK = re.compile(r"<think>.*?(</think>|$)", re.S | re.I)
@@ -1531,6 +1552,7 @@ class Translator:
                     for h in hops:   # one call per model for the whole group
                         cur = [" ".join(x.split()).strip() for x in self._client(h).translate(cur)]
                     for i, tr in zip(idx, cur):
+                        tr = tidy(texts[i], tr) if tr else tr   # (web furniture removed first: see _ZH_CRUMB)
                         if tr and langs.source_left(texts[i], tr, src_lang(texts[i]), self.target) < 0.2:
                             out[i] = tr
                             if on_item:

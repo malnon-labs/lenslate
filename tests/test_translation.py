@@ -233,3 +233,30 @@ class CacheStamp(unittest.TestCase):
         self.assertEqual(old["entries"]["はい"], "Yes")
         self.assertEqual(old["stamp"], "llm a@1 prompt 1")
         self.assertEqual(tf.TextCache(path, stamp="llm a@2 prompt 1").retired, 0)
+
+
+class EnglishToChinese(unittest.TestCase):
+    """Findings of the en -> zh test on English game screens (2026-11-18)."""
+
+    def test_quickmt_web_furniture_is_removed(self):
+        import textflow as tf
+        self.assertEqual(tf.tidy("Reduced", "减少减少"), "减少")
+        self.assertEqual(tf.tidy("Elena", "埃琳娜·埃琳娜"), "埃琳娜")
+        self.assertEqual(tf.tidy("Bye bye", "再见再见"), "再见再见")              # doubled in the original too
+        self.assertEqual(tf.tidy("The Ironclad", "饰 Ironclad"), "Ironclad")
+        self.assertEqual(tf.tidy("Accessory Starlight Pendant", "饰品 星光吊坠"), "饰品 星光吊坠")
+        left = tf.tidy("Ashes of the Silent Crown", "您的位置:电驴大全 > 电影 > Ashes of the Silent Crown")
+        self.assertEqual(left, "Ashes of the Silent Crown")                      # then rejected as untranslated
+        self.assertEqual(tf.langs.source_left("Ashes of the Silent Crown", left, "en", "zh"), 1.0)
+
+    def test_an_assistant_answer_is_no_translation(self):
+        import textflow as tf
+        self.assertTrue(tf.suspicious("English", "请提供需要翻译的英文文本。"))
+        self.assertFalse(tf.suspicious("English", "英语"))
+
+    def test_seed_label_with_a_number(self):
+        import seeds
+        self.assertEqual(seeds.lookup("Playtime 6:57:43", "en", "zh"), "游戏时间 6:57:43")
+        self.assertEqual(seeds.lookup("Unlocked 54/60", "en", "pt"), "Desbloqueado 54/60")
+        self.assertEqual(seeds.lookup("Master Volume 80%", "en", "es"), seeds.lookup("Master Volume", "en", "es") + " 80%")
+        self.assertIsNone(seeds.lookup("3 Lives", "en", "zh"))

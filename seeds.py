@@ -84,10 +84,26 @@ def pack(src, tgt):
     return data
 
 
+# a label followed by its value: "Playtime 6:57:43", "Discovered 539/596", "Ascensions 9/50", "Volume 80%"
+NUM_TAIL = re.compile(r"^(.*?[^\W\d_][^\d]*?)\s*[:：]?\s+([\d][\d\s:/.,%x×+\-]*)$")
+
+
 def lookup(text, src, tgt):
-    """The pack translation of a whole line, adapted to its shape, or None."""
+    """The pack translation of a whole line, adapted to its shape, or None. A line that is a pack label followed
+    by a number ("Playtime 6:57:43") gets the label's translation with the number kept."""
     if not src or not tgt or src == tgt:
         return None
+    tr = _lookup(text, src, tgt)
+    if tr is None:
+        m = NUM_TAIL.match(unicodedata.normalize("NFKC", text).strip())
+        if m:
+            label = _lookup(m.group(1), src, tgt)
+            if label is not None:
+                tr = label.rstrip(":： ") + " " + m.group(2).strip()
+    return tr
+
+
+def _lookup(text, src, tgt):
     p = pack(src, tgt)
     s = unicodedata.normalize("NFKC", text).strip()
     tr = p.get("=" + norm(text, tail=False))
