@@ -166,6 +166,12 @@ SCHEMA = [
       "ultrafast = like fast, but meikiocr (a reader trained on Japanese game text) finds and reads: ~6x faster "
       "and ~7x less processor work than fast; Japanese only (English lines are read by the normal reader, Chinese "
       "comes out wrong).", choices=("accurate", "fast", "ultrafast")),
+    S("ocr.ultrafast_fallback", True, "LENSLATE_ULTRAFAST_FALLBACK", "Try Ultrafast on sparse Japanese",
+      "When an area with Japanese text comes back with only a few lines, it is read once more with Ultrafast "
+      "(meikiocr, trained on Japanese game text), and the reading that found more text is kept. Small pixel fonts "
+      "of retro games (a 640x480 WOLF RPG game: Quick found 2 of 8 lines, Ultrafast all of them). It stops trying "
+      "in a game where Ultrafast twice found nothing more, and keeps using it where it helped. Costs ~0.1-0.3 s "
+      "on such an area and ~0.2 GB of memory for the second reader."),
     S("ocr.gpu", "off", "LENSLATE_OCR_GPU", "Read text on the graphics card",
       "off = reading runs on the processor. reader = the found lines are read on the graphics card (NVIDIA): about "
       "12x faster line reading for ~0.4 GB of GPU memory; finding text stays on the processor. all = finding and "

@@ -456,6 +456,52 @@ def merge_rows(lines):
 
 
 LETTER = re.compile(r"[^\W\d_]")
+
+
+# ------------------------------------------------------------------- Ultrafast as a second reader (sparse Japanese)
+SPARSE_LINES = 3        # an area with this many lines read or fewer is "sparse"
+ULTRA_GIVE_UP = 2       # misses in a row (Ultrafast found nothing more) before a region stops trying it
+
+
+def _letter_lines(lines):
+    return [ln for ln in lines if LETTER.search(ln.get("text", ""))]
+
+
+def ultrafast_wanted(got, enabled, reading, script, mem, area_h):
+    """Read this area again with Ultrafast? Only for Japanese (kana read here, or Japanese the only Chinese-script
+    source), when few lines came back from an area with room for more, in a region where it has not kept failing."""
+    if reading == "ultrafast" or script != "cjk" or "ja" not in enabled:
+        return False
+    if mem.get("ultra_wins", 0) > 0:
+        return True          # it helped in this region: keep using it
+    if mem.get("ultra_misses", 0) >= ULTRA_GIVE_UP:
+        return False
+    read = _letter_lines(got)
+    if not read or len(read) > SPARSE_LINES:
+        return False
+    if not any(langs.KANA.search(ln["text"]) for ln in read) and "zh" in enabled:
+        return False         # kanji-only lines with Chinese turned on: maybe Chinese, which Ultrafast reads wrong
+    hs = sorted(ln["box"][3] - ln["box"][1] for ln in read)
+    return area_h >= 2.5 * (len(read) + 1) * hs[len(hs) // 2]
+
+
+def _chars(lines):
+    return sum(len(re.findall(r"[^\W\d_]", ln.get("text", ""))) for ln in lines)
+
+
+def reads_more(alt, got):
+    """Did the second reading find clearly more text (more lines with letters and more letters)?"""
+    a, g = _letter_lines(alt), _letter_lines(got)
+    return len(a) > len(g) and _chars(a) >= 1.3 * _chars(g) + 4
+
+
+def note_ultrafast(mem, won):
+    if won:
+        mem["ultra_wins"] = mem.get("ultra_wins", 0) + 1
+        mem["ultra_misses"] = 0
+    else:
+        mem["ultra_misses"] = mem.get("ultra_misses", 0) + 1
+        mem["ultra_wins"] = 0
 SMALL_TEXT = 22    # median line height (px) below which the region is read at 2x
 HEADING = "■□◆◇●○▲△▼▽★☆※【《〈『"
 SENTENCE_END = "。．！？!?」』）)…♪～〜"

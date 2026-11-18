@@ -61,3 +61,35 @@ class KanaSpaces(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def ln(text, y, h=20):
+    return {"box": [10, y, 200, y + h], "text": text, "score": 0.9}
+
+
+class UltrafastFallback(unittest.TestCase):
+    def want(self, got, mem=None, enabled=("ja",), reading="accurate", area_h=240):
+        return tf.ultrafast_wanted(got, set(enabled), reading, "cjk", {} if mem is None else mem, area_h)
+
+    def test_sparse_japanese_area_is_tried(self):
+        self.assertTrue(self.want([ln("はじめから", 10), ln("つづきから", 40)]))
+
+    def test_full_area_or_other_languages_are_not(self):
+        self.assertFalse(self.want([ln("はじめから", i * 25) for i in range(6)]))         # plenty read
+        self.assertFalse(self.want([ln("はじめから", 10)], enabled=("zh", "en")))            # Japanese off
+        self.assertFalse(self.want([ln("はじめから", 10)], reading="ultrafast"))             # already Ultrafast
+        self.assertFalse(self.want([ln("設定", 10)], enabled=("ja", "zh")))                  # maybe Chinese
+        self.assertFalse(self.want([ln("はじめから", 10), ln("つづきから", 40)], area_h=70))  # no room for more
+        self.assertFalse(self.want([]))
+
+    def test_memory_of_the_region(self):
+        mem = {}
+        got = [ln("はじめから", 10)]
+        alt = [ln("はじめから", 10), ln("つづきから", 40), ln("おぷしょん", 70)]
+        self.assertTrue(tf.reads_more(alt, got))
+        self.assertFalse(tf.reads_more(got, got))
+        tf.note_ultrafast(mem, False)
+        tf.note_ultrafast(mem, False)
+        self.assertFalse(self.want(got, mem))                       # gave up after two misses
+        tf.note_ultrafast(mem, True)
+        self.assertTrue(self.want([ln("はじめから", i * 25) for i in range(6)], mem))   # it helped: always

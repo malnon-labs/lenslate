@@ -711,8 +711,10 @@ class OcrPipeline(QThread):
     done = Signal(object, object)  # cards (None = unchanged), {"grid", "replace"}
     failed = Signal(str)
 
-    def __init__(self, screen_geo, region, history, force, win_rect, ocr, cache, scale, junk=None, mem=None):
+    def __init__(self, screen_geo, region, history, force, win_rect, ocr, cache, scale, junk=None, mem=None,
+                 ocr_ultra=None):
         super().__init__()
+        self.ocr_ultra = ocr_ultra   # Ultrafast (meikiocr) as a second reader for sparse Japanese areas, or None
         # [(rect, until)]: areas whose re-read found nothing to translate (pixel-art signs next to an animated
         # sprite were re-read every second); shared with the daemon so it survives between refreshes
         self.junk = junk if junk is not None else []
@@ -960,6 +962,23 @@ class OcrPipeline(QThread):
                         secs += s2
                         if got is None:
                             return
+                # sparse Japanese (small pixel fonts): a second reading with Ultrafast, the fuller one is kept
+                if self.ocr_ultra is not None and cfgmod.get("ocr.ultrafast_fallback") and tf.ultrafast_wanted(
+                        got, tf.langs.sources(cfgmod.get("translator.sources")), cfgmod.get("ocr.reading"),
+                        tf.langs.reader_script(cfgmod.get("translator.sources")), self.mem, rect[3] - rect[1]):
+                    try:
+                        alt, s3 = self.read_rect(crop, rect, 1.0, self.ocr_ultra)
+                    except RuntimeError as e:     # no meikiocr model, or its helper failed: the first reading stays
+                        dbg("ultrafast fallback failed: %s" % e)
+                        alt, s3 = [], 0.0
+                    if alt is None:
+                        return
+                    secs += s3
+                    won = tf.reads_more(alt, got)
+                    tf.note_ultrafast(self.mem, won)
+                    dbg("ultrafast fallback in %s: %d -> %d lines (%s)" % (rect, len(got), len(alt), "kept" if won else "not better"))
+                    if won:
+                        got = alt
                 # readings the reader itself doubts (before the junk filter takes the worst of them away)
                 weak = [ln["box"] for ln in got if ln.get("score", 1.0) < WEAK_SCORE]
                 got = tf.split_touching(tf.plausible(got, H))
@@ -1199,15 +1218,15 @@ class OcrPipeline(QThread):
                 pass
         return [[b[0] + x1, b[1] + y1, b[2] + x1, b[3] + y1] for b in got], s
 
-    def read_rect(self, crop, rect, scale):
-        """OCR one area; boxes come back in crop coordinates."""
+    def read_rect(self, crop, rect, scale, ocr=None):
+        """OCR one area (with ocr, or the region's own reader); boxes come back in crop coordinates."""
         x1, y1, x2, y2 = rect
         if self.cancelled:
             return None, 0.0
         path = os.path.join(RUNTIME, "lenslate-ocr-%d.bmp" % os.getpid())   # BMP: 0.01 s vs 0.3 s PNG on 4K areas (RAM dir)
         crop.copy(x1, y1, x2 - x1, y2 - y1).save(path, "BMP")
         try:
-            got, s = self.ocr.read(path, scale)
+            got, s = (ocr or self.ocr).read(path, scale)
         finally:
             try:
                 os.unlink(path)
@@ -1588,6 +1607,8 @@ class Daemon(QObject):
         self.engine_name = ENGINE
         self.ocr = tf.OcrClient(HERE, DEBUG)
         self.ocr.on_notice = notify   # graphics-card reading fell back to the processor (not enough memory free)
+        # the second reader for sparse Japanese areas (started only when first needed; see tf.ultrafast_wanted)
+        self.ocr_ultra = tf.OcrClient(HERE, DEBUG, env={"LENSLATE_OCR_READER": "meiki"})
         # self.cache: translation cache + the model that fills it (llm or mt; `lenslate translator`)
         kind, llm = wanted_translator()
         self.cache = tf.Translator(HERE, CACHE_PATH, LANG, llm, OLLAMA, kind, DEBUG)
@@ -1951,7 +1972,7 @@ class Daemon(QObject):
             return
         if self.engine_name == "ocr":
             w = OcrPipeline(self.screen.geometry(), self.region, list(self.history), force, win, self.ocr, self.cache,
-                            self.text_scale, self.junk, self.mem)
+                            self.text_scale, self.junk, self.mem, self.ocr_ultra)
         else:
             w = Pipeline(self.screen.geometry(), self.region, self.last_sig, force, win)
         w.hide_cards.connect(lambda: self.overlay.set("showCards", False))
@@ -2001,6 +2022,8 @@ class Daemon(QObject):
                 notify(note)
             threading.Thread(target=self.cache.warm, daemon=True).start()
         if not busy:
+            if getattr(self, "ocr_ultra", None) is not None:
+                self.ocr_ultra.follow_config()
             restarted = self.ocr.follow_config()     # GPU mode / threads: restart the OCR helper
             if restarted is None:                    # the helper is busy (warming up): try again on the next check
                 applied = False
@@ -2222,6 +2245,7 @@ def main():
     rc = app.exec()
     lock.unlock()
     d.ocr.stop()
+    d.ocr_ultra.stop()
     Shared.stop()
     d.cache.save()
     d.cache.stop()
