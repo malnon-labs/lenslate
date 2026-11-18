@@ -24,6 +24,13 @@ class Catalogs(unittest.TestCase):
                 self.assertIn(en, shown, "%s: %r is no longer in the code" % (code, en[:60]))
                 self.assertEqual(SPEC.findall(en), SPEC.findall(tr), "%s: %r" % (code, en[:60]))
 
+    def test_every_text_is_translated(self):
+        shown = [t for t in i18n.extract() if i18n.needs_words(t)]
+        for code in i18n.LANGS:
+            if code != "en":
+                missing = [t[:50] for t in shown if t not in i18n.catalog(code)]
+                self.assertEqual(missing, [], code)
+
     def test_lookup_and_fallback(self):
         i18n.set_language("pt")
         try:

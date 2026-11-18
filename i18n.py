@@ -98,8 +98,9 @@ SHOWN = {"_", "QAction", "explain", "section_label", "note", "hint", "chip", "me
          "QRadioButton", "setTitle", "setSubTitle", "setWindowTitle", "setText", "setPlaceholderText", "say",
          "_label", "addItem"}
 FILES = ("gui.py", "setup.py", "shortcutsdialog.py")
+TABLES = {"STEPS", "PLAIN"}
 # shown, but kept in tuples and dicts the extractor does not follow: page names and their lines, Advanced's groups
-EXTRA = ["Japanese", "Chinese (Simplified and Traditional)", "English", "Korean", "Russian",
+EXTRA = ["Spanish", "Portuguese (Brazil)", "Chinese (Simplified)", "%s only", "%s (and English)", "Japanese", "Chinese (Simplified and Traditional)", "English", "Korean", "Russian",
          "Hover over anything to see what it does.", " (your own choice)", "Overlay", "Translation", "Models", "Games", "Names & fixes", "Advanced",
          "Translate text anywhere on screen: games, browsers, videos, documents.",
          "Which languages, and how lenslate reads and translates them. The panel shows what your choices cost on this PC.",
@@ -134,9 +135,21 @@ def extract():
                 t = _const(arg)
                 if t and any(c.isalpha() for c in t) and t not in out:
                     out.append(t)
+        for node in ast.walk(tree):     # option tables shown in the window (gui.STEPS, gui.PLAIN)
+            if isinstance(node, ast.Assign) and any(getattr(t, "id", "") in TABLES for t in node.targets) \
+                    and not isinstance(node.value, (ast.Call, ast.GeneratorExp, ast.DictComp)):
+                for c in ast.walk(node.value):
+                    t = _const(c)
+                    if t and " " in t.strip() or (t and t[:1].isupper()):
+                        if t not in out:
+                            out.append(t)
     for t in EXTRA:
         if t not in out:
             out.append(t)
+    import config as cfgmod
+    for p in cfgmod.PRESETS.values():
+        if p.get("label") and p["label"] not in out:
+            out.append(p["label"])
     import config as cfgmod
     for s in cfgmod.SCHEMA:
         for t in (s.label, s.help):
@@ -145,15 +158,25 @@ def extract():
     return out
 
 
+NOT_TEXT = {"warning", "success", "__other__", "lenslate", "lenslate %s",
+            "(described for the chosen model: llm_description)"}   # markers and names, not words to translate
+
+
+def needs_words(t):
+    """A text with words in it (not only placeholders, markup, or an internal marker)."""
+    import re
+    return t not in NOT_TEXT and bool(re.search(r"[A-Za-z]{2}", re.sub(r"<[^>]+>|%[-.0-9]*[sdfr%]|&nbsp;", "", t)))
+
+
 def main(args):
     if args[:1] == ["extract"]:
         print(json.dumps({t: "" for t in extract()}, ensure_ascii=False, indent=1))
         return 0
     if args[:1] == ["missing"] and len(args) > 1:
         have = catalog(args[1])
-        miss = [t for t in extract() if t not in have]
+        miss = [t for t in extract() if t not in have and needs_words(t)]
         print(json.dumps({t: "" for t in miss}, ensure_ascii=False, indent=1))
-        print("%d of %d texts missing" % (len(miss), len(extract())), file=sys.stderr)
+        print("%d of %d texts missing" % (len(miss), len([t for t in extract() if needs_words(t)])), file=sys.stderr)
         return 0
     print(__doc__)
     return 1

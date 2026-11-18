@@ -162,10 +162,11 @@ def setting_widget(key, flt, on_error):
     s = cfgmod.BY_KEY[key]
     val = cfgmod.get(key)
     if s.choices:
-        w = QComboBox()
-        w.addItems([str(c) for c in s.choices])
-        w.setCurrentText(str(val))
-        w.currentTextChanged.connect(lambda v: save(key, v, on_error))
+        w = QComboBox()          # shown in the window language, saved as the setting's own value
+        for c in s.choices:
+            w.addItem(_(str(c)), str(c))
+        w.setCurrentIndex(max(0, w.findData(str(val))))
+        w.currentIndexChanged.connect(lambda _i: save(key, w.currentData(), on_error))
     elif s.type is bool:
         w = QCheckBox()
         w.setChecked(bool(val))
@@ -426,6 +427,8 @@ STEPS = (
         ("online", "Online", "Each line is sent to Google, Bing, Yandex or DeepL. Nothing runs on this computer, "
          "but the text leaves it."))),
 )
+# the option names and explanations in the window language (display only: values stay as they are)
+STEPS = tuple((_(title), key, tuple((v, _(lab), _(txt)) for v, lab, txt in opts)) for title, key, opts in STEPS)
 # The one thing to know about each option, in plain words: shown first and in bold in its tooltip and under "?".
 PLAIN = {
     ("ocr.reading", "ultrafast"): "Fastest and lightest reading, but only for Japanese, and it misses tiny text.",
@@ -438,6 +441,7 @@ PLAIN = {
     ("translator.kind", "llm"): "Best translations: natural wording, names kept right. Uses graphics memory.",
     ("translator.kind", "online"): "Good translations with nothing running here, but the text is SENT to that company.",
 }
+PLAIN = {k: _(v) for k, v in PLAIN.items()}
 
 
 def rich(key, val, text, why=None):
@@ -1179,7 +1183,7 @@ class Window(QWidget):
         buttons = []
         for name in cfgmod.PRESET_ORDER:
             p = cfgmod.PRESETS[name]
-            b = QPushButton(p["label"] + (" (recommended)" if name == "balanced" else ""))
+            b = QPushButton(_(p["label"]) + (_(" (recommended)") if name == "balanced" else ""))
             b.setCheckable(True)
             b.setChecked(name == cur)
             why = blocked.get(("ocr.gpu", "all")) if p["values"].get("ocr.gpu") == "all" else None
@@ -1464,7 +1468,7 @@ class Window(QWidget):
                              "before (only reading); typical = half the lines are new; worst = every line is new. A "
                              "busy game or other programs make it slower.</i>", f))
         measuring = self.measuring()
-        b_measure = explain(QPushButton("Measuring…" if measuring else "Measure again"), "Measure again how fast "
+        b_measure = explain(QPushButton(_("Measuring…") if measuring else _("Measure again")), "Measure again how fast "
                             "this PC reads and translates (about 1-2 minutes): a dialogue box and three whole screens, read in every "
                             "reading mode on the processor and the graphics card, then four lines with every installed "
                             "translator. The steps on the left are locked until it is done.", f)
@@ -1507,26 +1511,26 @@ class Window(QWidget):
             return
         v = cfgmod.values_of("current")
         name = cfgmod.current_preset()
-        title = ("Same as the %s preset" % cfgmod.PRESETS[name]["label"]) if name in cfgmod.PRESETS else "These settings"
+        title = (_("Same as the %s preset") % _(cfgmod.PRESETS[name]["label"])) if name in cfgmod.PRESETS else _("These settings")
         fs = theme.tokens()["fs_section"]
         lines = ["<b>%s</b>" % title]
         est = bench.estimate("current", self.bench)
         if v["translator.kind"] == "online":
-            lines.append("speed: depends on the online service and your connection")
+            lines.append(_("speed: depends on the online service and your connection"))
         elif est is not None:
-            lines.append("<span style='font-size:%spt'><b>≈ %.2f s</b></span> per new dialogue line" % (fs, est))
+            lines.append(_("<span style='font-size:%spt'><b>≈ %.2f s</b></span> per new dialogue line") % (fs, est))
         work = bench.cpu_work("current", self.bench)
         if work is not None:
-            lines.append("processor work per read: %.2f s" % work)
+            lines.append(_("processor work per read: %.2f s") % work)
         elif self.bench is None:
-            lines.append("speed: not measured yet (Measure again)")
+            lines.append(_("speed: not measured yet (Measure again)"))
         elif bench._ocr_key(v, "ocr") not in self.bench:
-            lines.append("speed: not measured yet for this reading (Measure again)")
+            lines.append(_("speed: not measured yet for this reading (Measure again)"))
         needs = hwcheck.preset_needs("current")
         need = needs["vram_gb"]
         gnow = bench.gpu_now()
         if needs.get("custom_model"):
-            lines.append("GPU memory: depends on %s%s" % (needs["custom_model"], (
+            lines.append(_("GPU memory: depends on %s%s") % (needs["custom_model"], (
                 " (+ ~%.1f GB for reading)" % need) if need else ""))
         elif need:
             if gnow:
@@ -1540,21 +1544,21 @@ class Window(QWidget):
                 lines += ["<span style='color:%s'>⚠ %s</span>" % (theme.color("warning_text"), t)
                           for t in hwcheck.check("current", downloads=False)]
         else:
-            lines.append("no graphics-card memory used")
+            lines.append(_("no graphics-card memory used"))
         sc = bench.scene_estimates(v, self.bench)
         if sc:
             def cell(x):
                 return "–" if x is None else ("%.1f" % x)
             rows = "".join("<tr><td>%s</td><td align='right'>%s</td><td align='right'>%s</td>"
                            "<td align='right'>%s</td></tr>" % (t, cell(b), cell(m), cell(w)) for t, _n, b, m, w in sc)
-            lines.append("<br><b>Whole screen, seconds</b><table cellspacing='0' cellpadding='2'>"
-                         "<tr><td></td><td><i>best</i></td><td><i>typical</i></td><td><i>worst</i></td></tr>%s</table>"
+            lines.append(_("<br><b>Whole screen, seconds</b><table cellspacing='0' cellpadding='2'>"
+                         "<tr><td></td><td><i>best</i></td><td><i>typical</i></td><td><i>worst</i></td></tr>%s</table>")
                          % rows)
         elif self.bench is not None:
-            lines.append("<br>whole screens: not measured yet (Measure again)")
+            lines.append(_("<br>whole screens: not measured yet (Measure again)"))
         dl = hwcheck.missing_downloads("current")
         if dl:
-            lines.append("<span style='color:%s'>needs a download: %s</span>" % (
+            lines.append(_("<span style='color:%s'>needs a download: %s</span>") % (
                 theme.color("warning_text"), ", ".join("%s (%.1f GB)" % x for x in dl)))
         self.est_label.setText("<br>".join(lines))
 
@@ -1728,11 +1732,11 @@ class Window(QWidget):
 
         # Translate from: Auto (every supported language, recognised per line) or one language only
         self.src_combo = QComboBox()
-        self.src_combo.addItem("Auto (Japanese, Chinese, English)", ",".join(langs.SOURCES))
+        self.src_combo.addItem(_("Auto (Japanese, Chinese, English)"), ",".join(langs.SOURCES))
         for code, name in langs.SOURCES.items():
-            self.src_combo.addItem(name + " only", code)
+            self.src_combo.addItem(_("%s only") % _(name), code)
         for code, name in langs.OWN_READER.items():     # their own reader model: never part of Auto
-            self.src_combo.addItem(name + " (and English)", code + ",en")
+            self.src_combo.addItem(_("%s (and English)") % _(name), code + ",en")
         enabled = sorted(langs.sources(cfgmod.get("translator.sources")))
         own = next((c for c in langs.OWN_READER if c in enabled), None)
         idx = (max(0, self.src_combo.findData(own + ",en")) if own else

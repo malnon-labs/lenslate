@@ -27,8 +27,8 @@ release is **0.1.0** (an early preview). Changes per version are in [CHANGELOG.m
   recordings. Ignore notification surfaces, and warn about it in the debug-recording docs.
 - Changing hotkeys inside lenslate: tried on KDE (keys read, clash check, a key set and set back); the Cinnamon and
   GNOME paths only against a fake settings store so far.
-- The longer hover texts of the windows in Japanese, Korean and Russian (buttons, titles and settings are done),
-  and a native speaker's look at all five.
+- A native speaker's look at the windows in Portuguese, Chinese, Japanese, Korean and Russian (all texts are
+  translated; none has been checked by a native speaker yet).
 
 ### Languages
 - Brazilian Portuguese quality on real English games (OPUS on the processor, Gemma).

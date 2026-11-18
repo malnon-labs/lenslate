@@ -88,7 +88,7 @@ class Setup(QWizard):
         return ",".join(self.page(0).codes())
 
     def target(self):
-        return self.page(0).tgt.currentText()
+        return self.page(0).tgt.currentData()
 
     def llm_for(self, sources, target):
         """The language model for these languages: the automatic pick (PLaMo for Japanese -> English, Gemma
@@ -168,10 +168,11 @@ class LanguagesPage(QWizardPage):
         col.addWidget(set_role(_label(_("Korean and Russian each have their own reader: one of them at a time, with "
                                       "English.")), "muted"))
         self.tgt = QComboBox()
-        self.tgt.addItems(list(cfgmod.BY_KEY["translator.language"].choices))
-        self.tgt.setCurrentText(cfgmod.get("translator.language"))
+        for c in cfgmod.BY_KEY["translator.language"].choices:   # shown translated, the value is kept as data
+            self.tgt.addItem(_(c), c)
+        self.tgt.setCurrentIndex(max(0, self.tgt.findData(cfgmod.get("translator.language"))))
         wiz.explain(self.tgt, "The language the translations are written in.")
-        self.tgt.currentTextChanged.connect(lambda _t: self.refresh())
+        self.tgt.currentIndexChanged.connect(lambda _i: self.refresh())
         row = QHBoxLayout()
         row.addWidget(QLabel(_("<b>Translate into</b>")))
         row.addWidget(self.tgt)
@@ -208,13 +209,13 @@ class LanguagesPage(QWizardPage):
 
     def codes(self):
         """The ticked languages that will be translated ("English" into English is nothing to do)."""
-        tgt = langs.TARGET_CODES.get(self.tgt.currentText().lower(), "en")
+        tgt = langs.TARGET_CODES.get(self.tgt.currentData().lower(), "en")
         return [c for c in langs.ALL_SOURCES if self.boxes[c].isChecked() and not (c == "en" and tgt == "en")]
 
     def refresh(self):
         import hwcheck
         import models
-        tgt = self.tgt.currentText()
+        tgt = self.tgt.currentData()
         en = self.boxes["en"]
         en.setEnabled(tgt != "English")
         en.setToolTip("" if tgt != "English" else "Text already in English is left as it is.")

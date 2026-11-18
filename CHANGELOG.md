@@ -28,8 +28,9 @@ Lines marked *(cache)* make lenslate translate cached lines again: the old ones 
   you pick them, and an offline one with quickmt Japanese → English, quickmt Chinese → English and OPUS English →
   Portuguese (Brazil) inside. On Wayland they use the distro's Python Qt (the overlay layer needs it).
 - **lenslate's windows in Portuguese (Brazil), Chinese, Japanese, Korean and Russian** ([general] ui_language,
-  auto = the system language). All buttons, titles and setting names are translated; the longer hover texts are
-  translated in Portuguese and Chinese so far and stay English elsewhere for now.
+  auto = the system language). Every text the windows show is translated, hover help and setting explanations
+  included (a test checks that nothing is missing); Qt's own buttons follow too. Dropdowns show translated names
+  and still save the same values.
 - Settings window: side links (Keyboard shortcuts, Load offline pack) sit quietly next to their section; the
   Models page lists the processor translators first.
 
