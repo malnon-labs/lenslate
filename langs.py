@@ -183,11 +183,22 @@ _KATA_PAIR = re.compile(r"^(?:[\u30A1-\u30FA][力口工二夕卜八]|[力口工�
 
 _CYR_BANG = re.compile(r"(?<=[А-ЯЁ]{3})[ІIl](?![\w])")
 
+# The long-vowel mark ー read for the kanji 一 ("one"): ー only ever follows a kana (or a Latin letter, "ゲームー"),
+# so one that opens a line or follows a kanji or punctuation, and is followed by a kanji, is 一 (ー緒 -> 一緒,
+# ー人 -> 一人, 第ー章 -> 第一章). Seen 2026-11-18 in a Japanese RPG and in Sintel's subtitles: PLaMo invented
+# names for them ("Oho", "Huntero"). A full-width minus read in that spot is the same misread; the dashes ― and ‐
+# only between two kanji (a line opening with "―私は" is a novel's dialogue dash, and "――" stays a pause).
+_HAN_CLS = "\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF"
+_ICHI = re.compile(r"(?<![\u3041-\u309F\u30A1-\u30FA\u30FC\uFF66-\uFF9FA-Za-z0-9ー－―‐])[ー－](?=[%s])" % _HAN_CLS)
+_ICHI_DASH = re.compile(r"(?<=[%s])[―‐](?=[%s])" % (_HAN_CLS, _HAN_CLS))
+
 
 def fix_lookalikes(text):
     """Repairs of letters read as their look-alikes from another script. Russian: words that mix Cyrillic and
     Latin letters get their Latin look-alikes turned into Cyrillic - only when every Latin letter of the word is
     such a look-alike (so "USB-кабель" or "Wi-Fi" next to Russian text is not touched). Japanese: see _KATA_LIKE."""
+    if HAN.search(text):
+        text = _ICHI_DASH.sub("一", _ICHI.sub("一", text))
     if _KATA.search(text):
         text = _KATA_MID.sub(lambda m: _KATA_LIKE[m.group(0)], text)
         if _KATA_PAIR.match(text.strip()):

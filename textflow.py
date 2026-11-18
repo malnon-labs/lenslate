@@ -23,6 +23,7 @@ import numpy as np
 
 import config as cfgmod
 import seeds
+import kanaspace
 import langs
 import names as nm
 
@@ -441,7 +442,11 @@ def merge_rows(lines):
             if r.get("apart") or ln.get("apart"):
                 continue             # a piece of a split row of tabs (split_touching): a tab, never part of a line
             if overlap >= 0.6 * min(h, rh) and -0.6 * min(h, rh) <= gap <= reach * min(h, rh):
-                r["text"] = _join(r["text"], ln["text"])
+                # two kana-only pieces of one row a word gap apart (retro games written without kanji put spaces
+                # between words): keep the space, it is a word break there (see kanaspace.py)
+                kana_gap = (gap >= kanaspace.GAP_OF_H * min(h, rh) and not kanaspace.HAN.search(r["text"] + ln["text"])
+                            and kanaspace.KANA.search(r["text"][-1:]) and kanaspace.KANA.search(ln["text"][:1]))
+                r["text"] = r["text"] + " " + ln["text"] if kana_gap else _join(r["text"], ln["text"])
                 r["box"] = [rx1, min(y1, ry1), max(x2, rx2), max(y2, ry2)]
                 r["score"] = min(r["score"], ln["score"])
                 break

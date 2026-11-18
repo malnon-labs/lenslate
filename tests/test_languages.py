@@ -74,6 +74,18 @@ class CyrillicLookalikes(unittest.TestCase):
 
 
 class KatakanaLookalikes(unittest.TestCase):
+    def test_long_vowel_mark_read_for_ichi(self):
+        f = langs.fix_lookalikes
+        self.assertEqual(f("ー緒に行こう"), "一緒に行こう")
+        self.assertEqual(f("ー人で"), "一人で")
+        self.assertEqual(f("第ー章"), "第一章")
+        self.assertEqual(f("統―体"), "統一体")
+        self.assertEqual(f("ゲーム開始"), "ゲーム開始")        # a real long vowel after kana: kept
+        self.assertEqual(f("スーパー大会"), "スーパー大会")
+        self.assertEqual(f("―私は"), "―私は")                # a dialogue dash at the start: kept
+        self.assertEqual(f("それは――体"), "それは――体")      # a pause: kept
+        self.assertEqual(f("ー"), "ー")
+
     def test_kanji_that_look_like_katakana(self):
         self.assertEqual(langs.fix_lookalikes("モ力"), "モカ")
         self.assertEqual(langs.fix_lookalikes("ブ口グ"), "ブログ")

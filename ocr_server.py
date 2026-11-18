@@ -594,6 +594,23 @@ def meiki_read_lines(path, boxes):
     return out
 
 
+def kana_spaces(path, lines):
+    """Put the word spaces back in kana-only Japanese lines (see kanaspace.py), from the line's own picture."""
+    import kanaspace
+    todo = [ln for ln in lines if kanaspace.kana_only(ln.get("text", "")) and not _is_column(ln["box"])]
+    if not todo:
+        return lines
+    img = Image.open(path).convert("L")
+    gray = np.asarray(img)
+    H, W = gray.shape
+    for ln in todo:
+        x1, y1, x2, y2 = ln["box"]
+        cx1, cy1, cx2, cy2 = max(0, int(x1)), max(0, int(y1)), min(W, int(x2 + 0.5)), min(H, int(y2 + 0.5))
+        if cx2 - cx1 >= 8 and cy2 - cy1 >= 4:
+            ln["text"] = kanaspace.word_spaces(ln["text"], gray[cy1:cy2, cx1:cx2])
+    return lines
+
+
 def main():
     send({"ready": True})
     for line in sys.stdin:
@@ -604,12 +621,12 @@ def main():
             if req.get("op") == "read_lines":
                 lines = (meiki_read_lines(req["path"], req["boxes"]) if READER == "meiki" else
                          read_lines(req["path"], req["boxes"], bool(req.get("latin_matters", True))))
-                resp = {"lines": lines, "secs": round(time.time() - t, 3)}
+                resp = {"lines": kana_spaces(req["path"], lines), "secs": round(time.time() - t, 3)}
             elif req.get("op") == "detect":
                 resp = {"boxes": detect(req["path"], int(req.get("side", 1280))), "secs": round(time.time() - t, 3)}
             else:
                 lines = read(req["path"], float(req.get("scale", 1.0)))
-                resp = {"lines": lines, "secs": round(time.time() - t, 3)}
+                resp = {"lines": kana_spaces(req["path"], lines), "secs": round(time.time() - t, 3)}
         except Exception as e:  # noqa: BLE001
             resp = {"error": "%s: %s" % (type(e).__name__, e)}
         send(resp, req if isinstance(req, dict) else None)
