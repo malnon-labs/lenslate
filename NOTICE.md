@@ -18,6 +18,8 @@ checksum Hugging Face publishes for the file.
 |---|---|---|---|
 | quickmt-ja-en | huggingface.co/quickmt/quickmt-ja-en | CC-BY-4.0 | installer (asks first) |
 | quickmt-zh-en | huggingface.co/quickmt/quickmt-zh-en | CC-BY-4.0 | only when you choose it |
+| quickmt-ko-en | huggingface.co/quickmt/quickmt-ko-en | CC-BY-4.0 | only when you choose it |
+| quickmt-ru-en | huggingface.co/quickmt/quickmt-ru-en | CC-BY-4.0 | only when you choose it |
 | quickmt-en-es | huggingface.co/quickmt/quickmt-en-es | CC-BY-4.0 | only when you choose it |
 | quickmt-en-zh | huggingface.co/quickmt/quickmt-en-zh | CC-BY-4.0 | only when you choose it |
 | quickmt-en-pt | huggingface.co/quickmt/quickmt-en-pt | CC-BY-4.0 | only when you choose it |

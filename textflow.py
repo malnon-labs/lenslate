@@ -630,6 +630,13 @@ SENT_END = re.compile(r"[。！？!?…\.]\s*[」』）)]*$")
 _ZH_CRUMB = re.compile(r"^\s*(?:您的位置|当前位置|所在位置|位置)\s*[:：].*[>»]\s*")
 _ZH_LABEL = re.compile(r"^\s*(?:曲名|歌曲名|歌名|片名|标题|饰)\s*[:：]?\s+")
 _TWICE = re.compile(r"^(.{2,}?)[·・\s]?\1$")
+# the same into English/Spanish/Portuguese (quickmt ko/ru -> en on lone menu words, 2026-11-18): web-page buttons
+# instead of a translation ("설정" -> "Get in touch", "인벤토리" -> "Skip to content"), and words said again and again
+# ("Да" -> "Yes Yes Yes Yes", "Снаряжение" -> "Equipment and equipment", "Журнал" -> "The magazine magazine")
+_WEB_EN = re.compile(r"^(?:get in touch|skip to (?:main )?content|scroll to (?:the )?top|back to top|read more|"
+                     r"click here|learn more|contact us|all rights reserved|home page)\W*$", re.I)
+_REPEATS = re.compile(r"\b(\w+)(?:[\s,]+\1\b)+", re.I)
+_X_AND_X = re.compile(r"^(.+?) (?:and|of) \1$", re.I)
 
 
 def tidy(src, tr):
@@ -648,6 +655,11 @@ def tidy(src, tr):
             t = m.group(1)
         if not t.strip():
             return t
+    elif not langs.LATIN.search(s) and langs.LATIN.search(t):   # into a Latin-script language from another script
+        if _WEB_EN.match(t):
+            return ""            # not a translation at all: the line stays untranslated (or a seed pack has it)
+        t = _REPEATS.sub(lambda m: m.group(1), t)
+        t = _X_AND_X.sub(lambda m: m.group(1), t)
     if not any(c in s[:1] for c in DECOR):
         t = t.lstrip(DECOR + " ")
     if not any(c in s[-1:] for c in DECOR):
@@ -1236,6 +1248,8 @@ MODELS_DIR = cfgmod.models_dir()
 LEGACY_MODEL = "qwen3-vl:4b-instruct"   # its translations live in the plain translations-<lang>.json
 # CPU translation models per language pair (quickmt has one model per pair; Sugoi is Japanese -> English only).
 MT_PAIRS = {("ja", "en"): "quickmt-ja-en", ("zh", "en"): "quickmt-zh-en",
+            ("ko", "en"): "quickmt-ko-en", ("ru", "en"): "quickmt-ru-en",   # (2026-11-18: sentences good, lone words
+                                                                            # weak: the ko-en / ru-en seed packs)
             ("en", "es"): "quickmt-en-es", ("en", "pt"): "opus-en-ptbr", ("en", "zh"): "quickmt-en-zh"}   # quickmt-en-pt writes European Portuguese
 MT_TARGET_TAGS = {"opus-en-ptbr": ">>pob<<"}
 
@@ -1550,7 +1564,12 @@ class Translator:
                         continue
                     cur = [sent[i] for i in idx]
                     for h in hops:   # one call per model for the whole group
-                        cur = [" ".join(x.split()).strip() for x in self._client(h).translate(cur)]
+                        todo = [k for k, x in enumerate(cur) if x]
+                        done = self._client(h).translate([cur[k] for k in todo]) if todo else []
+                        for k, x in zip(todo, done):
+                            # cleaned after every step: web furniture of the first step ("설정" -> "Get in touch")
+                            # must not be translated on into Portuguese ("Entre em contato")
+                            cur[k] = tidy(texts[idx[k]], " ".join(x.split()).strip())
                     for i, tr in zip(idx, cur):
                         tr = tidy(texts[i], tr) if tr else tr   # (web furniture removed first: see _ZH_CRUMB)
                         if tr and langs.source_left(texts[i], tr, src_lang(texts[i]), self.target) < 0.2:

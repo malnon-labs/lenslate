@@ -211,8 +211,8 @@ def check(name, info=None, sources=None, target=None, downloads=True, llm=None):
     out = []
     src = langs.sources(sources if sources is not None else cfgmod.get("translator.sources"))
     if cfgmod.PRESETS.get(name, {}).get("values", {}).get("translator.kind") == "mt" and src & set(langs.OWN_READER):
-        out.append("It translates on the processor, and there is no processor translator for Korean or Russian "
-                   "yet: those need the language model or an online service.")
+        out.append("It translates on the processor: for Korean and Russian that translator is literal and weak on "
+                   "lone words (menus come from the ready-made lists); the language model reads more naturally.")
     if need["nvidia"] and not (g and g["vendor"] == "NVIDIA"):
         out.append("It reads text on the graphics card, which needs an NVIDIA card; none was found (the processor would read instead).")
     if need["vram_gb"]:

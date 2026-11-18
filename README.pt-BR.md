@@ -64,8 +64,8 @@ Wayland.
 - **Com o modelo de IA** na placa de vídeo, ou um tradutor online, cada idioma que ele lê pode ser traduzido
   para cada idioma acima. Os modelos de IA são multilíngues, não um modelo por par de idiomas.
 - **Sem placa de vídeo,** tradutores pequenos no processador cobrem os pares mais comuns: 🇯🇵→🇬🇧, 🇨🇳→🇬🇧,
-  🇬🇧→🇨🇳, 🇬🇧→🇪🇸 e 🇬🇧→🇧🇷. Os outros pares passam pelo inglês. 🇰🇷 Coreano e 🇷🇺 russo ainda não têm
-  (está planejado), então por enquanto precisam do modelo de IA ou de um tradutor online.
+  🇬🇧→🇨🇳, 🇬🇧→🇪🇸, 🇬🇧→🇧🇷, 🇰🇷→🇬🇧 e 🇷🇺→🇬🇧. Os outros pares passam pelo inglês. Os de coreano e russo são
+  literais e fracos com palavras soltas (os menus vêm de listas prontas); o modelo de IA traduz de forma mais natural.
 
 ## Todo tipo de texto
 

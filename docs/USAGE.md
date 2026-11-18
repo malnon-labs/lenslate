@@ -30,7 +30,7 @@ permission. It downloads no translation model in a desktop session: the setup wi
 In a desktop session the first start of the window (`lenslate gui`, or the installer's last question) opens the
 **setup window**: tick the languages you read (Japanese, Chinese, English, Korean, Russian - Korean and Russian one
 at a time, with English) and the one to translate into. Only what those languages need is downloaded: the small
-processor translators for them (always, ~0.4 GB each; Korean and Russian have none) and, with a preset that uses
+processor translators for them (always, ~0.4 GB each) and, with a preset that uses
 the graphics card, one language model - PLaMo 3 Translate 0.8B for Japanese into English (most natural dialogue,
 0.6 GB of GPU memory, non-commercial licence), Gemma 4 E2B for every other mix. A model you chose yourself is kept.
 Then a preset suggested for this PC's hardware (any other can be picked; a preset that does not fit gets a warning
@@ -71,8 +71,10 @@ models and come later.
   margin (text near the edge was missed), rows in different languages stay separate cards.
 - Korean and Russian (new 2026-11-11): pick "Korean (and English)" or "Russian (and English)" in Translate from
   (config: `sources = "ko,en"` / `"ru,en"`). The main reader has no Hangul or Cyrillic, so the OCR helper loads
-  PaddleOCR's PP-OCRv5 reader for that script (a few MB, fetched on first use). There is no processor translator for
-  them here: use a language model (Gemma, PLaMo) or an online service. Ultrafast reading is Japanese only.
+  PaddleOCR's PP-OCRv5 reader for that script (a few MB, fetched on first use). Processor translators: quickmt
+  ko-en and ru-en (since 0.2: good on sentences, poor on lone words - the ko-en / ru-en seed packs carry the menus,
+  and seed packs are also used through English, so ko -> pt menus work too). A language model (Gemma) reads more
+  naturally. Ultrafast reading is Japanese only.
 - Name lists find candidates in Japanese text (さん/ちゃん/くん...) and Chinese text (先生/师姐/大哥..., "李明：", 【】;
   pinyin spellings); entries you add by hand work for any language.
 

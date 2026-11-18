@@ -260,3 +260,28 @@ class EnglishToChinese(unittest.TestCase):
         self.assertEqual(seeds.lookup("Unlocked 54/60", "en", "pt"), "Desbloqueado 54/60")
         self.assertEqual(seeds.lookup("Master Volume 80%", "en", "es"), seeds.lookup("Master Volume", "en", "es") + " 80%")
         self.assertIsNone(seeds.lookup("3 Lives", "en", "zh"))
+
+
+class KoreanRussianProcessor(unittest.TestCase):
+    """quickmt ko-en / ru-en (2026-11-18): good sentences, web furniture and repeats on lone words."""
+
+    def test_routes_exist(self):
+        import textflow as tf
+        self.assertEqual(tf.mt_route("mt", "ko", "en"), ["quickmt-ko-en"])
+        self.assertEqual(tf.mt_route("mt", "ru", "pt"), ["quickmt-ru-en", "opus-en-ptbr"])
+
+    def test_lone_word_junk(self):
+        import textflow as tf
+        self.assertEqual(tf.tidy("설정", "Get in touch"), "")
+        self.assertEqual(tf.tidy("Да", "Yes Yes Yes Yes"), "Yes")
+        self.assertEqual(tf.tidy("Снаряжение", "Equipment and equipment"), "Equipment")
+        self.assertEqual(tf.tidy("레벨 7", "Level 7 of Level 7"), "Level 7")
+        self.assertEqual(tf.tidy("Cancel", "Cancel cancel"), "Cancel cancel")   # Latin source: left alone
+
+    def test_seed_packs_and_the_way_through_english(self):
+        import seeds
+        self.assertEqual(seeds.lookup("설정", "ko", "en"), "Settings")
+        self.assertEqual(seeds.lookup("Настройки", "ru", "en"), "Settings")
+        self.assertEqual(seeds.lookup("Уровень 12", "ru", "en"), "Level 12")
+        self.assertEqual(seeds.lookup("인벤토리", "ko", "pt"), seeds.lookup("Inventory", "en", "pt"))
+        self.assertEqual(seeds.lookup("ニューゲーム", "ja", "zh"), seeds.lookup("New Game", "en", "zh"))

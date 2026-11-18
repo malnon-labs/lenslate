@@ -24,7 +24,8 @@ class PickModel(unittest.TestCase):
         self.assertEqual(hwcheck.language_models("zh", "English"), ["quickmt-zh-en"])
         self.assertEqual(sorted(hwcheck.language_models("ja", "Portuguese (Brazil)")),
                          ["opus-en-ptbr", "quickmt-ja-en"])
-        self.assertEqual(hwcheck.language_models("ko,en", "English"), [])   # Korean: language model or online
+        self.assertEqual(hwcheck.language_models("ko,en", "English"), ["quickmt-ko-en"])
+        self.assertEqual(sorted(hwcheck.language_models("ru", "Portuguese (Brazil)")), ["opus-en-ptbr", "quickmt-ru-en"])
 
     def test_the_picked_model_is_what_the_preset_needs(self):
         need = hwcheck.preset_needs("balanced", "ja", "English", llm="plamo-3-translate-0.8b")

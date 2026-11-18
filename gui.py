@@ -458,8 +458,6 @@ OPTION_LIMITS = {
         "Only for Japanese text (Translate from includes no Japanese).",
     ("translator.kind", "sugoi"): lambda src, tgt, nv: None if ("ja" in src and tgt == "en") else
         "Only Japanese to English (pick Japanese and English above).",
-    ("translator.kind", "mt"): lambda src, tgt, nv: None if not src & set(langs.OWN_READER) else
-        "No processor translator for Korean or Russian yet: use the language model or an online service.",
     ("ocr.gpu", "all"): lambda src, tgt, nv: None if nv else "Needs an NVIDIA graphics card; none was found.",
     # retired from the window 2026-11-10: on 18 test screens Careful found nothing Quick missed and was 2-3x slower.
     # The code stays (config.toml `[ocr] reading = "accurate"` is switched to Quick when the window opens).

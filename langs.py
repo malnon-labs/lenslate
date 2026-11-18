@@ -8,7 +8,8 @@ Latin letters -> English (Spanish/Portuguese lines also look Latin; they are onl
 source and the target is not a Latin-script language the line could already be in - see wants()).
 Korean and Russian (2026-11-11) are sources of their own: each needs its own reader model (the main reader has
 no Hangul or Cyrillic), so they are chosen alone ("Korean only"), never part of Auto; English on the same screen
-is still read. No processor translator exists for them here: the language model or an online service translates.
+is still read. Processor translators for them since 2026-11-18 (quickmt ko-en, ru-en: good on sentences, poor on lone
+words, so the seed packs carry the menus).
 """
 import re
 import time

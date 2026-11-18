@@ -62,8 +62,8 @@ descriptions show up in your language in the same place, a bit like Google Lens 
 - **With the AI model** on your graphics card, or an online translator, every language it reads can be
   translated into every language above. The AI models are multilingual, not one model per language pair.
 - **Without a graphics card,** small processor translators cover the most common pairs: 🇯🇵→🇬🇧, 🇨🇳→🇬🇧,
-  🇬🇧→🇨🇳, 🇬🇧→🇪🇸 and 🇬🇧→🇧🇷. Other pairs go through English. 🇰🇷 Korean and 🇷🇺 Russian don't have one yet
-  (planned), so for now they need the AI model or an online translator.
+  🇬🇧→🇨🇳, 🇬🇧→🇪🇸, 🇬🇧→🇧🇷, 🇰🇷→🇬🇧 and 🇷🇺→🇬🇧. Other pairs go through English. The Korean and Russian ones
+  are literal and weak on lone words (menus come from ready-made lists); the AI model reads more naturally.
 
 ## All kinds of text
 

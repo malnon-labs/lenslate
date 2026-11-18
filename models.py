@@ -30,6 +30,8 @@ REVISIONS = {
     "quickmt/quickmt-en-es": "430b78899a30bf5a867dffd407c64b028bbaebf4",
     "quickmt/quickmt-en-zh": "f48b69e53866b717607b59f94350e9aae3ed021c",
     "quickmt/quickmt-en-pt": "3b4cf7a68fa57a195486da65e112b431b54360de",
+    "quickmt/quickmt-ko-en": "5d6841fc859fb40acbf9b90837b72b9becd3b577",
+    "quickmt/quickmt-ru-en": "00eb1d00e3157e554c3e0571f0ebf8203befa04e",
     "ooeoeo/opus-mt-tc-big-en-pt-ct2-float16": "1b42ae200c9d9149b316a043b0b56874abcd62f8",
     "entai2965/sugoi-v4-ja-en-ctranslate2": "71d67eb8e73ec2f5aaefc0689e03a4eb843d3a2b",
     "unsloth/gemma-4-E2B-it-GGUF": "0314792d7f1f7e229411f620751375812bb9faf2",
@@ -87,6 +89,14 @@ CATALOG = [
           "Small translation model on the processor for Chinese (Simplified and Traditional) games. Fast, no GPU "
           "memory. Also the first step for Chinese → Spanish/Portuguese on the processor.",
           0.41, "CC-BY-4.0", repo="quickmt/quickmt-zh-en", files=["config.json", "model.bin", "source_vocabulary.json", "target_vocabulary.json", "src.spm.model", "tgt.spm.model"], ram_gb=0.5),
+    Model("quickmt-ko-en", "mt", "quickmt Korean → English",
+          "Small translation model on the processor for Korean games. Fast, no GPU memory, literal. Also the first "
+          "step for Korean → Spanish/Portuguese/Chinese on the processor (through English).",
+          0.36, "CC-BY-4.0", repo="quickmt/quickmt-ko-en", files=["config.json", "model.bin", "source_vocabulary.json", "target_vocabulary.json", "src.spm.model", "tgt.spm.model"], ram_gb=0.5),
+    Model("quickmt-ru-en", "mt", "quickmt Russian → English",
+          "Small translation model on the processor for Russian games. Fast, no GPU memory, literal. Also the first "
+          "step for Russian → Spanish/Portuguese/Chinese on the processor (through English).",
+          0.41, "CC-BY-4.0", repo="quickmt/quickmt-ru-en", files=["config.json", "model.bin", "source_vocabulary.json", "target_vocabulary.json", "src.spm.model", "tgt.spm.model"], ram_gb=0.5),
     Model("quickmt-en-es", "mt", "quickmt English → Spanish",
           "Small translation model on the processor: English games into Spanish, and the second step for "
           "Japanese/Chinese → Spanish (through English).",
@@ -158,6 +168,7 @@ BY_NAME = {m.name: m for m in CATALOG}
 _GENERAL = "Japanese, Chinese, Korean, Russian, English → English, Spanish, Portuguese (Brazil), Chinese"
 CAN = {
     "quickmt-ja-en": "Japanese → English", "quickmt-zh-en": "Chinese → English",
+    "quickmt-ko-en": "Korean → English", "quickmt-ru-en": "Russian → English",
     "quickmt-en-es": "English → Spanish", "quickmt-en-zh": "English → Chinese (Simplified)",
     "quickmt-en-pt": "English → Portuguese (Portugal)", "opus-en-ptbr": "English → Portuguese (Brazil)",
     "sugoi-v4-ja-en": "Japanese → English (dialogue)",

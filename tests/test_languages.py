@@ -40,14 +40,14 @@ class OwnReaderLanguages(unittest.TestCase):
         self.assertEqual(tf._join("저 탑 위에", "불빛이 보여."), "저 탑 위에 불빛이 보여.")
         self.assertEqual(tf._join("あの塔の上に", "光が見える"), "あの塔の上に光が見える")
 
-    def test_no_processor_translator_is_said(self):
+    def test_weak_processor_translator_is_said(self):
         import hwcheck
         info = {"cpu": "x", "threads": 8, "ram_gb": 16, "gpus": [], "disk_free_gb": 100}
         try:
             probs = hwcheck.check("nogpu", info, "ko,en", "English", downloads=False)
         except (KeyError, TypeError):
             self.skipTest("hardware summary has another shape")
-        self.assertTrue(any("Korean or Russian" in p for p in probs))
+        self.assertTrue(any("Korean and Russian" in p for p in probs))
 
 
 if __name__ == "__main__":

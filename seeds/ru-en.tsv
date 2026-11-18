@@ -1,0 +1,191 @@
+# lenslate seed pack: Russian -> English
+# Common game menu / UI lines with their usual translation. Whole lines only (a label followed by a number,
+# "Уровень 5", also matches). Format: original<TAB>translation.
+# Your own pack: ~/.local/share/lenslate/seeds/ru-en.tsv (wins over this one).
+# Why: the processor translator (quickmt ru-en) gets lone words wrong ("Настройки" -> "How to set up").
+
+# Title screen and main menu
+Новая игра	New Game
+Начать игру	Start Game
+Начать	Start
+Продолжить	Continue
+Загрузить	Load
+Загрузить игру	Load Game
+Сохранить	Save
+Сохранить игру	Save Game
+Настройки	Settings
+Параметры	Options
+Опции	Options
+Выход	Exit
+Выйти	Quit
+Выйти из игры	Quit Game
+Выход из игры	Quit Game
+Авторы	Credits
+Титры	Credits
+Главное меню	Main Menu
+В главное меню	To Main Menu
+Меню	Menu
+Нажмите любую клавишу	Press any key
+Одиночная игра	Single Player
+Сетевая игра	Multiplayer
+Мультиплеер	Multiplayer
+Обучение	Tutorial
+Достижения	Achievements
+Дополнения	Extras
+
+# Common buttons and dialogs
+Да	Yes
+Нет	No
+ОК	OK
+Ок	OK
+Отмена	Cancel
+Закрыть	Close
+Назад	Back
+Далее	Next
+Вперёд	Next
+Применить	Apply
+Сбросить	Reset
+По умолчанию	Default
+Сбросить настройки	Reset Settings
+Выбрать	Select
+Подтвердить	Confirm
+Удалить	Delete
+Изменить	Edit
+Пропустить	Skip
+Пауза	Pause
+Возобновить	Resume
+Повторить	Retry
+Заново	Restart
+Перезапустить	Restart
+Справка	Help
+Помощь	Help
+Сохранить игру?	Save the game?
+Выйти из игры?	Quit the game?
+Вы уверены?	Are you sure?
+Сохранить изменения?	Save changes?
+Игра сохранена	Game saved
+Сохранено	Saved
+Загрузка	Loading
+Пустой слот	Empty Slot
+Слот	Slot
+Вкл	On
+Выкл	Off
+Включено	On
+Выключено	Off
+
+# Settings
+Графика	Graphics
+Экран	Display
+Режим экрана	Display Mode
+Режим отображения	Display Mode
+Полноэкранный режим	Fullscreen
+Полный экран	Fullscreen
+Оконный режим	Windowed
+Окно без рамки	Borderless Window
+Разрешение	Resolution
+Разрешение экрана	Screen Resolution
+Вертикальная синхронизация	VSync
+Ограничение кадров	Frame Rate Limit
+Яркость	Brightness
+Гамма	Gamma
+Качество	Quality
+Тени	Shadows
+Качество текстур	Texture Quality
+Сглаживание	Anti-Aliasing
+Звук	Sound
+Аудио	Audio
+Общая громкость	Master Volume
+Громкость	Volume
+Громкость музыки	Music Volume
+Музыка	Music
+Звуковые эффекты	Sound Effects
+Эффекты	Effects
+Голос	Voice
+Громкость голоса	Voice Volume
+Управление	Controls
+Назначение клавиш	Key Bindings
+Клавиатура	Keyboard
+Мышь	Mouse
+Геймпад	Gamepad
+Контроллер	Controller
+Чувствительность мыши	Mouse Sensitivity
+Чувствительность	Sensitivity
+Вибрация	Vibration
+Язык	Language
+Субтитры	Subtitles
+Размер субтитров	Subtitle Size
+Скорость текста	Text Speed
+Автопрокрутка	Auto Advance
+Сложность	Difficulty
+Выберите сложность	Select Difficulty
+Лёгкая	Easy
+Легкая	Easy
+Лёгкий	Easy
+Обычная	Normal
+Нормальная	Normal
+Обычный	Normal
+Сложная	Hard
+Сложный	Hard
+Очень сложная	Very Hard
+Игра	Game
+Общие	General
+Основные	General
+Специальные возможности	Accessibility
+
+# Gameplay menus
+Инвентарь	Inventory
+Предметы	Items
+Снаряжение	Equipment
+Экипировка	Equipment
+Оружие	Weapon
+Броня	Armor
+Аксессуар	Accessory
+Навыки	Skills
+Умения	Skills
+Магия	Magic
+Заклинания	Spells
+Статус	Status
+Характеристики	Stats
+Задания	Quests
+Квесты	Quests
+Задание	Quest
+Карта	Map
+Журнал	Journal
+Магазин	Shop
+Купить	Buy
+Продать	Sell
+Создание	Crafting
+Крафт	Crafting
+Персонаж	Character
+Персонажи	Characters
+Отряд	Party
+Уровень	Level
+Опыт	EXP
+Здоровье	Health
+Мана	Mana
+Атака	Attack
+Защита	Defense
+Скорость	Speed
+Золото	Gold
+Новый уровень!	Level Up!
+Игра окончена	Game Over
+Конец игры	Game Over
+Победа	Victory
+Поражение	Defeat
+Бой	Battle
+Сбежать	Run
+Бежать	Run
+Атаковать	Attack
+Защищаться	Defend
+Использовать	Use
+Выбросить	Discard
+Надеть	Equip
+Снять	Unequip
+Осмотреть	Examine
+Поговорить	Talk
+Статистика	Statistics
+Статистика профиля	Profile Stats
+История попыток	Run History
+Дрон	Drone
+Недостаточно золота.	Not enough gold.
+Вы получили предмет.	You got an item.

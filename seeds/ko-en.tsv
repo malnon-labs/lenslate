@@ -1,0 +1,181 @@
+# lenslate seed pack: Korean -> English
+# Common game menu / UI lines with their usual translation. Whole lines only (a label followed by a number,
+# "레벨 5", also matches). Format: original<TAB>translation.
+# Your own pack: ~/.local/share/lenslate/seeds/ko-en.tsv (wins over this one).
+# Why: the processor translator (quickmt ko-en) gets lone words wrong ("설정" -> "Get in touch").
+
+# Title screen and main menu
+새 게임	New Game
+새로 시작	New Game
+처음부터	From the Beginning
+이어하기	Continue
+계속하기	Continue
+계속	Continue
+불러오기	Load
+게임 불러오기	Load Game
+저장	Save
+저장하기	Save
+게임 저장	Save Game
+설정	Settings
+옵션	Options
+환경 설정	Settings
+게임 종료	Quit Game
+종료	Quit
+나가기	Exit
+크레딧	Credits
+제작진	Credits
+타이틀로	To Title
+타이틀 화면	Title Screen
+메인 메뉴	Main Menu
+메뉴	Menu
+시작	Start
+게임 시작	Start Game
+아무 키나 누르세요	Press any key
+버튼을 누르세요	Press a button
+멀티플레이	Multiplayer
+싱글플레이	Single Player
+튜토리얼	Tutorial
+추가 콘텐츠	Extras
+업적	Achievements
+도전 과제	Achievements
+
+# Common buttons and dialogs
+예	Yes
+네	Yes
+아니오	No
+아니요	No
+확인	OK
+취소	Cancel
+닫기	Close
+뒤로	Back
+돌아가기	Back
+다음	Next
+이전	Previous
+적용	Apply
+초기화	Reset
+기본값	Default
+기본값으로 되돌리기	Restore Defaults
+선택	Select
+결정	Confirm
+삭제	Delete
+편집	Edit
+건너뛰기	Skip
+일시정지	Pause
+재개	Resume
+다시 시도	Retry
+재시작	Restart
+도움말	Help
+저장하시겠습니까?	Save the game?
+종료하시겠습니까?	Quit the game?
+정말 종료하시겠습니까?	Are you sure you want to quit?
+변경 사항을 저장하시겠습니까?	Save changes?
+저장되었습니다	Saved
+저장 완료	Saved
+로딩 중	Loading
+불러오는 중	Loading
+빈 슬롯	Empty Slot
+슬롯	Slot
+켜기	On
+끄기	Off
+켬	On
+끔	Off
+
+# Settings
+그래픽	Graphics
+화면	Display
+화면 모드	Display Mode
+전체 화면	Fullscreen
+창 모드	Windowed
+테두리 없는 창	Borderless Window
+해상도	Resolution
+수직 동기화	VSync
+프레임 제한	Frame Rate Limit
+밝기	Brightness
+감마	Gamma
+화질	Quality
+그림자	Shadows
+텍스처 품질	Texture Quality
+안티앨리어싱	Anti-Aliasing
+사운드	Sound
+오디오	Audio
+마스터 볼륨	Master Volume
+전체 음량	Master Volume
+음악 볼륨	Music Volume
+배경음	Music
+배경음악	Background Music
+효과음	Sound Effects
+음성	Voice
+음성 볼륨	Voice Volume
+조작	Controls
+조작 설정	Controls
+키 설정	Key Bindings
+키보드	Keyboard
+마우스	Mouse
+컨트롤러	Controller
+마우스 감도	Mouse Sensitivity
+감도	Sensitivity
+진동	Vibration
+언어	Language
+자막	Subtitles
+자막 크기	Subtitle Size
+텍스트 속도	Text Speed
+자동 진행	Auto Advance
+난이도	Difficulty
+난이도 선택	Select Difficulty
+쉬움	Easy
+보통	Normal
+어려움	Hard
+매우 어려움	Very Hard
+게임	Game
+일반	General
+접근성	Accessibility
+
+# Gameplay menus
+인벤토리	Inventory
+소지품	Items
+아이템	Items
+장비	Equipment
+무기	Weapon
+방어구	Armor
+장신구	Accessory
+스킬	Skills
+기술	Skills
+마법	Magic
+상태	Status
+능력치	Stats
+퀘스트	Quests
+임무	Missions
+지도	Map
+맵	Map
+일지	Journal
+도감	Compendium
+상점	Shop
+구매	Buy
+판매	Sell
+제작	Crafting
+캐릭터	Character
+파티	Party
+레벨	Level
+경험치	EXP
+체력	HP
+마나	MP
+공격력	Attack
+방어력	Defense
+속도	Speed
+골드	Gold
+레벨 업!	Level Up!
+게임 오버	Game Over
+승리	Victory
+패배	Defeat
+전투	Battle
+도망치기	Run
+공격	Attack
+방어	Defend
+사용	Use
+버리기	Discard
+장착	Equip
+해제	Unequip
+조사하기	Examine
+대화하기	Talk
+골드가 부족합니다.	Not enough gold.
+아이템을 획득했습니다.	You got an item.

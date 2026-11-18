@@ -118,7 +118,8 @@ SCHEMA = [
       "ja = Japanese, zh = Chinese (Simplified and Traditional), en = English. Each line's language is "
       "recognised automatically; text already in the 'Translate into' language is left alone. Korean (ko) and "
       "Russian (ru) have their own reader model, so choose one of them without Japanese or Chinese (ko,en or "
-      "ru,en); they are translated by the language model or an online service."),
+      "ru,en). Their processor translators (quickmt ko-en, ru-en) are literal and weak on lone words; menus "
+      "come from the seed packs, and the language model does better on dialogue."),
     S("translator.ollama_url", "http://127.0.0.1:11434/api/chat", "LENSLATE_URL", "Ollama address",
       "Where the Ollama server listens. Only change this if Ollama runs on another port or machine."),
     S("translator.num_ctx", 4096, "LENSLATE_NUM_CTX", "Model context size",

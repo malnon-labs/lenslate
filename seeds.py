@@ -41,6 +41,10 @@ def files(src, tgt):
     return [os.path.join(d, name) for d in DIRS]
 
 
+def files_exist(src, tgt):
+    return any(os.path.exists(p) for p in files(src, tgt))
+
+
 def read(path):
     """{key: translation} from one pack file ({} if missing). Two keys per line: the exact form ("=" + text with
     its end mark, translation as written) and the bare form (no end mark; the translation's end mark removed too,
@@ -94,6 +98,10 @@ def lookup(text, src, tgt):
     if not src or not tgt or src == tgt:
         return None
     tr = _lookup(text, src, tgt)
+    if tr is None and "en" not in (src, tgt) and not files_exist(src, tgt):
+        # no pack for this pair (Korean -> Portuguese): through English, when both halves are in a pack
+        mid = lookup(text, src, "en")
+        tr = lookup(mid, "en", tgt) if mid else None
     if tr is None:
         m = NUM_TAIL.match(unicodedata.normalize("NFKC", text).strip())
         if m:

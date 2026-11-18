@@ -131,11 +131,11 @@ LANG_HELP = {
     "zh": "Chinese games and text, Simplified and Traditional characters.",
     "en": "English games and text (useful when you translate into Spanish, Portuguese or Chinese).",
     "ko": "Korean. Read by its own reader model, so it goes together with English only (not with Japanese, "
-          "Chinese or Russian). Translated by the language model or an online service: no processor translator "
-          "exists for it yet.",
+          "Chinese or Russian). Its processor translator is literal and weak on lone words (menus come from a "
+          "ready-made list); the language model translates it better.",
     "ru": "Russian. Read by its own reader model, so it goes together with English only (not with Japanese, "
-          "Chinese or Korean). Translated by the language model or an online service: no processor translator "
-          "exists for it yet.",
+          "Chinese or Korean). Its processor translator is literal and weak on lone words (menus come from a "
+          "ready-made list); the language model translates it better.",
 }
 
 
@@ -229,9 +229,8 @@ class LanguagesPage(QWizardPage):
                 lines.append("<b>Always installed</b> (processor, %.1f GB): %s" % (
                     sum(m.size_gb for m in base), ", ".join(m.can for m in base)))
             else:
-                lines.append("<b>No processor translator</b> exists for %s: it needs the language model below or "
-                             "an online service." % " / ".join(langs.ALL_SOURCES[c] for c in codes
-                                                               if c in langs.OWN_READER))
+                lines.append("<b>No processor translator</b> is needed for these languages: only the language "
+                             "model below or an online service.")
             lines.append("<b>Language model</b> (%.1f GB download, %.1f GB of graphics-card memory; only with a "
                          "preset that uses the graphics card): %s%s" % (llm.size_gb, llm.vram_gb or 0, llm.title, " - %s" % why if llm.name == name else " (your own choice)"))
             if llm.name.startswith("plamo"):
