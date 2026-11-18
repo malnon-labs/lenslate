@@ -473,7 +473,8 @@ def _letter_lines(lines):
 
 def ultrafast_wanted(got, enabled, reading, script, mem, area_h):
     """Read this area again with Ultrafast? Only for Japanese (kana read here, or Japanese the only Chinese-script
-    source), when few lines came back from an area with room for more, in a region where it has not kept failing."""
+    source), when few lines came back from an area with room for more, in a region where it has not kept failing.
+    Lines that look Chinese stop it (with Chinese turned on); an area where only Latin text was read does not."""
     if reading == "ultrafast" or script != "cjk" or "ja" not in enabled:
         return False
     if mem.get("ultra_wins", 0) > 0:
@@ -483,8 +484,10 @@ def ultrafast_wanted(got, enabled, reading, script, mem, area_h):
     read = _letter_lines(got)
     if not read or len(read) > SPARSE_LINES:
         return False
-    if not any(langs.KANA.search(ln["text"]) for ln in read) and "zh" in enabled:
+    if "zh" in enabled and any(langs.HAN.search(ln["text"]) and not langs.KANA.search(ln["text"]) for ln in read):
         return False         # kanji-only lines with Chinese turned on: maybe Chinese, which Ultrafast reads wrong
+    # (nothing Japanese read at all is the case it is for: on a WOLF RPG title screen with a 10 px pixel font the
+    # normal reader found only the two English lines, "Presented by ..." and a label; Ultrafast read all eight)
     hs = sorted(ln["box"][3] - ln["box"][1] for ln in read)
     return area_h >= 2.5 * (len(read) + 1) * hs[len(hs) // 2]
 
@@ -508,7 +511,7 @@ def note_ultrafast(mem, won):
         mem["ultra_wins"] = 0
 SMALL_TEXT = 22    # median line height (px) below which the region is read at 2x
 HEADING = "■□◆◇●○▲△▼▽★☆※【《〈『"
-SENTENCE_END = "。．！？!?」』）)…♪～〜"
+SENTENCE_END = "。．！？!?」』）)…♪～〜】"   # 】: "ノーマル【レトロなバランス】" is a whole menu entry
 
 
 # A row that opens as "Label: value" ("Shipping Method: Standard", "配送方法：標準") is a new entry of a list, not the
@@ -608,7 +611,9 @@ def group_blocks(rows):
         rs = b["rows"]
         text = ""
         for r in rs:
-            text = _join(text, r["text"])
+            # a line break inside kana-only text is a word break too (retro games without kanji)
+            kana = text and kanaspace.kana_only(text) and kanaspace.kana_only(r["text"])
+            text = text + " " + r["text"] if kana else _join(text, r["text"])
         heights = sorted(r["box"][3] - r["box"][1] for r in rs)
         out.append({
             "box": [min(r["box"][0] for r in rs), min(r["box"][1] for r in rs),

@@ -79,6 +79,9 @@ class UltrafastFallback(unittest.TestCase):
         self.assertFalse(self.want([ln("はじめから", 10)], enabled=("zh", "en")))            # Japanese off
         self.assertFalse(self.want([ln("はじめから", 10)], reading="ultrafast"))             # already Ultrafast
         self.assertFalse(self.want([ln("設定", 10)], enabled=("ja", "zh")))                  # maybe Chinese
+        # the WOLF RPG title screen: the normal reader found only the English lines
+        self.assertTrue(self.want([ln("I can do it", 10), ln("Presented by Dot tokage 2026", 200)],
+                                  enabled=("ja", "zh", "en")))
         self.assertFalse(self.want([ln("はじめから", 10), ln("つづきから", 40)], area_h=70))  # no room for more
         self.assertFalse(self.want([]))
 
@@ -113,6 +116,16 @@ class CentredBlocks(unittest.TestCase):
     def test_speech_bubble_in_japanese(self):
         rows = centred(["きょうはいいてんきだから", "いっしょにさんぽしよう"], [260, 240])
         self.assertEqual(len(tf.group_blocks(rows)), 1)
+
+    def test_wolf_rpg_title_screen(self):
+        """The real screen (corpus/games-2026-11-18/w-diff-accurate-after.png): two menu entries in brackets, and a
+        dialogue box of kana-only text wrapped over three lines."""
+        rows = [{"box": [52, 130, 430, 152], "text": "ノーマル【レトロなバランス】", "score": 0.9},
+                {"box": [52, 155, 420, 177], "text": "イージー【てにはいる", "score": 0.9}]
+        self.assertEqual(len(tf.group_blocks(rows)), 2)
+        box = [{"box": [58, 260, 420, 282], "text": "なんいどを えらんでください", "score": 0.9},
+               {"box": [58, 283, 400, 305], "text": "プレイちゅう システムから", "score": 0.9}]
+        self.assertEqual([b["text"] for b in tf.group_blocks(box)], ["なんいどを えらんでください プレイちゅう システムから"])
 
     def test_centred_menu_stays_apart(self):
         self.assertEqual(len(tf.group_blocks(centred(["Start Game", "Options", "Quit"], [200, 140, 80], gap=18))), 3)

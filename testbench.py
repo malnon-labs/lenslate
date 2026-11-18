@@ -410,12 +410,22 @@ def _render(img, cards, opacity):
     return out
 
 
+_ULTRA = []   # the second reader for sparse Japanese areas (one per testbench run, like the overlay's)
+
+
+def _ultra():
+    import textflow as tf
+    if not _ULTRA:
+        _ULTRA.append(tf.OcrClient(HERE, env={"LENSLATE_OCR_READER": "meiki"}))
+    return _ULTRA[0]
+
+
 def _read_once(img, ocr, tr, scale=None):
     """One forced refresh of the whole image through the real pipeline: (record, cards, scale)."""
     from PySide6.QtCore import QRect
     import lenslate as ls
     region = QRect(0, 0, img.width(), img.height())
-    p = ls.OcrPipeline(region, region, [], True, None, ocr, tr, scale)
+    p = ls.OcrPipeline(region, region, [], True, None, ocr, tr, scale, ocr_ultra=_ultra())
     p.grab = lambda: img
     got = {}
     p.done.connect(lambda cards, state: got.update(cards=cards, state=state))
@@ -480,6 +490,8 @@ def run_preset(preset, images, out, progress=print):
             "new": [{"orig": n["orig"], "tr": n["tr"], "after_s": n.get("after_s")} for n in first.get("new") or []],
             "preview": prev}
     ocr.stop()
+    for u in _ULTRA:
+        u.stop()
     tr.stop()
     import llm
     llm.RUNNER.stop()   # give the graphics card back before the next preset
@@ -723,6 +735,8 @@ def run_ocr_model(model, reading, gpu, images, out, progress=print):
             "texts": texts, "acc": None if truth is None else round(_accuracy(truth, texts), 4)}
     res["gpu_mb"] = watch.done() if watch else 0
     ocr.stop()
+    for u in _ULTRA:
+        u.stop()
     tr.stop()
     for f in glob.glob(os.path.join(out, "cache-ocr*")):
         os.remove(f)
