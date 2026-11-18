@@ -37,3 +37,33 @@ jobs:
           files: |
             dist/*.tar.gz
             dist/*.sha256
+  # AppImages (packaging/build-appimage.sh): one that downloads translators when you pick them, and an offline one
+  # with three processor translators inside. Built on Ubuntu 22.04 so they run on older systems too. Each must stay
+  # under GitHub's 2 GB per file (the script checks).
+  appimage:
+    needs: tarball
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: ["", "--offline"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build tools and Qt's X11 cursor library (bundled)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libxcb-cursor0 libfuse2 python3
+      - name: Build
+        run: packaging/build-appimage.sh ${{ matrix.variant }}
+      - name: Smoke test (version, and the engine reading a test screen with the image read-only)
+        run: |
+          A="$(ls dist/*.AppImage)"
+          chmod +x "$A"
+          "$A" --appimage-extract >/dev/null
+          ./squashfs-root/AppRun --version
+          printf '{"path": "%s"}\n' "$PWD/samples/testbench/3-dialogue.png" |
+            HF_HUB_CACHE=squashfs-root/usr/hf HF_HUB_OFFLINE=1 LENSLATE_OCR_GPU=off \
+            squashfs-root/usr/python/bin/python3 -I squashfs-root/usr/share/lenslate/app/ocr_server.py | tail -1 | grep -q '"lines"'
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.AppImage
+            dist/*.AppImage.sha256

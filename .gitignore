@@ -8,3 +8,6 @@ __pycache__/
 *.bak
 *.bak[0-9]*
 *.backup*
+# build output (packaging/build-appimage.sh)
+build/
+dist/

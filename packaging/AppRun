@@ -1,0 +1,73 @@
+#!/bin/bash
+# lenslate AppImage launcher.
+#
+# Inside the image: a standalone Python with the engine (OCR + processor translators, their OCR models already
+# fetched), Qt from PyPI (PySide6), and the app. Which Python runs the app:
+#   - X11 session: the bundled one (its own Qt).
+#   - Wayland: the distro's Python with the distro's PySide6, because the overlay layer (layer-shell-qt) only works
+#     with the system's own Qt. Without those packages, lenslate runs through XWayland with the bundled Qt and says
+#     what to install (then cards sit in an X11 window; games that run through Proton/Wine are XWayland windows too).
+# The engine (helpers) always runs on the bundled Python. Settings, caches and downloaded models go where an
+# installed lenslate keeps them (~/.config/lenslate, ~/.cache/lenslate, ~/.local/share/lenslate).
+set -u
+HERE="$(dirname "$(readlink -f "$0")")"
+APPDIR_APP="$HERE/usr/share/lenslate/app"
+PYB="$HERE/usr/python/bin/python3"
+DATA="${XDG_DATA_HOME:-$HOME/.local/share}/lenslate"
+SELF="${APPIMAGE:-$HERE/AppRun}"
+export LENSLATE_ENGINE_PYTHON="$PYB"
+export LENSLATE_APPIMAGE="$SELF"
+# meikiocr's models (Ultrafast reading) are inside the image; nothing in the engine downloads from Hugging Face
+export HF_HUB_CACHE="$HERE/usr/hf" HF_HUB_OFFLINE=1
+note() { printf 'lenslate: %s\n' "$*" >&2; }
+
+GUI="$PYB"
+GUI_ENV=(env LD_LIBRARY_PATH="$HERE/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}")
+if [ -n "${WAYLAND_DISPLAY:-}" ]; then
+  SYS="$(command -v python3 || true)"
+  if [ -n "$SYS" ] && "$SYS" -c 'import PySide6.QtQuick, numpy' 2>/dev/null; then
+    GUI="$SYS"
+    GUI_ENV=(env)
+  else
+    msg="On Wayland the translation overlay needs your distro's Python Qt packages (PySide6 with QtQuick, NumPy) and layer-shell-qt - for example: Fedora: sudo dnf install python3-pyside6 python3-numpy layer-shell-qt; Arch: sudo pacman -S pyside6 python-numpy layer-shell-qt; Debian/Ubuntu: see README. Running through XWayland until then."
+    note "$msg"
+    command -v notify-send >/dev/null && notify-send -a lenslate "lenslate" "$msg" 2>/dev/null || true
+    GUI_ENV=(env -u WAYLAND_DISPLAY QT_QPA_PLATFORM=xcb XDG_SESSION_TYPE=x11 LD_LIBRARY_PATH="$HERE/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}")
+  fi
+fi
+
+first_start() {
+  mkdir -p "$DATA" "$HOME/.local/bin"
+  # the `lenslate` command (hotkeys and launchers call it): a small wrapper that starts this AppImage. An installed
+  # lenslate's own command (install.sh) is left alone.
+  local cmd="$HOME/.local/bin/lenslate"
+  if [ ! -e "$cmd" ] || grep -q "lenslate AppImage" "$cmd" 2>/dev/null; then
+    printf '#!/bin/bash\n# lenslate AppImage: runs %s\nexec "%s" "$@"\n' "$SELF" "$SELF" > "$cmd"
+    chmod +x "$cmd"
+  fi
+  # KDE Wayland: KWin lets only programs named in a desktop file use its screenshot interface (window capture);
+  # lenslate gets its own copy of the Python interpreter for that, like install.sh does
+  if [ "$GUI" != "$PYB" ] && [ "${XDG_SESSION_TYPE:-}" = wayland ] && [[ "${XDG_CURRENT_DESKTOP:-}" == *KDE* ]]; then
+    local lib="$HOME/.local/libexec/lenslate" apps="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
+    mkdir -p "$lib" "$apps"
+    cp "$(readlink -f "$GUI")" "$lib/lenslate-python" 2>/dev/null &&
+      printf '[Desktop Entry]\nType=Application\nName=lenslate screen capture\nExec=%s\nNoDisplay=true\nX-KDE-DBUS-Restricted-Interfaces=org.kde.KWin.ScreenShot2\n' \
+        "$lib/lenslate-python" > "$apps/net.local.lenslate-capture.desktop"
+  fi
+}
+[ -e "$DATA/.appimage-$(basename "$SELF")" ] || { first_start; touch "$DATA/.appimage-$(basename "$SELF")"; }
+if [ "$GUI" != "$PYB" ] && [ -x "$HOME/.local/libexec/lenslate/lenslate-python" ] && [[ "${XDG_CURRENT_DESKTOP:-}" == *KDE* ]]; then
+  GUI="$HOME/.local/libexec/lenslate/lenslate-python"
+fi
+
+# the offline AppImage: its processor translators are imported once (each file checked) into the models folder
+PACK="$HERE/usr/share/lenslate/offline-pack.tar"
+if [ -f "$PACK" ]; then
+  mark="$DATA/.offline-pack-$(stat -c %s "$PACK")"
+  if [ ! -e "$mark" ]; then
+    note "first start of the offline AppImage: installing its translators (about a minute)"
+    "${GUI_ENV[@]}" "$GUI" "$APPDIR_APP/lenslate.py" models import "$PACK" >&2 && touch "$mark"
+  fi
+fi
+
+exec "${GUI_ENV[@]}" "$GUI" "$APPDIR_APP/lenslate.py" "$@"

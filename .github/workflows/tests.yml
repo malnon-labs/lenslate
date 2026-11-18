@@ -30,8 +30,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: syntax
-        run: bash -n install.sh
+        run: bash -n install.sh && bash -n packaging/build-appimage.sh && bash -n packaging/AppRun
       - name: shellcheck (warnings and errors)
-        run: shellcheck -S warning install.sh
+        run: shellcheck -S warning install.sh packaging/build-appimage.sh packaging/AppRun
       - name: every Python file compiles
         run: python3 -m compileall -q .
