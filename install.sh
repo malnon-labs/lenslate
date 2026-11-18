@@ -206,6 +206,7 @@ else
   (cd "$SRC" && cp -r *.py *.qml requirements-engine.txt README.md install.sh "$APP.new"/)
   [ -d "$SRC/samples" ] && cp -r "$SRC/samples" "$APP.new"/
   [ -d "$SRC/seeds" ] && cp -r "$SRC/seeds" "$APP.new"/
+  [ -d "$SRC/i18n" ] && cp -r "$SRC/i18n" "$APP.new"/     # lenslate's windows in other languages
   [ -d "$SRC/hooks" ] && cp -r "$SRC/hooks" "$APP.new"/   # game plugins (lenslate hook install)
   [ -d "$SRC/packaging" ] && cp -r "$SRC/packaging" "$APP.new"/   # the app icon
   for f in LICENSE NOTICE.md CHANGELOG.md; do [ -f "$SRC/$f" ] && cp "$SRC/$f" "$APP.new"/; done

@@ -20,6 +20,7 @@ atexit.register(shutil.rmtree, SCRATCH, True)
 for var in ("XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_DATA_HOME"):
     os.environ[var] = os.path.join(SCRATCH, var.lower())
     os.makedirs(os.environ[var], exist_ok=True)
+os.environ["LENSLATE_UI_LANGUAGE"] = "en"   # the windows in English, whatever the system language
 os.environ["LENSLATE_MODELS"] = os.path.join(SCRATCH, "models")   # empty: no model is "downloaded"
 os.makedirs(os.environ["LENSLATE_MODELS"], exist_ok=True)
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")

@@ -62,6 +62,11 @@ SCHEMA = [
       # reading, Sugoi, Ultrafast as presets) are steps you can still pick, so they read as custom.
       aliases={"light": "nogpu", "fast": "balanced", "low_cpu": "custom", "ultrafast": "custom",
                "light_plus": "custom", "quality": "custom"}),
+    S("general.ui_language", "auto", "LENSLATE_UI_LANGUAGE", "Window language",
+      "The language of lenslate's own windows. auto = your system's language when lenslate has it, otherwise "
+      "English. en = English, pt = Portuguese (Brazil), zh = Chinese (Simplified), ja = Japanese, ko = Korean, "
+      "ru = Russian. Takes effect when the window opens again. Texts not translated yet stay in English.",
+      choices=("auto", "en", "pt", "zh", "ja", "ko", "ru")),
     S("general.setup_done", False, "LENSLATE_SETUP_DONE", "Setup done",
       "Set when the first-launch setup window was finished or closed, so it does not open again by itself. Set it to "
       "false (or run `lenslate setup`) to see it again."),

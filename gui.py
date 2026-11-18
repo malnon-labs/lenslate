@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (QToolButton, QLayout, QBoxLayout, QApplication, Q
                                QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
 import config as cfgmod
+from i18n import _
 import langs
 import re
 import time
@@ -113,8 +114,8 @@ class HelpFilter(QObject):
         """state: idle (the default hint), help (hover text), error (red, stays until the next click)."""
         if state == "error":
             self.pending = text
-            text = "⚠ " + text
-        self.bar.setText(text)
+            text = "⚠ " + _(text)
+        self.bar.setText(_(text))
         set_role(self.bar, "helpbar", state=state)
 
     def eventFilter(self, obj, ev):
@@ -148,6 +149,7 @@ READING_TIPS = (   # (title, one-line version shown on the page, full text on ho
 
 
 def explain(widget, text, flt):
+    text = _(text)
     widget.setProperty("help", text)
     widget.setToolTip("<p style='max-width:420px'>%s</p>" % text)
     widget.installEventFilter(flt)
@@ -185,7 +187,7 @@ def setting_widget(key, flt, on_error):
         if "key" in key:
             w.setEchoMode(QLineEdit.Password)
         w.editingFinished.connect(lambda: save(key, w.text(), on_error))
-    help_text = "%s: %s" % (s.label, s.help)
+    help_text = "%s: %s" % (_(s.label), _(s.help))
     if cfgmod.overridden(key):
         w.setEnabled(False)
         help_text += " (Locked: set by the environment variable %s.)" % s.env
@@ -214,7 +216,7 @@ class Section(QLabel):
     """A section header (bigger, bold, space above)."""
 
     def __init__(self, text):
-        super().__init__(text)
+        super().__init__(_(text))
         set_role(self, "section")
         self.setContentsMargins(0, GAP - 8, 0, 2)
 
@@ -225,7 +227,7 @@ def section_label(text):
 
 def note(text, width=TEXT_W):
     """A quieter explanation line (muted text colour that passes contrast in light and dark)."""
-    lab = QLabel(text)
+    lab = QLabel(_(text))
     lab.setWordWrap(True)
     if width:
         lab.setMaximumWidth(width)
@@ -238,13 +240,13 @@ def hint(text):
 
 
 def chip(text, kind=None):
-    lab = QLabel(text)
+    lab = QLabel(_(text))
     return set_role(lab, "chip", kind=kind or "")
 
 
 def message(text, kind="info"):
     """An inline message box (info / warning / error) with a coloured side bar; the text says what it is."""
-    lab = QLabel(text)
+    lab = QLabel(_(text))
     lab.setWordWrap(True)
     lab.setMaximumWidth(CONTENT_W)
     return set_role(lab, "message", kind=kind)
@@ -291,7 +293,7 @@ def form(rows):
     f.setHorizontalSpacing(12)
     f.setVerticalSpacing(8)
     for label, widget in rows:
-        lab = QLabel(label)
+        lab = QLabel(_(label))
         lab.setMinimumWidth(LABEL_W)
         lab.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         lab.setWordWrap(True)
@@ -648,7 +650,7 @@ class Compare(QDialog):
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.setWindowTitle("Compare translation methods")
+        self.setWindowTitle(_("Compare translation methods"))
         self.resize(940, 380)
         t = QTableWidget(len(self.ROWS), 4)
         t.setHorizontalHeaderLabels(["quickmt", "Sugoi", "Gemma 4 E2B", "Online (Google…)"])
@@ -665,7 +667,7 @@ class Compare(QDialog):
 class Window(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("lenslate")
+        self.setWindowTitle(_("lenslate"))
         self.setWindowIcon(app_icon())
         self.resize(1120, 700)
         self.jobs = []
@@ -722,11 +724,11 @@ class Window(QWidget):
                  "Names & fixes": "\U0001F3F7\uFE0F", "Advanced": "\u2699\uFE0F"}
         icons = page_icons(icons)
         for name, builder, about in self.page_specs:
-            self.nav.addItem(name)
+            self.nav.addItem(_(name))
             item = self.nav.item(self.nav.count() - 1)
-            item.setToolTip(about)
+            item.setToolTip(_(about))
             item.setIcon(icons[name])
-            self.pages.addWidget(framed(name, about, builder()))
+            self.pages.addWidget(framed(_(name), _(about), builder()))
         for i in range(self.nav.count()):
             self.nav.item(i).setData(Qt.UserRole, self.nav.item(i).text())
         self.set_nav_collapsed(self.nav_user_collapsed)
@@ -891,7 +893,7 @@ class Window(QWidget):
         p = cfgmod.PRESETS[name]
         # (no command to the running overlay: it follows config.toml within 2 s, and only one program writes the file)
         self.rebuild_pages()
-        self.say("%s preset. %s Trade-off: %s" % (p["label"], p["summary"], p["tradeoff"]))
+        self.say(_("%s preset. %s Trade-off: %s") % (p["label"], p["summary"], p["tradeoff"]))
         QTimer.singleShot(0, self.offer_model)
 
     def preset_fits(self, name):
@@ -922,12 +924,12 @@ class Window(QWidget):
         self.rebuild_pages()
         if ok:
             p = cfgmod.PRESETS.get(cfgmod.current_preset())
-            self.say("Setup done%s." % (": %s preset" % p["label"] if p else ""))
+            self.say(_("Setup done%s.") % (": %s preset" % p["label"] if p else ""))
             if measure:
                 self.nav.setCurrentItem(self.nav.findItems("Translation", Qt.MatchFixedString)[0])
                 self.run_benchmark()
         else:
-            self.say("Setup closed; nothing changed. Translation page > Run setup again brings it back.")
+            self.say(_("Setup closed; nothing changed. Translation page > Run setup again brings it back."))
 
     def first_launch(self):
         """Setup window the first time; afterwards the older one-question checks."""
@@ -986,19 +988,19 @@ class Window(QWidget):
         srow.addWidget(self.run_text, 1)
         srow.addWidget(self.run_btn)
 
-        b_select = explain(QPushButton("Pick area…"), "Drag a box around the text you want translated: a game's "
+        b_select = explain(QPushButton(_("Pick area…")), "Drag a box around the text you want translated: a game's "
                            "dialogue box, a video's subtitles, part of a web page, a PDF, or the whole screen. "
                            "Smaller areas are read faster. " + hot("select"), f)
         b_select.clicked.connect(lambda: send("select") or run_lenslate("select"))
-        self.b_now = explain(QPushButton("Translate now"), "Read the whole chosen area again and translate it. "
+        self.b_now = explain(QPushButton(_("Translate now")), "Read the whole chosen area again and translate it. "
                              "Lines translated before come from the cache instantly. " + hot("now"), f)
         self.b_now.clicked.connect(lambda: (send("now"), self.refresh_status()))
-        self.b_toggle = explain(QPushButton("Show / hide"), "Hide the translation cards (automatic translation "
+        self.b_toggle = explain(QPushButton(_("Show / hide")), "Hide the translation cards (automatic translation "
                                 "pauses while hidden), or show them again. " + hot("toggle"), f)
         self.b_toggle.clicked.connect(lambda: (send("toggle"), self.refresh_status()))
-        self.b_reset = explain(QPushButton("Forget area"), "Remove the cards and forget the chosen area.", f)
+        self.b_reset = explain(QPushButton(_("Forget area")), "Remove the cards and forget the chosen area.", f)
         self.b_reset.clicked.connect(lambda: (send("reset"), self.refresh_status()))
-        self.auto_box = explain(QCheckBox("Keep translating automatically"),
+        self.auto_box = explain(QCheckBox(_("Keep translating automatically")),
                                 "Check the area again and again (every 'Auto-refresh interval' seconds) and translate "
                                 "new text as it appears. Only the parts that changed are read again, so it costs "
                                 "little while nothing changes. Pick an area first. " + hot("auto"), f)
@@ -1008,14 +1010,14 @@ class Window(QWidget):
         for b in (b_select, self.b_now, self.b_toggle, self.b_reset):
             row2.addWidget(set_role(b, "secondary"))
             b.setMinimumWidth(120)
-        self.area_hint = hint("Pick an area to use the other buttons.")
+        self.area_hint = hint(_("Pick an area to use the other buttons."))
 
         op = cfgmod.BY_KEY["overlay.opacity"]
         self.opacity = QSlider(Qt.Horizontal)
         self.opacity.setRange(10, 100)
         self.opacity.setValue(int(round(cfgmod.get("overlay.opacity") * 100)))
-        self.opacity_label = QLabel("%d%%" % self.opacity.value())
-        self.opacity.valueChanged.connect(lambda v: (self.opacity_label.setText("%d%%" % v),
+        self.opacity_label = QLabel(_("%d%%") % self.opacity.value())
+        self.opacity.valueChanged.connect(lambda v: (self.opacity_label.setText(_("%d%%") % v),
                                                      save("overlay.opacity", v / 100, self.error)))
         explain(self.opacity, "%s: %s" % (op.label, op.help), f)
         self.opacity.setFixedWidth(320)
@@ -1030,7 +1032,7 @@ class Window(QWidget):
         sec = section_label("Translate what is on screen")
         explain(sec, "Works on anything on screen: games, browsers, video players, PDF and image viewers, the "
                 "desktop. The buttons below have hotkeys for use inside a game: Keyboard shortcuts changes them.", f)
-        b_keys = explain(set_role(QPushButton("Keyboard shortcuts…"), "secondary"),
+        b_keys = explain(set_role(QPushButton(_("Keyboard shortcuts…")), "secondary"),
                          "See and change the hotkeys of Pick area, Translate now, Keep translating and Show / hide. "
                          "lenslate checks that a key is free before it uses it.", f)
         b_keys.clicked.connect(self.edit_shortcuts)
@@ -1041,11 +1043,11 @@ class Window(QWidget):
         self.read_tip.setMaximumWidth(CONTENT_W)
         tl = QHBoxLayout(self.read_tip)
         tl.setContentsMargins(12, 8, 8, 8)
-        tip_text = QLabel("<b>Tip:</b> in the game's settings, a solid text-box background, bigger text and the "
-                          "standard font make lenslate read faster and make fewer mistakes.")
+        tip_text = QLabel(_("<b>Tip:</b> in the game's settings, a solid text-box background, bigger text and the "
+                          "standard font make lenslate read faster and make fewer mistakes."))
         tip_text.setWordWrap(True)
         explain(tip_text, " ".join("%s: %s" % (t, full) for t, _short, full in READING_TIPS), f)
-        tip_ok = set_role(QPushButton("Got it"), "quiet")
+        tip_ok = set_role(QPushButton(_("Got it")), "quiet")
         explain(tip_ok, "Hide this tip for good (Advanced > Overlay brings it back).", f)
         tip_ok.clicked.connect(lambda: (save("overlay.reading_tip", False, self.error), self.read_tip.hide()))
         tl.addWidget(tip_text, 1)
@@ -1066,11 +1068,11 @@ class Window(QWidget):
         sec = section_label("How lenslate sees the screen")
         explain(sec, "The capture method depends on your desktop (Advanced > Screen capture method can force the "
                 "screen-sharing portal). Full guide: docs/CAPTURE.md.", self.flt)
-        body = note("<b>%s.</b> %s<ul style='margin-left:-18px'>%s</ul>" % (
+        body = note(_("<b>%s.</b> %s<ul style='margin-left:-18px'>%s</ul>") % (
             g["title"], g["summary"], "".join("<li>%s</li>" % t for t in g["tips"])), CONTENT_W)
         out = [sec, body]
         if method == "portal":
-            b = set_role(QPushButton("Choose what to share…"), "secondary")
+            b = set_role(QPushButton(_("Choose what to share…")), "secondary")
             explain(b, "Ask your desktop again which window or screen lenslate may see (same as `lenslate "
                     "share`). lenslate must be running.", self.flt)
             b.clicked.connect(lambda: self.say(send("share") or "lenslate is not running: start it first."))
@@ -1082,15 +1084,15 @@ class Window(QWidget):
         if self.run_btn.text() == "Restart lenslate":
             send("quit")
             QTimer.singleShot(1200, lambda: run_lenslate("translator"))
-            self.run_text.setText("Restarting…")
+            self.run_text.setText(_("Restarting…"))
             QTimer.singleShot(3500, self.refresh_status)
             return
         if send("status", 400) is None:
             run_lenslate("translator")    # starts the overlay without asking for an area
-            self.run_text.setText("Starting…")
+            self.run_text.setText(_("Starting…"))
         else:
             send("quit")
-            self.run_text.setText("Stopping…")
+            self.run_text.setText(_("Stopping…"))
         QTimer.singleShot(1500, self.refresh_status)
 
     def edit_shortcuts(self):
@@ -1114,7 +1116,7 @@ class Window(QWidget):
         self.read_tip.setVisible(running and bool(cfgmod.get("overlay.reading_tip")))
         self.run_dot.setText("●")   # green = running, grey = stopped (the text next to it says it too)
         self.run_dot.setStyleSheet("color: %s; font-size: 16pt;" % theme.color("success_text" if running else "text_muted"))
-        self.run_btn.setText("Stop lenslate" if running else "Start lenslate")
+        self.run_btn.setText(_("Stop lenslate") if running else _("Start lenslate"))
         set_role(self.run_btn, "secondary" if running else "primary")
         tip = ("Stop the overlay completely and free its memory, including the language model's GPU memory."
                if running else "Start the overlay in the background. Nothing is read until you pick an area.")
@@ -1130,20 +1132,20 @@ class Window(QWidget):
         set_role(self.status_card, state="warning" if (running and st and st.get("stale")) else "")
         self.auto_box.setChecked(bool(st and st.get("auto")) and has_area)
         if running and st and st.get("stale"):
-            self.run_text.setText("⚠ Running an older version of lenslate: restart it to use the new one")
-            self.run_btn.setText("Restart lenslate")
+            self.run_text.setText(_("⚠ Running an older version of lenslate: restart it to use the new one"))
+            self.run_btn.setText(_("Restart lenslate"))
             set_role(self.run_btn, "primary")
             explain(self.run_btn, "lenslate was updated while it was running. Restart it so it uses the new version "
                     "(an older running version can overwrite newer settings).", self.flt)
             return
         if not running:
-            self.run_text.setText("Stopped")
+            self.run_text.setText(_("Stopped"))
         elif not st:
-            self.run_text.setText("Running (an older version: restart it to see its state)")
+            self.run_text.setText(_("Running (an older version: restart it to see its state)"))
         else:
             area = "no area picked" if not has_area else "area %d×%d on %s" % (
                 st["region"][2], st["region"][3], st.get("screen") or "screen")
-            self.run_text.setText("Running · %s · %s · %s%s" % (
+            self.run_text.setText(_("Running · %s · %s · %s%s") % (
                 area, "cards hidden" if st.get("hidden") else "cards shown", st.get("translator"),
                 " · working…" if st.get("busy") else ""))
 
@@ -1190,7 +1192,7 @@ class Window(QWidget):
             self.gui_state.setValue("custom_steps", json.dumps({k: now[k] for k in ("ocr.reading", "ocr.gpu",
                                                                                      "translator.kind")}))
             mine = self._custom_steps()
-        c = QPushButton("Custom")
+        c = QPushButton(_("Custom"))
         c.setCheckable(True)
         c.setChecked(cur == "custom")
         c.setEnabled(cur == "custom" or mine is not None)
@@ -1228,7 +1230,7 @@ class Window(QWidget):
         cfgmod.set_many(d)
         changed = enforce_steps()     # e.g. the languages changed since: an option that no longer fits
         self.rebuild_pages()
-        self.say("Custom: %s.%s" % (self._describe_steps(d), (" Switched: " + "; ".join(changed)) if changed else ""))
+        self.say(_("Custom: %s.%s") % (self._describe_steps(d), (" Switched: " + "; ".join(changed)) if changed else ""))
 
     def languages_changed(self):
         changed = enforce_steps()
@@ -1247,7 +1249,7 @@ class Window(QWidget):
         lay = QVBoxLayout(box)
         lay.setContentsMargins(14, 12, 14, 14)
         lay.setSpacing(14)
-        head = set_role(QLabel("How it reads and translates"), "section")
+        head = set_role(QLabel(_("How it reads and translates")), "section")
         explain(head, "Two choices: how text is read (and on which chip: CPU or GPU), and who translates. Hover an "
                 "option, or press ?, to see how it works and what it costs; the panel estimates the speed of the "
                 "whole combination on this PC.", f)
@@ -1294,7 +1296,7 @@ class Window(QWidget):
             right.setSpacing(6)
             trow = QHBoxLayout()
             trow.setSpacing(6)
-            trow.addWidget(QLabel("<span style='color:%s'><b>%d</b></span>&nbsp;&nbsp;<b>%s</b>" % (
+            trow.addWidget(QLabel(_("<span style='color:%s'><b>%d</b></span>&nbsp;&nbsp;<b>%s</b>") % (
                 theme.color("accent"), row + 1, title)))
             q = QToolButton()
             q.setText("?")
@@ -1375,13 +1377,13 @@ class Window(QWidget):
                     self.rebuild_pages()
                     return
                 if "ocrgpu" in self.tasks:
-                    self.say("The graphics-card reader is still downloading…")
+                    self.say(_("The graphics-card reader is still downloading…"))
                     return
-                self.say("Downloading the graphics-card reader (3.4 GB; no progress is shown, it can "
-                                     "take a few minutes)…")
+                self.say(_("Downloading the graphics-card reader (3.4 GB; no progress is shown, it can "
+                                     "take a few minutes)…"))
                 job = self.start_job(Job(lambda progress: ocrgpu.install()), "ocrgpu")
                 job.finished_ok.connect(lambda _r: (cfgmod.set("ocr.gpu", "all"), self.rebuild_pages(),
-                                                    self.say("The graphics-card reader is installed.")))
+                                                    self.say(_("The graphics-card reader is installed."))))
                 job.failed.connect(lambda e: (self.error("Graphics-card reader: " + e), self.rebuild_pages()))
                 job.start()
                 return
@@ -1399,7 +1401,7 @@ class Window(QWidget):
         if key == "translator.kind":
             QTimer.singleShot(0, self.offer_model)   # the language model is not downloaded yet: offer it
         p = cfgmod.PRESETS.get(cfgmod.current_preset())
-        self.say("Now: %s." % (p["label"] + " preset" if p else "Custom (your own combination)"))
+        self.say(_("Now: %s.") % (p["label"] + " preset" if p else "Custom (your own combination)"))
 
     def page_presets(self):
         """The Translation page: languages first (everything else depends on them), then the three steps with
@@ -1408,10 +1410,10 @@ class Window(QWidget):
         import hwcheck
         f = self.flt
         self.bench = bench.load()
-        b_cmp = explain(QPushButton("Compare all…"), "Every translation method side by side: where it runs, memory, "
+        b_cmp = explain(QPushButton(_("Compare all…")), "Every translation method side by side: where it runs, memory, "
                         "download, speed, menus, dialogue, names, languages, privacy and licence.", f)
         b_cmp.clicked.connect(lambda: Compare(self).exec())
-        b_setup = explain(QPushButton("Run setup again…"), "The first-launch setup: languages, settings that fit "
+        b_setup = explain(QPushButton(_("Run setup again…")), "The first-launch setup: languages, settings that fit "
                           "this PC (with a hardware check), and the downloads they need.", f)
         b_setup.clicked.connect(self.run_setup)
         self._head_buttons = [set_role(b_cmp, "quiet"), set_role(b_setup, "quiet")]
@@ -1424,8 +1426,8 @@ class Window(QWidget):
         rl.setSpacing(4)
         hw = bench.hardware()
         g = hwcheck.best_gpu()
-        rl.addWidget(set_role(QLabel("Your PC"), "section"))
-        rl.addWidget(explain(hint("%s<br>%s" % (hw["cpu"], ("%s, %.0f GB" % (g["name"], g["vram_mb"] / 1024))
+        rl.addWidget(set_role(QLabel(_("Your PC")), "section"))
+        rl.addWidget(explain(hint(_("%s<br>%s") % (hw["cpu"], ("%s, %.0f GB" % (g["name"], g["vram_mb"] / 1024))
                                                  if g and g["dedicated"] else ("integrated %s graphics" % g["vendor"])
                                                  if g else "no graphics card found")),
                              "The processor and graphics card lenslate found. Live graphics-card usage below needs "
@@ -1440,7 +1442,7 @@ class Window(QWidget):
         rl.addSpacing(8)   # at the top: the panel bottom is often below the fold
         rl.addWidget(self.bench_label)
         rl.addWidget(self.bench_bar)
-        self.cpu_lab, self.gpu_lab, self.vram_lab = QLabel("Processor"), QLabel("Graphics card"), QLabel("GPU memory")
+        self.cpu_lab, self.gpu_lab, self.vram_lab = QLabel(_("Processor")), QLabel(_("Graphics card")), QLabel(_("GPU memory"))
         rl.addSpacing(6)
         for lab, tip in ((self.cpu_lab, "How busy the processor is right now (all programs)."),
                          (self.gpu_lab, "How busy the graphics card is right now (all programs)."),
@@ -1561,11 +1563,11 @@ class Window(QWidget):
         except RuntimeError:   # page rebuilt
             return
         c = self.cpu_meter.percent()
-        self.cpu_lab.setText("Processor %d%%" % c)
+        self.cpu_lab.setText(_("Processor %d%%") % c)
         g = bench.gpu_now()
         if g:
-            self.gpu_lab.setText("Graphics card %d%%" % g[0])
-            self.vram_lab.setText("GPU memory %.1f / %.1f GB" % (g[1] / 1024, g[2] / 1024))
+            self.gpu_lab.setText(_("Graphics card %d%%") % g[0])
+            self.vram_lab.setText(_("GPU memory %.1f / %.1f GB") % (g[1] / 1024, g[2] / 1024))
 
     def maybe_benchmark(self):
         """First launch (or new hardware): say what will happen, then measure - or later."""
@@ -1634,10 +1636,10 @@ class Window(QWidget):
                 return
             bar.setValue(int(st["value"]))
             if st["phase"] == "done":
-                lab.setText("<span style='color:%s'><b>✓ Done</b></span> at %s. The numbers below are new." % (
+                lab.setText(_("<span style='color:%s'><b>✓ Done</b></span> at %s. The numbers below are new.") % (
                     theme.color("success_text"), st["text"]))
             else:
-                lab.setText("<b>Measuring %d%%</b><br>%s" % (st["value"], st["text"]))
+                lab.setText(_("<b>Measuring %d%%</b><br>%s") % (st["value"], st["text"]))
         except RuntimeError:      # the page (and its bar) was just replaced
             pass
 
@@ -1661,7 +1663,7 @@ class Window(QWidget):
             self.bench_state = {"phase": "done", "value": 100, "text": time.strftime("%H:%M")}
             self._click_log("measure done")
             self.rebuild_pages()
-            self.say("Measured: reading %.2f s (fast %.2f s), translating per line: quickmt %.2f s%s%s." % (
+            self.say(_("Measured: reading %.2f s (fast %.2f s), translating per line: quickmt %.2f s%s%s.") % (
                 res["ocr_accurate"], res["ocr_fast"], res["mt"],
                 ", Sugoi %.2f s" % res["sugoi"] if res.get("sugoi") else "",
                 ", language model %.2f s" % res["llm"] if res.get("llm") else ""))
@@ -1680,7 +1682,7 @@ class Window(QWidget):
         """Below the preset steps: the language model's own options (when it translates), languages, online."""
         f = self.flt
         current = cfgmod.get("translator.kind")
-        self.online_warn = message("⚠ Online: the text on screen is sent to the online service.", "warning")
+        self.online_warn = message(_("⚠ Online: the text on screen is sent to the online service."), "warning")
         self.online_warn.setVisible(current == "online")
 
         import models
@@ -1760,7 +1762,7 @@ class Window(QWidget):
         el.setSpacing(8)
         fb = QCheckBox()
         fb.setObjectName("online_fallback")
-        fb_text = QLabel("If the local translator fails on a line, send that line to an online service")
+        fb_text = QLabel(_("If the local translator fails on a line, send that line to an online service"))
         fb_text.setWordWrap(True)     # (a checkbox's own text cannot wrap and kept the page wide)
         for w_ in (fb, fb_text):
             explain(w_, cfgmod.BY_KEY["translator.online_fallback"].help if current != "online" else
@@ -1771,7 +1773,7 @@ class Window(QWidget):
         fbr.addWidget(fb, 0, Qt.AlignTop)
         fbr.addWidget(fb_text, 1)
         el.addLayout(fbr)
-        warn = message("⚠ With this on, lines the local translator cannot do leave this computer.", "warning")
+        warn = message(_("⚠ With this on, lines the local translator cannot do leave this computer."), "warning")
         if current == "online":
             fb.setChecked(True)
             fb.setEnabled(False)
@@ -1838,7 +1840,7 @@ class Window(QWidget):
         explain(self.runtime_label, "lenslate runs language models itself with llama.cpp (Vulkan: NVIDIA, AMD and "
                 "Intel graphics). Nothing else needs to be installed. Ollama is used only if you choose it.", f)
         rows.append(self.runtime_label)
-        pack = explain(set_role(QPushButton("Load offline pack…"), "secondary"),
+        pack = explain(set_role(QPushButton(_("Load offline pack…")), "secondary"),
                        "Install processor translators from an offline pack file (lenslate-pack-*.tar from the "
                        "release page, or one made with `lenslate models pack`) - for a PC without internet. Every "
                        "file is checked before it is used.", f)
@@ -1866,7 +1868,7 @@ class Window(QWidget):
         lay.setSpacing(4)
         head = QHBoxLayout()
         head.setSpacing(8)
-        title = QLabel("<b>%s</b>" % m.title)
+        title = QLabel(_("<b>%s</b>") % m.title)
         title.setWordWrap(True)
         btn = QPushButton()
         btn.setMinimumWidth(150)
@@ -1883,10 +1885,10 @@ class Window(QWidget):
         head.addLayout(tags, 1)
         head.addWidget(btn, 0, Qt.AlignTop)
         mem = ("%.1f GB GPU memory" % m.vram_gb) if m.vram_gb else ("%.1f GB memory" % (m.ram_gb or 0))
-        size = hint("%.1f GB download · %s · licence: %s" % (m.size_gb, mem, m.license.split(" (")[0]))
+        size = hint(_("%.1f GB download · %s · licence: %s") % (m.size_gb, mem, m.license.split(" (")[0]))
         if " (" in m.license:   # the licence's note ("free for personal and non-commercial use") in its hover text
             size.setToolTip(m.license)
-        can = QLabel("<b>Translates:</b> %s" % m.can) if getattr(m, "can", "") else None
+        can = QLabel(_("<b>Translates:</b> %s") % m.can) if getattr(m, "can", "") else None
         about = QLabel(m.about)
         about.setWordWrap(True)
         bar = QProgressBar()
@@ -1954,9 +1956,9 @@ class Window(QWidget):
         def end(ok_or_err, failed=False):
             row()
             if failed:
-                self.error("%s: %s" % (m.title, ok_or_err))
+                self.error(_("%s: %s") % (m.title, ok_or_err))
             else:
-                self.say("%s is installed." % m.title)
+                self.say(_("%s is installed.") % m.title)
         job.progress.connect(prog)
         job.finished_ok.connect(lambda _r: end(None))
         job.failed.connect(lambda e: end(e, True))
@@ -1992,7 +1994,7 @@ class Window(QWidget):
             except RuntimeError:
                 pass
             if failed:
-                self.error("Offline pack: %s" % result)
+                self.error(_("Offline pack: %s") % result)
                 return
             done, skipped = result
             for m in models.CATALOG:
@@ -2001,12 +2003,12 @@ class Window(QWidget):
                         self._update_model_row(m)
                     except RuntimeError:
                         pass
-            self.say("Offline pack: installed %s%s." % (", ".join(done) or "nothing new",
+            self.say(_("Offline pack: installed %s%s.") % (", ".join(done) or "nothing new",
                                                       ("; already installed: " + ", ".join(skipped)) if skipped else ""))
         job.progress.connect(prog)
         job.finished_ok.connect(lambda r: end(r))
         job.failed.connect(lambda e: end(e, True))
-        self.say("Loading %s (%s)…" % (os.path.basename(path), ", ".join(names)))
+        self.say(_("Loading %s (%s)…") % (os.path.basename(path), ", ".join(names)))
         job.start()
 
     # --------------------------------------------------------------------------------------------- games page
@@ -2014,24 +2016,24 @@ class Window(QWidget):
         f = self.flt
         self.game_path = explain(QLineEdit(), "The game's folder (the one with its .exe, or with game/ for Ren'Py "
                                  "games).", f)
-        browse = set_role(explain(QPushButton("Choose folder…"), "Pick the game's folder.", f), "secondary")
-        self.game_path.setPlaceholderText("Game folder")
+        browse = set_role(explain(QPushButton(_("Choose folder…")), "Pick the game's folder.", f), "secondary")
+        self.game_path.setPlaceholderText(_("Game folder"))
         browse.clicked.connect(self.choose_game)
         self.game_path.editingFinished.connect(self.game_changed)
         prow = QHBoxLayout()
         prow.addWidget(self.game_path, 1)
         prow.addWidget(browse)
-        self.game_info = note("Choose a game folder to enable these actions.", CONTENT_W)
-        self.b_install = explain(QPushButton("Install hook"), "Put lenslate inside the game, so it translates "
+        self.game_info = note(_("Choose a game folder to enable these actions."), CONTENT_W)
+        self.b_install = explain(QPushButton(_("Install hook")), "Put lenslate inside the game, so it translates "
                                  "the game's own text: no screen reading, no misread characters. Every file it "
                                  "changes is backed up. Works for RPG Maker MV/MZ, Ren'Py and Unity (with XUnity).",
                                  f)
-        self.b_remove = explain(QPushButton("Remove hook"), "Take lenslate out of the game and restore the "
+        self.b_remove = explain(QPushButton(_("Remove hook")), "Take lenslate out of the game and restore the "
                                 "backed-up files.", f)
-        self.b_pre = explain(QPushButton("Translate all text now"), "Read every line of the game from its files "
+        self.b_pre = explain(QPushButton(_("Translate all text now")), "Read every line of the game from its files "
                              "and translate it ahead of time, so everything appears instantly while you play "
                              "(RPG Maker MV/MZ; Ren'Py games do this by themselves when they start).", f)
-        self.b_names = explain(QPushButton("Find character names"), "Look for character names in the game's "
+        self.b_names = explain(QPushButton(_("Find character names")), "Look for character names in the game's "
                                "files and suggest their spelling. You confirm them on the Names & fixes page.", f)
         self.b_install.clicked.connect(lambda: self.game_job("install"))
         self.b_remove.clicked.connect(lambda: self.game_job("remove"))
@@ -2099,7 +2101,7 @@ class Window(QWidget):
         if d != gs["path"]:
             gs.update(path=d, log="")
         if not os.path.isdir(d):
-            self.game_info.setText("Not a folder.")
+            self.game_info.setText(_("Not a folder."))
             return
         st = hooks.status(d)
         names = {"rpgm-mv": "RPG Maker MV", "rpgm-mz": "RPG Maker MZ", "unity": "Unity", "renpy": "Ren'Py",
@@ -2117,7 +2119,7 @@ class Window(QWidget):
         if st.get("loader_off"):
             extra += " · BepInEx is switched off: Install switches it back on"
         ok_c, warn_c = theme.color("success_text"), theme.color("warning_text")
-        self.game_info.setText("<b>%s</b> · game id %s · %s%s%s" % (
+        self.game_info.setText(_("<b>%s</b> · game id %s · %s%s%s") % (
             eng, st["game"], "<span style='color:%s'>✓ hook installed</span>" % ok_c if st["installed"] else "no hook",
             "" if st["supported"] else " · <span style='color:%s'>⚠ no hook for this engine yet: use the screen "
             "overlay</span>" % warn_c, extra))
@@ -2224,11 +2226,11 @@ class Window(QWidget):
         explain(self.name_table, "Original = the name or term as the game writes it; Translation = how it must "
                 "always be translated. State: used = applied to every translation; suggestion = found by lenslate, "
                 "not used until you set it to used; rejected = not a name, never suggested again.", f)
-        b_add = explain(QPushButton("Add row"), "Add a name or term by hand (for example 淫紋 → lewd crest).", f)
+        b_add = explain(QPushButton(_("Add row")), "Add a name or term by hand (for example 淫紋 → lewd crest).", f)
         b_add.clicked.connect(lambda: self._name_row("", "", "used"))
-        b_ok = explain(QPushButton("Use all suggestions"), "Mark every suggestion as used.", f)
+        b_ok = explain(QPushButton(_("Use all suggestions")), "Mark every suggestion as used.", f)
         b_ok.clicked.connect(self.confirm_all_names)
-        b_save = explain(QPushButton("Save"), "Write the list. The overlay and hook server pick it up within "
+        b_save = explain(QPushButton(_("Save")), "Write the list. The overlay and hook server pick it up within "
                          "a few seconds.", f)
         b_save.clicked.connect(self.save_names)
         self.name_table.setAlternatingRowColors(True)
@@ -2238,7 +2240,7 @@ class Window(QWidget):
         row.addStretch(1)
         row.addWidget(set_role(b_save, "primary"))
         self.reload_name_games()
-        self.names_empty = note("No names for this game yet. Add one, or use Find character names on the Games page.")
+        self.names_empty = note(_("No names for this game yet. Add one, or use Find character names on the Games page."))
         return page(form([("Game", self.name_game)]), self.names_empty, self.name_table, row, wide=True)
 
     # ------------------------------------------------------------------------------------ fix translations
@@ -2248,7 +2250,7 @@ class Window(QWidget):
                                 "its own, so you always see that model's wording.", f)
         self.fix_search = explain(QLineEdit(), "Type part of the original or of the translation (for example a word "
                                   "that was translated wrong).", f)
-        self.fix_search.setPlaceholderText("Search…")
+        self.fix_search.setPlaceholderText(_("Search…"))
         self.fix_search.textChanged.connect(lambda _t: self.fix_timer.start(250))
         self.fix_timer = QTimer(self)
         self.fix_timer.setSingleShot(True)
@@ -2261,10 +2263,10 @@ class Window(QWidget):
         self.fix_table.setWordWrap(True)
         explain(self.fix_table, "Double-click a translation to correct it, then Save. Only the translation can be "
                 "edited: the original is what the game showed.", f)
-        b_del = explain(QPushButton("Delete selected"), "Forget the selected translations: they are translated "
+        b_del = explain(QPushButton(_("Delete selected")), "Forget the selected translations: they are translated "
                         "again the next time they appear (useful after changing a name or the model).", f)
         b_del.clicked.connect(self.delete_fixes)
-        b_save = explain(QPushButton("Save"), "Keep your corrections. A running overlay or hook server uses them "
+        b_save = explain(QPushButton(_("Save")), "Keep your corrections. A running overlay or hook server uses them "
                          "within a few seconds.", f)
         b_save.clicked.connect(self.save_fixes)
         self.fix_table.setAlternatingRowColors(True)
@@ -2321,7 +2323,7 @@ class Window(QWidget):
             self.fix_cache.delete(self.fix_table.item(r, 0).data(Qt.UserRole))
             self.fix_table.removeRow(r)
         self.fix_cache.save()
-        self.say("Deleted %d translations; they are translated again when they next appear." % len(rows))
+        self.say(_("Deleted %d translations; they are translated again when they next appear.") % len(rows))
 
     def save_fixes(self):
         n = 0
@@ -2332,7 +2334,7 @@ class Window(QWidget):
                 self.fix_cache.mark_fixed(key)   # a hand correction: kept over ready-made menu translations
                 n += 1
         self.fix_cache.save()
-        self.say("Saved %d corrections." % n)
+        self.say(_("Saved %d corrections.") % n)
 
     def reload_name_games(self):
         import names as nm
@@ -2397,7 +2399,7 @@ class Window(QWidget):
         os.makedirs(nm.NAMES_DIR, exist_ok=True)
         with open(os.path.join(nm.NAMES_DIR, game + ".tsv"), "w", encoding="utf-8") as fh:
             fh.write("\n".join(lines) + "\n")
-        self.say("Saved %s (%d entries)." % (game, len(lines) - 1))
+        self.say(_("Saved %s (%d entries).") % (game, len(lines) - 1))
 
     # ------------------------------------------------------------------------------------------ advanced page
     def page_advanced(self):
@@ -2406,11 +2408,11 @@ class Window(QWidget):
                  "translator.kind", "translator.llm_model", "translator.llm_backend", "translator.language",
                  "translator.sources", "translator.online_provider", "translator.online_fallback", "translator.seed_packs",
                  "translator.deepl_key"}
-        cfg = explain(QPushButton("Open config.toml"), "Open the settings file in your text editor. Every "
+        cfg = explain(QPushButton(_("Open config.toml")), "Open the settings file in your text editor. Every "
                       "setting is explained in it; changes apply while lenslate runs.", f)
         cfg.clicked.connect(lambda: subprocess.Popen(["xdg-open", cfgmod.CONFIG_PATH]))
         top = QHBoxLayout()
-        ver = explain(QLabel("lenslate %s" % version.describe()), "The version of lenslate that is installed (and "
+        ver = explain(QLabel(_("lenslate %s") % version.describe()), "The version of lenslate that is installed (and "
                       "the commit it was made from). Give it when you report a problem.", f)
         ver.setTextInteractionFlags(Qt.TextSelectableByMouse)
         top.addWidget(set_role(ver, "hint"))
@@ -2421,10 +2423,10 @@ class Window(QWidget):
             keys = [s.key for s in cfgmod.SCHEMA if s.key.startswith(sec + ".") and s.key not in shown]
             if not keys:
                 continue
-            g = QGroupBox({"general": "General", "translator": "Translator", "ocr": "Screen reading (OCR)",
+            g = QGroupBox(_({"general": "General", "translator": "Translator", "ocr": "Screen reading (OCR)",
                            "hook": "Hook mode", "paths": "Files and folders", "debug": "Troubleshooting",
-                           "overlay": "Overlay", "refresh": "Refreshing"}.get(sec, sec.capitalize()))
-            g.setLayout(form([(cfgmod.BY_KEY[k].label, setting_widget(k, f, self.error)) for k in keys]))
+                           "overlay": "Overlay", "refresh": "Refreshing"}.get(sec, sec.capitalize())))
+            g.setLayout(form([(_(cfgmod.BY_KEY[k].label), setting_widget(k, f, self.error)) for k in keys]))
             explain(g, about, f)
             out.append(g)
         return page(*out)
@@ -2461,10 +2463,10 @@ def make_tray(app, win):
         grp.addAction(a)
         sub.addAction(a)
     menu.addSeparator()
-    a = QAction("Stop lenslate", menu)
+    a = QAction(_("Stop lenslate"), menu)
     a.triggered.connect(lambda: send("quit"))
     menu.addAction(a)
-    a = QAction("Close this window and tray icon", menu)
+    a = QAction(_("Close this window and tray icon"), menu)
     a.triggered.connect(app.quit)
     menu.addAction(a)
     tray.setContextMenu(menu)
@@ -2485,6 +2487,8 @@ class MainWindow(Window):
 def main(args=()):
     os.environ.pop("QT_WAYLAND_SHELL_INTEGRATION", None)   # normal windows, not overlay-layer surfaces
     app = QApplication.instance() or QApplication(sys.argv[:1])
+    import i18n
+    i18n.install_qt(app)
     app.setApplicationName("lenslate")
     app.setDesktopFileName("lenslate")
     app.setWindowIcon(app_icon())

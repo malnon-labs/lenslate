@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QFrame, QGrid
                                QMessageBox, QProgressBar, QPushButton, QRadioButton, QVBoxLayout, QWizard, QWizardPage)
 
 import config as cfgmod
+from i18n import _
 import hwcheck
 import langs
 import shortcutsdialog
@@ -35,13 +36,13 @@ class PageHelp(QObject):
             page = self.wiz.currentPage()
             if page is not None and hasattr(page, "bar"):
                 enter = ev.type() == QEvent.Enter
-                page.bar.setText(obj.property("help") if enter else HELP)
+                page.bar.setText(obj.property("help") if enter else _(HELP))
                 set_role(page.bar, state="help" if enter else "idle")
         return False
 
 
 def help_bar(page):
-    page.bar = QLabel(HELP)
+    page.bar = QLabel(_(HELP))
     page.bar.setWordWrap(True)
     page.bar.setFixedHeight(54)
     page.bar.setAlignment(Qt.AlignLeft | Qt.AlignTop)
@@ -49,6 +50,7 @@ def help_bar(page):
 
 
 def _label(text, wrap=True, style=""):
+    text = _(text)
     lab = QLabel(text)
     lab.setWordWrap(wrap)
     lab.setTextFormat(Qt.RichText)
@@ -60,7 +62,7 @@ def _label(text, wrap=True, style=""):
 class Setup(QWizard):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("lenslate setup")
+        self.setWindowTitle(_("lenslate setup"))
         self.setWizardStyle(QWizard.ClassicStyle)
         self.resize(860, 680)
         self.flt = PageHelp(self)
@@ -75,6 +77,7 @@ class Setup(QWizard):
             set_role(self.button(b), "primary")
 
     def explain(self, w, text):
+        text = _(text)
         w.setProperty("help", text)
         w.setToolTip("<p style='max-width:420px'>%s</p>" % text)
         w.installEventFilter(self.flt)
@@ -147,33 +150,33 @@ class LanguagesPage(QWizardPage):
     def __init__(self, wiz):
         super().__init__()
         self.wiz = wiz
-        self.setTitle("Welcome to lenslate")
-        self.setSubTitle("lenslate paints translations over text anywhere on your screen, on this computer. "
-                         "Which languages do you need? Only what they need is downloaded.")
+        self.setTitle(_("Welcome to lenslate"))
+        self.setSubTitle(_("lenslate paints translations over text anywhere on your screen, on this computer. "
+                         "Which languages do you need? Only what they need is downloaded."))
         cur = langs.sources(cfgmod.get("translator.sources"))
         self.boxes = {}
         col = QVBoxLayout()
-        col.addWidget(QLabel("<b>Translate from</b> (tick every language you read in games or on screen)"))
+        col.addWidget(QLabel(_("<b>Translate from</b> (tick every language you read in games or on screen)")))
         names = dict(langs.ALL_SOURCES, zh="Chinese (Simplified and Traditional)")
         for code in langs.ALL_SOURCES:
-            cb = QCheckBox(names[code])
+            cb = QCheckBox(_(names[code]))
             cb.setChecked(code in cur)
             wiz.explain(cb, LANG_HELP[code])
             cb.toggled.connect(lambda on, c=code: self.toggled(c, on))
             self.boxes[code] = cb
             col.addWidget(cb)
-        col.addWidget(set_role(_label("Korean and Russian each have their own reader: one of them at a time, with "
-                                      "English."), "muted"))
+        col.addWidget(set_role(_label(_("Korean and Russian each have their own reader: one of them at a time, with "
+                                      "English.")), "muted"))
         self.tgt = QComboBox()
         self.tgt.addItems(list(cfgmod.BY_KEY["translator.language"].choices))
         self.tgt.setCurrentText(cfgmod.get("translator.language"))
         wiz.explain(self.tgt, "The language the translations are written in.")
         self.tgt.currentTextChanged.connect(lambda _t: self.refresh())
         row = QHBoxLayout()
-        row.addWidget(QLabel("<b>Translate into</b>"))
+        row.addWidget(QLabel(_("<b>Translate into</b>")))
         row.addWidget(self.tgt)
         row.addStretch(1)
-        self.plan = _label("")
+        self.plan = _label(_(""))
         wiz.explain(self.plan, "What these languages need. The processor translators are always installed for "
                     "them (small, no graphics-card memory, also the backup when the language model is busy or "
                     "missing). The language model is only downloaded with a preset that uses the graphics card "
@@ -188,7 +191,7 @@ class LanguagesPage(QWizardPage):
         lay.addLayout(row)
         lay.addSpacing(8)
         lay.addWidget(plan)
-        lay.addWidget(set_role(_label("You can change these later on the Translation page."), "muted"))
+        lay.addWidget(set_role(_label(_("You can change these later on the Translation page.")), "muted"))
         lay.addStretch(1)
         lay.addWidget(help_bar(self))
         self.refresh()
@@ -217,7 +220,7 @@ class LanguagesPage(QWizardPage):
         en.setToolTip("" if tgt != "English" else "Text already in English is left as it is.")
         codes = self.codes()
         if not codes:
-            self.plan.setText("<span style='%s'>Tick at least one language%s.</span>" % (
+            self.plan.setText(_("<span style='%s'>Tick at least one language%s.</span>") % (
                 _c("warning_text"), " other than English" if tgt == "English" else ""))
         else:
             src = ",".join(codes)
@@ -227,13 +230,14 @@ class LanguagesPage(QWizardPage):
             llm = models.BY_NAME[self.wiz.llm_for(src, tgt)]
             lines = []
             if base:
-                lines.append("<b>Always installed</b> (processor, %.1f GB): %s" % (
+                lines.append(_("<b>Always installed</b> (processor, %.1f GB): %s") % (
                     sum(m.size_gb for m in base), ", ".join(m.can for m in base)))
             else:
-                lines.append("<b>No processor translator</b> is needed for these languages: only the language "
-                             "model below or an online service.")
-            lines.append("<b>Language model</b> (%.1f GB download, %.1f GB of graphics-card memory; only with a "
-                         "preset that uses the graphics card): %s%s" % (llm.size_gb, llm.vram_gb or 0, llm.title, " - %s" % why if llm.name == name else " (your own choice)"))
+                lines.append(_("<b>No processor translator</b> is needed for these languages: only the language "
+                             "model below or an online service."))
+            lines.append(_("<b>Language model</b> (%.1f GB download, %.1f GB of graphics-card memory; only with a "
+                         "preset that uses the graphics card): %s%s") % (llm.size_gb, llm.vram_gb or 0, llm.title,
+                                                                         " - %s" % why if llm.name == name else _(" (your own choice)")))
             if llm.name.startswith("plamo"):
                 lines.append("<span style='%s'>PLaMo's licence allows personal and non-commercial use only.</span>"
                              % _c("text_muted"))
@@ -249,15 +253,15 @@ class PresetPage(QWizardPage):
     def __init__(self, wiz):
         super().__init__()
         self.wiz = wiz
-        self.setTitle("How should lenslate work on this PC?")
-        self.setSubTitle("A preset picks several settings at once. The recommended one fits the hardware lenslate "
-                         "found; you can pick any other, and change it any time on the Translation page.")
+        self.setTitle(_("How should lenslate work on this PC?"))
+        self.setSubTitle(_("A preset picks several settings at once. The recommended one fits the hardware lenslate "
+                         "found; you can pick any other, and change it any time on the Translation page."))
         self.chosen = None
         self.lay = QVBoxLayout(self)
-        self.pc = _label("")
+        self.pc = _label(_(""))
         self.wiz.explain(self.pc, "What lenslate found in this PC. The graphics card's own memory decides whether the "
                          "language model (best translations) fits next to a game.")
-        self.rec = _label("")
+        self.rec = _label(_(""))
         self.group = QButtonGroup(self)
         self.radios = {}
         box = QGridLayout()
@@ -275,7 +279,7 @@ class PresetPage(QWizardPage):
             self.radios[name] = r
             desc = set_role(_label(p["summary"]), "muted")
             wiz.explain(desc, "%s Trade-off: %s" % (p["summary"], p["tradeoff"]))
-            chip = set_role(QLabel("★ Recommended"), "chip", kind="accent")
+            chip = set_role(QLabel(_("★ Recommended")), "chip", kind="accent")
             chip.setVisible(False)
             self.rec_chips[name] = chip
             box.addWidget(r, i, 0, Qt.AlignTop)
@@ -288,12 +292,12 @@ class PresetPage(QWizardPage):
         self.lay.addWidget(frame)
         self.lay.addWidget(self.rec)
         self.lay.addLayout(box)
-        self.trade = _label("")
+        self.trade = _label(_(""))
         tcard = set_role(QFrame(), "card")
         tl = QVBoxLayout(tcard)
         tl.setContentsMargins(12, 10, 12, 10)
         tl.addWidget(self.trade)
-        self.warn = set_role(_label(""), "message", kind="warning")
+        self.warn = set_role(_label(_("")), "message", kind="warning")
         self.lay.addSpacing(8)
         self.lay.addWidget(tcard)
         self.lay.addWidget(self.warn)
@@ -312,11 +316,11 @@ class PresetPage(QWizardPage):
                                                    if g["used_mb"] is not None else "")
                if g and g["dedicated"] else ("integrated %s graphics (no memory of its own)" % g["vendor"]) if g
                else "no graphics card found")
-        self.pc.setText("<b>Your PC</b><br>Processor: %s (%d threads)<br>Graphics: %s<br>Memory: %.0f GB · "
-                        "Free disk space: %s" % (i["cpu"], i["threads"], gpu, i["ram_gb"],
+        self.pc.setText(_("<b>Your PC</b><br>Processor: %s (%d threads)<br>Graphics: %s<br>Memory: %.0f GB · "
+                        "Free disk space: %s") % (i["cpu"], i["threads"], gpu, i["ram_gb"],
                                                  "%.0f GB" % i["disk_free_gb"] if i["disk_free_gb"] is not None else "?"))
         self.recommended, why = hwcheck.recommend(i, self.wiz.sources(), self.wiz.target(), llm=self.wiz.llm())
-        self.rec.setText("Recommended: <b>%s</b> (%s)." % (cfgmod.PRESETS[self.recommended]["label"], why))
+        self.rec.setText(_("Recommended: <b>%s</b> (%s).") % (cfgmod.PRESETS[self.recommended]["label"], why))
         for n, r in self.radios.items():
             self.rec_chips[n].setVisible(n == self.recommended)
         start = self.chosen or self.recommended
@@ -332,13 +336,13 @@ class PresetPage(QWizardPage):
             m = models.BY_NAME[self.wiz.llm()]
             uses = "<br>Language model for your languages: <b>%s</b> (%.1f GB of graphics-card memory)." % (
                 m.title, m.vram_gb or 0)
-        self.trade.setText("<b>%s</b>: %s<br>Trade-off: %s%s" % (p["label"], p["summary"], p["tradeoff"], uses))
+        self.trade.setText(_("<b>%s</b>: %s<br>Trade-off: %s%s") % (p["label"], p["summary"], p["tradeoff"], uses))
         self.problems = hwcheck.check(name, self.wiz.info, self.wiz.sources(), self.wiz.target(), llm=self.wiz.llm())
         self.warn.setText("<br>".join("⚠ " + t for t in self.problems))
         self.warn.setVisible(bool(self.problems))
         other = name != self.recommended
         self.use_rec.setVisible(bool(self.problems) and other)
-        self.use_rec.setText("Use %s instead" % cfgmod.PRESETS[self.recommended]["label"])
+        self.use_rec.setText(_("Use %s instead") % cfgmod.PRESETS[self.recommended]["label"])
 
     def validatePage(self):
         if not self.problems:
@@ -367,27 +371,27 @@ class DownloadsPage(QWizardPage):
     def __init__(self, wiz):
         super().__init__()
         self.wiz = wiz
-        self.setTitle("Downloads")
-        self.setSubTitle("What the chosen preset and languages need. Nothing is downloaded until you press "
-                         "Download. Everything can also be added or removed later on the Models page.")
+        self.setTitle(_("Downloads"))
+        self.setSubTitle(_("What the chosen preset and languages need. Nothing is downloaded until you press "
+                         "Download. Everything can also be added or removed later on the Models page."))
         self.lay = QVBoxLayout(self)
         self.grid = QGridLayout()
         self.lay.addLayout(self.grid)
-        self.total = _label("")
+        self.total = _label(_(""))
         self.lay.addWidget(self.total)
         row = QHBoxLayout()
-        self.go = set_role(QPushButton("↓ Download selected"), "download")
+        self.go = set_role(QPushButton(_("↓ Download selected")), "download")
         self.go.clicked.connect(self.start)
         wiz.explain(self.go, "Download the ticked items one after another. You can keep reading while it runs; "
                     "an interrupted download continues where it stopped next time.")
-        self.stop_btn = set_role(QPushButton("Cancel downloads"), "danger")
+        self.stop_btn = set_role(QPushButton(_("Cancel downloads")), "danger")
         self.stop_btn.setVisible(False)
         self.stop_btn.clicked.connect(self.cancel)
         row.addWidget(self.go)
         row.addWidget(self.stop_btn)
         row.addStretch(1)
         self.lay.addLayout(row)
-        self.status = _label("")
+        self.status = _label(_(""))
         self.lay.addWidget(self.status)
         self.lay.addStretch(1)
         self.lay.addWidget(help_bar(self))
@@ -435,7 +439,7 @@ class DownloadsPage(QWizardPage):
             can = getattr(models.BY_NAME.get(key), "can", "")
             self.wiz.explain(cb, "%s. %s%.1f GB download, licence: %s." % (
                 why[0].upper() + why[1:], ("Translates: %s. " % can) if can else "", gb, lic))
-            info = _label("%.1f GB · %s%s · %s" % (gb, ("<b>%s</b> · " % can) if can else "", lic,
+            info = _label(_("%.1f GB · %s%s · %s") % (gb, ("<b>%s</b> · " % can) if can else "", lic,
                                                   "<span style='%s'>✓ installed</span>" % _c("success_text")
                                                   if installed else why))
             bar = QProgressBar()
@@ -457,7 +461,7 @@ class DownloadsPage(QWizardPage):
         gb = sum(it["gb"] for it in self.selected())
         free = self.wiz.info.get("disk_free_gb")
         low = free is not None and gb + 1 > free
-        self.total.setText("<b><span style='%s'>%sSelected: %.1f GB · free disk space: %s</span></b>" % (
+        self.total.setText(_("<b><span style='%s'>%sSelected: %.1f GB · free disk space: %s</span></b>") % (
             _c("warning_text") if low else "", "⚠ Not enough disk space. " if low else "", gb,
             "%.0f GB" % free if free is not None else "?"))
         self.go.setEnabled(bool(gb) and not self.running())
@@ -476,7 +480,7 @@ class DownloadsPage(QWizardPage):
         self.cancelled = True
         self.queue = []
         if self.job is not None:
-            self.status.setText("Stopping…")
+            self.status.setText(_("Stopping…"))
 
     def next_item(self):
         import gui
@@ -487,7 +491,7 @@ class DownloadsPage(QWizardPage):
         bar = it["bar"]
         bar.setVisible(True)
         bar.setRange(0, 0)
-        self.status.setText("Downloading %s…" % it["title"])
+        self.status.setText(_("Downloading %s…") % it["title"])
         if it["key"] == "ocr-gpu":
             import ocrgpu
             fn = lambda progress: ocrgpu.install()   # noqa: E731 - pip shows no byte progress: busy bar
@@ -515,7 +519,7 @@ class DownloadsPage(QWizardPage):
                 return
             bar.setVisible(False)
             it["installed"] = True
-            it["info"].setText("%.1f GB · <span style='%s'>✓ installed</span>" % (it["gb"], _c("success_text")))
+            it["info"].setText(_("%.1f GB · <span style='%s'>✓ installed</span>") % (it["gb"], _c("success_text")))
             self.next_item()
 
         def bad(e):
@@ -566,17 +570,17 @@ class DonePage(QWizardPage):
     def __init__(self, wiz):
         super().__init__()
         self.wiz = wiz
-        self.setTitle("Ready")
-        self.setSubTitle("lenslate is set up. Here is how to use it.")
+        self.setTitle(_("Ready"))
+        self.setSubTitle(_("lenslate is set up. Here is how to use it."))
         self.lay = QVBoxLayout(self)
-        self.text = _label("")
+        self.text = _label(_(""))
         self.lay.addWidget(self.text)
-        self.measure = QCheckBox("Measure this PC's speed now (about 15-40 seconds)")
+        self.measure = QCheckBox(_("Measure this PC's speed now (about 15-40 seconds)"))
         wiz.explain(self.measure, "Reads and translates a sample dialogue box with each installed method, so the "
                     "Translation page can show real numbers for your processor and graphics card. The processor is busy "
                     "for a moment.")
         self.lay.addWidget(self.measure)
-        keys = set_role(QPushButton("Keyboard shortcuts…"), "secondary")
+        keys = set_role(QPushButton(_("Keyboard shortcuts…")), "secondary")
         wiz.explain(keys, "See and change the four hotkeys. lenslate checks that a key is free before it uses it.")
         keys.clicked.connect(lambda: (shortcutsdialog.ShortcutsDialog(self).exec(), self.initializePage()))
         keys.setMaximumWidth(220)
@@ -588,7 +592,7 @@ class DonePage(QWizardPage):
         import bench
         p = cfgmod.PRESETS[self.wiz.preset()]
         self.text.setText(
-            "<p>Preset: <b>%s</b> · translating %s into <b>%s</b>.</p>"
+            _("<p>Preset: <b>%s</b> · translating %s into <b>%s</b>.</p>"
             "<p><b>How to use it:</b> open the settings window (or the tray icon's menu) and use its buttons:</p><ul>"
             "<li><b>Pick area…</b>: drag a box around the text to translate (a dialogue box, subtitles, a page)</li>"
             "<li><b>Translate now</b>: translate that area again</li>"
@@ -597,7 +601,7 @@ class DonePage(QWizardPage):
             "<p>The same four have keyboard shortcuts for use inside a game: %s (the Keyboard shortcuts "
             "button below changes them). "
             "Hover over anything in the settings window for an explanation. Run this setup again from the "
-            "Translation page.</p>"
+            "Translation page.</p>")
             % (p["label"], " / ".join(langs.ALL_SOURCES[c] for c in sorted(langs.sources(self.wiz.sources()))),
                self.wiz.target(), ", ".join(k for k in shortcutsdialog.keys_now().values() if k) or "none set yet"))
         self.measure.setChecked(bench.load() is None)
@@ -609,6 +613,8 @@ def run(parent=None):
     app = QApplication.instance()
     if app is not None and not app.styleSheet():    # started on its own (`lenslate setup`), not from the window
         theme.install(app)
+        import i18n
+        i18n.install_qt(app)
     w = Setup(parent)
     ok = w.exec() == QWizard.Accepted
     return ok, (ok and w.measure)

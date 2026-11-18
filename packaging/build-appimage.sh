@@ -62,7 +62,7 @@ say "Qt and the engine packages"
 say "the app"
 APP="$DIR/usr/share/lenslate/app"
 mkdir -p "$APP"
-cp -r ./*.py ./*.qml requirements-engine.txt README.md install.sh LICENSE NOTICE.md CHANGELOG.md seeds samples hooks packaging "$APP"/
+cp -r ./*.py ./*.qml requirements-engine.txt README.md install.sh LICENSE NOTICE.md CHANGELOG.md seeds i18n samples hooks packaging "$APP"/
 git rev-parse --short=12 HEAD > "$APP/COMMIT" 2>/dev/null || true
 
 say "OCR models (into the image: it is read-only later)"

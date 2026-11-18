@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (QApplication, QDialog, QGridLayout, QHBoxLayout, 
                                QPlainTextEdit, QPushButton, QVBoxLayout)
 
 import hotkeys as hk
+from i18n import _
 
 
 def _role(w, role):
@@ -40,7 +41,7 @@ class ShortcutsDialog(QDialog):
         self.desk = desk or hk.desktop()
         self.on_saved = on_saved
         self.can_write = hk.writable(self.desk)
-        self.setWindowTitle("Keyboard shortcuts")
+        self.setWindowTitle(_("Keyboard shortcuts"))
         self.setMinimumWidth(560)
         lay = QVBoxLayout(self)
         intro = QLabel(("Press a new key combination for a command, then Save. lenslate checks first that nothing "
@@ -62,7 +63,7 @@ class ShortcutsDialog(QDialog):
                 e.setKeySequence(QKeySequence(start[action]))
             e.setMinimumWidth(170)
             e.keySequenceChanged.connect(lambda _s: self.check())
-            clear = _role(QPushButton("No key"), "quiet")
+            clear = _role(QPushButton(_("No key")), "quiet")
             clear.setToolTip("Take the key away from this command")
             clear.clicked.connect(lambda _c=False, e=e: e.clear())
             note = QLabel()
@@ -82,15 +83,15 @@ class ShortcutsDialog(QDialog):
         self.status.setWordWrap(True)
         lay.addWidget(self.status)
         buttons = QHBoxLayout()
-        defaults = _role(QPushButton("Defaults"), "secondary")
+        defaults = _role(QPushButton(_("Defaults")), "secondary")
         defaults.setToolTip("Ctrl+Alt+Z, X, C and V: free in the default shortcuts of every desktop lenslate knows")
         defaults.clicked.connect(self.defaults)
         buttons.addWidget(defaults)
         buttons.addStretch(1)
-        close = _role(QPushButton("Close"), "secondary")
+        close = _role(QPushButton(_("Close")), "secondary")
         close.clicked.connect(self.reject)
         buttons.addWidget(close)
-        self.save_btn = _role(QPushButton("Save"), "primary")
+        self.save_btn = _role(QPushButton(_("Save")), "primary")
         self.save_btn.clicked.connect(self.save)
         self.save_btn.setVisible(self.can_write)
         buttons.addWidget(self.save_btn)
@@ -118,7 +119,7 @@ class ShortcutsDialog(QDialog):
                 {a: w for a, w in hk.conflicts("other", keys).items()}
         except Exception as e:  # noqa: BLE001
             bad = {}
-            self.status.setText("Could not check the keys: %s" % e)
+            self.status.setText(_("Could not check the keys: %s") % e)
         for a, note in self.notes.items():
             w = bad.get(a)
             if w:
@@ -145,10 +146,10 @@ class ShortcutsDialog(QDialog):
         try:
             msg = hk.apply(self.desk, self.chosen())
         except (RuntimeError, ValueError) as e:
-            self.status.setText("Nothing was changed: %s" % e)
+            self.status.setText(_("Nothing was changed: %s") % e)
             return
         finally:
             QApplication.restoreOverrideCursor()
-        self.status.setText("Saved: %s." % msg)
+        self.status.setText(_("Saved: %s.") % msg)
         if self.on_saved:
             self.on_saved(self.chosen())
