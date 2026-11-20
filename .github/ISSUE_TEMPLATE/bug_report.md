@@ -25,6 +25,8 @@ lenslate hwcheck
 4. Zip the newest folder in `~/.cache/lenslate/debug/` and attach it.
 
 The recording holds screenshots of the area you chose and the text read from it - look through it first and
-leave out anything private. It never contains anything outside the chosen area.
+leave out anything private. It never contains anything outside the chosen area, but a desktop notification that
+popped up inside it can be in a picture (on Cinnamon, GNOME, Hyprland, Sway and niri; KDE and Xfce/MATE cover them).
+Turn on Do Not Disturb while recording to be safe.
 
 **Settings** (optional): `~/.config/lenslate/config.toml` - remove the `deepl_key` line if you have one.

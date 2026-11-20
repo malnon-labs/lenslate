@@ -208,6 +208,12 @@ SCHEMA = [
       "and remembers it (`lenslate share` asks again). With the portal a shared window must fill its monitor "
       "(fullscreen or borderless), because the desktop does not say where a window is. Needs a restart.",
       choices=("auto", "portal")),
+    S("capture.ignore_notifications", True, "LENSLATE_IGNORE_NOTIFICATIONS", "Skip desktop notifications",
+      "A notification that pops up inside the area (a chat message, a download finished) is not read or "
+      "translated. KDE and most X11 desktops say where their notifications are: that spot is covered before "
+      "reading. Elsewhere (Cinnamon, GNOME, Hyprland, Sway, niri) lenslate leaves out the lines that match the "
+      "text of a notification shown in the last few seconds. Only matters when the area is read from the whole "
+      "screen; a game window's own picture never has them."),
     S("debug.enabled", False, "LENSLATE_DEBUG", "Debug log",
       "Print what lenslate does and record every refresh with its screenshot to ~/.cache/lenslate/debug/. "
       "Uses disk space; turn it off when not troubleshooting."),

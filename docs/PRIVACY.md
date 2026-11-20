@@ -44,6 +44,16 @@ A debug recording is off by default. When you turn it on, it saves screenshots o
 and the translations into `~/.cache/lenslate/debug/` on your PC. It is only shared if you attach it to a bug
 report yourself, so look through it first: it contains pictures of your game.
 
+Desktop notifications that pop up inside the area (a chat message, an e-mail) are left out of the reading.
+On KDE and on X11 desktops whose notifications are windows (Xfce, MATE, dunst) they are also covered in the
+recorded pictures. On Cinnamon, GNOME, Hyprland, Sway and niri, lenslate cannot see where a notification is: only
+the lines matching its text are blacked out, so its icon, the sender's name or a picture in it can still be in
+a recorded screenshot. Turn on your desktop's Do Not Disturb while recording if that matters.
+
+To recognise notifications, lenslate watches the notifications sent on your session bus (with `dbus-monitor`)
+while it runs: their app name and text are kept in memory for a few seconds, only to compare them with what was
+read, and are never saved or sent anywhere. Turn this off with `ignore_notifications = false` under [capture].
+
 ## Removing everything
 
 `./install.sh --uninstall`. Then remove `~/.config/lenslate`,

@@ -52,11 +52,12 @@ import urllib.request
 
 import numpy as np
 from PySide6.QtCore import QByteArray, QBuffer, QIODevice, QLockFile, QObject, QPoint, QRect, QThread, QTimer, QUrl, Qt, Signal
-from PySide6.QtGui import QColor, QFont, QFontMetrics, QGuiApplication, QImage
+from PySide6.QtGui import QColor, QFont, QFontMetrics, QGuiApplication, QImage, QPainter
 from PySide6.QtNetwork import QLocalServer, QLocalSocket
 from PySide6.QtQml import QQmlApplicationEngine
 
 import names as nm
+import notifications as notif
 import textflow as tf
 
 # X11 session (no Wayland compositor), or forced for a test with LENSLATE_PLATFORM=x11: windows, capture and the
@@ -530,6 +531,64 @@ def capture_window(target, global_region):
     return img.copy(int(r.x() * scale), int(r.y() * scale), int(r.width() * scale), int(r.height() * scale))
 
 
+NOTIF_PAD = 8  # logical px around a notification window: its shadow is drawn outside the window's rectangle
+_CLEAN = {}   # area -> its last whole-screen picture with the notifications covered (see cover_notifications)
+
+
+def notification_rects():
+    """Global logical rectangles of the desktop's notifications on screen now, where the desktop can say (KDE,
+    X11 notification windows); [] elsewhere, and while the bus watcher saw no notification lately."""
+    if not notif.enabled(cfgmod.get) or (notif.WATCH.running and not notif.WATCH.active()):
+        return []
+    if "KDE" in os.environ.get("XDG_CURRENT_DESKTOP", "").upper() and os.environ.get("WAYLAND_DISPLAY"):
+        return [QRect(*r) for r in notif.kde_rects()]
+    if X11:
+        out = []
+        for x, y, w, h in notif.x11_rects():
+            tl, k = x_to_logical(x, y), x_scale_at(x, y)
+            out.append(QRect(tl.x(), tl.y(), round(w / k), round(h / k)))
+        return out
+    return []
+
+
+def cover_notifications(crop, region):
+    """Paint over the notifications inside a whole-screen crop of the global logical region, before anything reads
+    or records it: with the same spot of the area's previous picture when there is one (nothing changes there while
+    the notification is up, and the game's text under it is read again once it goes), else with a flat colour."""
+    key = region.getRect()
+    hit = [r.adjusted(-NOTIF_PAD, -NOTIF_PAD, NOTIF_PAD, NOTIF_PAD).intersected(region) for r in notification_rects()]
+    hit = [r for r in hit if not r.isEmpty()]
+    if not hit:
+        _CLEAN[key] = crop
+        return crop
+    s = crop.width() / max(1, region.width())
+    prev = _CLEAN.get(key)
+    same = prev is not None and prev.size() == crop.size()
+    out = crop.copy()
+    p = QPainter(out)
+    for r in hit:
+        rr = QRect(int((r.x() - region.x()) * s), int((r.y() - region.y()) * s),
+                   int(round(r.width() * s)) + 1, int(round(r.height() * s)) + 1).intersected(out.rect())
+        if same:
+            p.drawImage(rr.topLeft(), prev, rr)
+        else:
+            p.fillRect(rr, crop.pixelColor(max(0, rr.x() - 2), max(0, rr.y() - 2)))
+    p.end()
+    dbg("covered %d notification(s) in the picture: %s" % (len(hit), [r.getRect() for r in hit]))
+    _CLEAN[key] = out
+    return out
+
+
+def blank_boxes(img, boxes):
+    """A copy of the picture with the boxes painted black (lines of notifications, for debug recordings)."""
+    out = img.copy()
+    p = QPainter(out)
+    for x1, y1, x2, y2 in boxes:
+        p.fillRect(QRect(int(x1), int(y1), int(x2 - x1) + 1, int(y2 - y1) + 1), QColor(0, 0, 0))
+    p.end()
+    return out
+
+
 def crop_screen_region(img, bounds, screen_geo, region):
     """region is in screen-local logical px. Returns the cropped QImage."""
     scale = img.width() / max(1, bounds.width())
@@ -661,17 +720,24 @@ class Pipeline(QThread):
         self.screen_geo, self.region, self.last_sig, self.force = screen_geo, region, last_sig, force
         self.win_rect = win_rect
         self.cancelled = False
+        self.screen_shot = False     # the last picture was a whole-screen one (desktop notifications can be in it)
+        self.notif_boxes = []        # lines dropped as part of a notification (blacked out in debug recordings)
 
     def grab(self):
+        """The area's picture. A whole-screen picture (no window, or a screen shared through the portal) can hold
+        the desktop's notifications: self.screen_shot says so, and those the desktop can locate are covered."""
+        area = self.region.translated(self.screen_geo.topLeft())
         if self.win_rect is not None:
-            crop = capture_window(self.win_rect, self.region.translated(self.screen_geo.topLeft()))
+            crop = capture_window(self.win_rect, area)
             if crop is not None:
-                return crop
+                self.screen_shot = PORTAL and not Shared.is_window()
+                return cover_notifications(crop, area) if self.screen_shot else crop
             # the cards are on screen: a full capture now would read our own overlay
             self.hide_cards.emit()
             QThread.msleep(250)
         img, bounds = capture_all()
-        return crop_screen_region(img, bounds, self.screen_geo, self.region)
+        self.screen_shot = True
+        return cover_notifications(crop_screen_region(img, bounds, self.screen_geo, self.region), area)
 
     def run(self):
         try:
@@ -723,6 +789,8 @@ class OcrPipeline(QThread):
         self.win_rect, self.ocr, self.cache = win_rect, ocr, cache
         self.scale = scale   # None = not known yet for this region; 1.0 or 2.0 once measured
         self.cancelled = False
+        self.screen_shot = False
+        self.notif_boxes = []
 
     grab = Pipeline.grab
 
@@ -985,6 +1053,13 @@ class OcrPipeline(QThread):
                 for ln in got:   # kana anywhere on this screen: its kanji-only words are Japanese too (langs.source_of)
                     ln["text"] = tf.strip_stray_brackets(tf.langs.fix_lookalikes(ln["text"]))   # ЖypHал -> Журнал, モ力 -> モカ, "НОВИНКА]"
                     tf.langs.note(ln["text"])
+                if self.screen_shot and notif.enabled(cfgmod.get) and notif.WATCH.active():
+                    # a notification the desktop gave no position for (Cinnamon, GNOME, the portal): its lines
+                    drop = [ln for ln in got if notif.WATCH.matches(ln["text"])]
+                    if drop:
+                        dbg("notification text left out: %s" % " | ".join(ln["text"] for ln in drop)[:200])
+                        self.notif_boxes += [ln["box"] for ln in drop]
+                        got = [ln for ln in got if not any(ln is d for d in drop)]
                 lines += got
                 new = []
                 here = []      # card rects made from this area
@@ -1078,7 +1153,8 @@ class OcrPipeline(QThread):
                 "new": [{"orig": c["orig"], "tr": c["tr"], "after_s": tr_times.get(id(c))} for c in misses],
                 "first_card_s": None if t_first is None else round(t_first, 3),
                 "cards": [card_json(c, id(c) in kept_ids) for c in cards],
-            }, crop)
+                "notification_lines": len(self.notif_boxes),
+            }, blank_boxes(crop, self.notif_boxes) if self.notif_boxes else crop)
         if self.cancelled:
             return
         self.done.emit(cards, {"grid": g, "replace": None, "scale": self.scale})
@@ -1627,6 +1703,8 @@ class Daemon(QObject):
         self.gen = 0               # bumped by new region / clear: results of older runs are dropped
         if PORTAL:                 # the desktop asks which window or screen to share (once; then remembered)
             Shared.start(lambda e: notify("Screen sharing: " + e))
+        if notif.enabled(cfgmod.get) and not notif.WATCH.start():   # desktop notifications inside the area
+            dbg("dbus-monitor not found: notifications are only left out where the desktop says where they are")
         self.pending = None        # run requested while busy: None, False (auto) or True (forced)
         self._sel_token = 0
         self._badge_token = 0

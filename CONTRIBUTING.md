@@ -15,7 +15,8 @@ useful thing right now.
 **A debug recording helps the most.** Turn it on with `[debug] enabled = true` in
 `~/.config/lenslate/config.toml` (or start lenslate with `LENSLATE_DEBUG=1`), repeat the problem, and attach
 the newest folder in `~/.cache/lenslate/debug/`. It contains screenshots of your game, so look through it
-first.
+first (on Cinnamon, GNOME and tiling desktops a notification that popped up inside the area can be in them too;
+Do Not Disturb while recording avoids that).
 
 **A bad translation?** Say which translator made it, and paste the original line and the translation. If the
 original line was *read* wrong (a wrong character), that's a reading problem, not a translation problem, and

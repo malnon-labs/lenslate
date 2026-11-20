@@ -34,6 +34,15 @@ class _XErrorEvent(ctypes.Structure):
                 ("error_code", ctypes.c_ubyte), ("request_code", ctypes.c_ubyte), ("minor_code", ctypes.c_ubyte)]
 
 
+class _XWindowAttributes(ctypes.Structure):
+    _fields_ = [("x", c_int), ("y", c_int), ("width", c_int), ("height", c_int), ("border_width", c_int),
+                ("depth", c_int), ("visual", c_void_p), ("root", c_ulong), ("class_", c_int), ("bit_gravity", c_int),
+                ("win_gravity", c_int), ("backing_store", c_int), ("backing_planes", c_ulong),
+                ("backing_pixel", c_ulong), ("save_under", c_int), ("colormap", c_ulong), ("map_installed", c_int),
+                ("map_state", c_int), ("all_event_masks", c_long), ("your_event_mask", c_long),
+                ("do_not_propagate_mask", c_long), ("override_redirect", c_int), ("screen", c_void_p)]
+
+
 class _XClassHint(ctypes.Structure):
     _fields_ = [("res_name", c_void_p), ("res_class", c_void_p)]     # raw pointers: they are freed with XFree
 
@@ -84,7 +93,10 @@ def _open():
             ("XGetSelectionOwner", c_ulong, [c_void_p, c_ulong]),
             ("XDefaultScreen", c_int, [c_void_p]),
             ("XChangeProperty", c_int, [c_void_p, c_ulong, c_ulong, c_ulong, c_int, c_int, c_void_p, c_int]),
-            ("XRaiseWindow", c_int, [c_void_p, c_ulong])):
+            ("XRaiseWindow", c_int, [c_void_p, c_ulong]),
+            ("XQueryTree", c_int, [c_void_p, c_ulong, POINTER(c_ulong), POINTER(c_ulong), POINTER(c_void_p),
+                                   POINTER(c_uint)]),
+            ("XGetWindowAttributes", c_int, [c_void_p, c_ulong, POINTER(_XWindowAttributes)])):
         f = getattr(x, name)
         f.restype, f.argtypes = res, args
     x.XSetErrorHandler(_on_error)
@@ -291,3 +303,46 @@ def grab_window(wid):
         finally:
             _X.XFreePixmap(_DPY, pix)
             _ok()
+
+
+NOTIFICATION_TYPES = ("_NET_WM_WINDOW_TYPE_NOTIFICATION", "_KDE_NET_WM_WINDOW_TYPE_ON_SCREEN_DISPLAY",
+                      "_KDE_NET_WM_WINDOW_TYPE_CRITICAL_NOTIFICATION")
+
+
+def _children(wid):
+    """The direct children of a window (for the root: WM frames and unmanaged windows such as notification popups)."""
+    root, parent, kids, n = c_ulong(), c_ulong(), c_void_p(), c_uint()
+    _ok()
+    if not _X.XQueryTree(_DPY, wid, byref(root), byref(parent), byref(kids), byref(n)):
+        _ok()
+        return []
+    out = []
+    if kids.value:
+        arr = ctypes.cast(kids, POINTER(c_ulong))
+        out = [int(arr[i]) for i in range(n.value)]
+        _X.XFree(kids)
+    _ok()
+    return out
+
+
+def _viewable(wid):
+    a = _XWindowAttributes()
+    _ok()
+    got = _X.XGetWindowAttributes(_DPY, wid, byref(a))
+    return bool(_ok() and got and a.map_state == 2)       # IsViewable
+
+
+def notification_rects():
+    """(x, y, w, h) in X pixels of every notification window on screen (EWMH _NET_WM_WINDOW_TYPE_NOTIFICATION:
+    xfce4-notifyd, MATE, dunst, KDE on X11). Cinnamon and GNOME draw theirs inside the shell: no window to find."""
+    with _LOCK:
+        if not _open():
+            return []
+        wanted = {_atom(n) for n in NOTIFICATION_TYPES}
+        out = []
+        for wid in dict.fromkeys(stacking() + _children(_root())):
+            if wanted.intersection(_ids(wid, "_NET_WM_WINDOW_TYPE")) and _viewable(wid):
+                g = geometry(wid)
+                if g is not None and g[2] > 1 and g[3] > 1:
+                    out.append(g)
+        return out

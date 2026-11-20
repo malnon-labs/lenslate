@@ -153,7 +153,8 @@ Debug recording: set `enabled = true` under [debug] in config.toml (or run with 
 `touch ~/.cache/lenslate/debug-on` to turn it on for hotkey-started sessions; delete the file to turn it off).
 Each session then writes ~/.cache/lenslate/debug/<time>/: session.log, runs.jsonl (one record per refresh: what changed,
 what was read, OCR text, translations, timings) and the captured image of every real read. Attach that folder (it
-contains screenshots of your game) to a bug report. Debug runs can be replayed offline: build an OcrPipeline with
+contains screenshots of your game - and, on desktops that do not say where their notifications are, possibly
+parts of a notification that popped up inside the area: see docs/PRIVACY.md) to a bug report. Debug runs can be replayed offline: build an OcrPipeline with
 grab() returning the saved images (see the test scripts in the history).
 
 ## Translators
