@@ -246,6 +246,7 @@ if [ "${XDG_SESSION_TYPE:-}" = wayland ] && [[ "${XDG_CURRENT_DESKTOP:-}" == *KD
   # of the Python interpreter, so only lenslate (not every Python script) has that permission.
   mkdir -p "$LIBEXEC"
   cp "$(readlink -f "$PY")" "$LIBEXEC/lenslate-python"
+  readlink -f "$PY" > "$LIBEXEC/lenslate-python.source"
   RUNPY="$LIBEXEC/lenslate-python"
   cat > "$APPS/net.local.lenslate-capture.desktop" <<EOF
 [Desktop Entry]
@@ -262,7 +263,19 @@ cat > "$BIN/lenslate" <<EOF
 #!/bin/bash
 # lenslate (installed by install.sh). Runs on $( [ "$OWN_QT" = 1 ] && echo "its own Python environment with Qt from PyPI" || { [ "$RUNPY" = "$PY" ] && echo "the system Python" || echo "a private copy of the system Python that KWin lets capture windows"; } ).
 PY="$RUNPY"
-[ -x "\$PY" ] || PY="$PY"
+SYS="$PY"
+if [ "\$PY" != "\$SYS" ]; then
+  # the private copy only starts with the libpython of the Python it was copied from: after a distro upgrade
+  # (Fedora 44 -> 45: 3.14 -> 3.15) it could not start at all. Copy the system Python again when it changed.
+  src="\$(readlink -f "\$SYS")"
+  if [ ! -x "\$PY" ] || [ "\$(cat "\$PY.source" 2>/dev/null)" != "\$src" ]; then
+    if cp "\$src" "\$PY.new" 2>/dev/null && mv -f "\$PY.new" "\$PY"; then
+      echo "\$src" > "\$PY.source"
+    else
+      PY="\$SYS"
+    fi
+  fi
+fi
 exec "\$PY" "$APPDIR/lenslate.py" "\$@"
 EOF
 chmod +x "$BIN/lenslate"

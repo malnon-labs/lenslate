@@ -50,14 +50,20 @@ first_start() {
   if [ "$GUI" != "$PYB" ] && [ "${XDG_SESSION_TYPE:-}" = wayland ] && [[ "${XDG_CURRENT_DESKTOP:-}" == *KDE* ]]; then
     local lib="$HOME/.local/libexec/lenslate" apps="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
     mkdir -p "$lib" "$apps"
-    cp "$(readlink -f "$GUI")" "$lib/lenslate-python" 2>/dev/null &&
+    cp "$(readlink -f "$GUI")" "$lib/lenslate-python" 2>/dev/null && readlink -f "$GUI" > "$lib/lenslate-python.source" &&
       printf '[Desktop Entry]\nType=Application\nName=lenslate screen capture\nExec=%s\nNoDisplay=true\nX-KDE-DBUS-Restricted-Interfaces=org.kde.KWin.ScreenShot2\n' \
         "$lib/lenslate-python" > "$apps/net.local.lenslate-capture.desktop"
   fi
 }
 [ -e "$DATA/.appimage-$(basename "$SELF")" ] || { first_start; touch "$DATA/.appimage-$(basename "$SELF")"; }
 if [ "$GUI" != "$PYB" ] && [ -x "$HOME/.local/libexec/lenslate/lenslate-python" ] && [[ "${XDG_CURRENT_DESKTOP:-}" == *KDE* ]]; then
-  GUI="$HOME/.local/libexec/lenslate/lenslate-python"
+  # the copy starts only with the libpython of the Python it came from: after a distro upgrade (3.14 -> 3.15) it
+  # could not start. Copy it again when the distro's Python changed; if that fails, run the distro's Python itself.
+  own="$HOME/.local/libexec/lenslate/lenslate-python" src="$(readlink -f "$GUI")"
+  if [ "$(cat "$own.source" 2>/dev/null)" = "$src" ] || { cp "$src" "$own.new" 2>/dev/null && mv -f "$own.new" "$own" &&
+       echo "$src" > "$own.source"; }; then
+    GUI="$own"
+  fi
 fi
 
 # the offline AppImage: its processor translators are imported once (each file checked) into the models folder
@@ -65,8 +71,15 @@ PACK="$HERE/usr/share/lenslate/offline-pack.tar"
 if [ -f "$PACK" ]; then
   mark="$DATA/.offline-pack-$(stat -c %s "$PACK")"
   if [ ! -e "$mark" ]; then
-    note "first start of the offline AppImage: installing its translators (about a minute)"
-    "${GUI_ENV[@]}" "$GUI" "$APPDIR_APP/lenslate.py" models import "$PACK" >&2 && touch "$mark"
+    # one import at a time: a hotkey pressed during the first start waits for it instead of importing again
+    mkdir -p "$DATA"
+    exec 9>"$DATA/.offline-pack.lock"
+    command -v flock >/dev/null && flock 9
+    if [ ! -e "$mark" ]; then
+      note "first start of the offline AppImage: installing its translators (about a minute)"
+      "${GUI_ENV[@]}" "$GUI" "$APPDIR_APP/lenslate.py" models import "$PACK" >&2 && touch "$mark"
+    fi
+    exec 9>&-
   fi
 fi
 
