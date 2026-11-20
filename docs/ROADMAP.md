@@ -19,16 +19,48 @@ release is **0.1.0** (an early preview). Changes per version are in [CHANGELOG.m
 ## Next
 
 ### 0.2: still to do before the release
-- **Build the AppImages for real and try them** on a clean KDE Wayland and an X11 system: the release workflow
-  builds both (packaging/build-appimage.sh); so far only the unpacked AppDir was tried (engine, read-only image,
-  first start, offline-pack import), not the packed file or the overlay from it.
+- **The AppImages on a real X11 machine:** both were built and tried as packed files: KDE Wayland on my PC, a fresh
+  KDE session whose home never had lenslate (the first start set up the command and the capture permission; cards
+  on the text with the offline image), and a real Cinnamon X11 session in a container (the offline one without
+  network). Still to do: real X11 hardware.
 - A VirusTotal scan of each AppImage, linked in the release notes.
-- **Desktop notifications** that pop up inside the area are read and translated too, and they end up in debug
-  recordings. Ignore notification surfaces, and warn about it in the debug-recording docs.
-- Changing hotkeys inside lenslate: tried on KDE (keys read, clash check, a key set and set back); the Cinnamon and
-  GNOME paths only against a fake settings store so far.
 - A native speaker's look at the windows in Portuguese, Chinese, Japanese, Korean and Russian (all texts are
   translated; none has been checked by a native speaker yet).
+
+### Clean-ups (from a review of the app against desktop-app practice, 2026-11-20)
+Small enough for 0.2:
+- **Docs say only what was tested:** a tested / partly tested / not tried table near the top of the README instead of
+  "Everything above works"; Hyprland / Sway named as untried; USAGE's stale lines (keys "planned", the language list)
+  and typos fixed.
+- **Every visible text translated:** the tray menu, the sidebar's fold button and raw values ("bing", "suggestion",
+  "unknown") still show in English. A test that opens the windows in another language and fails on English text left.
+- **Self-changing settings shown properly:** when lenslate switches an option that no longer fits (start-up, preset
+  change), a message on the page with Undo, not a line in the help bar that the next mouse move erases.
+- **First run:** "Click the game once after picking the area" said in the overlay itself; one name for the background
+  part ("Overlay: running / stopped") instead of a second "lenslate"; Next in setup not leaving you without a translator.
+- README screenshots retaken with the default settings; the Names page's "No names yet" above a filled table fixed.
+
+Before 1.0:
+- **Keyboard and screen readers:** help also on keyboard focus, accessible names from the same help text (the folded
+  sidebar keeps its page names), visible one-line descriptions on the important controls and "?" buttons instead of
+  the permanent hover bar; help bars that grow with large fonts. Release check: every control usable without a mouse.
+- **A calmer settings window:** theme icons instead of emoji, radio buttons / dropdowns where KDE uses them, the
+  typewriter timings and timing tables under an "Advanced" fold, one way of applying settings on every page.
+- **Packaging:** a final app ID (reverse-DNS) with AppStream metadata checked in CI; update information inside the
+  AppImage and an opt-in "check for updates" (off by default); AUR / COPR packages for KDE.
+- **Code:** the old *.bak copies out of the project folder; the first-run window renamed from setup.py (packaging tools
+  treat that name as an install script); a package with pyproject.toml; gui.py split per page and lenslate.py into
+  daemon / capture / layout parts; one place for the pinned versions.
+- **CI:** the distro Pythons the window runs on (3.14, 3.15), ruff, a smoke test that opens every page, actions pinned
+  by commit, write permission only for the release job, signed provenance for release files.
+- **Contributors:** a short ARCHITECTURE.md and the dev setup (install.sh --dev) in CONTRIBUTING; UX-GUIDE.md moved out
+  of the user docs; a short highlights list per release in the changelog.
+
+Later:
+- A hold-to-peek key (original text while held) and area profiles (dialogue, menu, subtitles).
+- Online translators labelled as unofficial endpoints that may break.
+- gettext catalogs and Weblate before asking native speakers to help.
+- A local crash log and a "Copy debug info" button (still no telemetry).
 
 ### Languages
 - Brazilian Portuguese quality on real English games (OPUS on the processor, Gemma).
@@ -62,7 +94,7 @@ release is **0.1.0** (an early preview). Changes per version are in [CHANGELOG.m
 ### Still to test on real hardware
 - An exclusive-fullscreen game (none tried so far offered it).
 - The Unity hook's own BepInEx + XUnity install on a real game (only test folders so far).
-- `lenslate hotkeys install` with the new keys on Cinnamon and GNOME.
+- Hotkeys on a real GNOME login (the keys work in a GNOME Shell 48 session in a container; Cinnamon also live earlier).
 - Upgrading from an old install with old caches.
 
 ## Known weak spots (accepted for 0.1)
@@ -171,7 +203,10 @@ menus. ~0.03 s a line on the processor, 0.36 / 0.41 GB.
 
 ## Done
 
-- **0.2 (in progress, 2026-11-18):** reading fixes from the README screenshots (ー read for 一, word spaces in
+- **0.2 (in progress, 2026-11-20):** desktop notifications inside the area are no longer read (KDE / X11
+  notification windows covered before reading and recording; elsewhere their lines are left out by their text);
+  the launcher copies KDE's private Python again after a distro Python upgrade (3.14 → 3.15 had stopped lenslate
+  from starting). reading fixes from the README screenshots (ー read for 一, word spaces in
   kana-only lines, wrapped text in bubbles and centred panels joined, boxed tabs and far-apart words split, two
   rows in one Ultrafast box split, Ultrafast as a second reader for sparse Japanese); English → Chinese tested on
   English game screens (quickmt's web leftovers removed, en-zh pack grown); processor translators and seed packs

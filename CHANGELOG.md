@@ -5,6 +5,26 @@ Lines marked *(cache)* make lenslate translate cached lines again: the old ones 
 
 ## Unreleased (0.2)
 
+### 2026-11-20
+- **Desktop notifications** that pop up inside the area are no longer read and translated ([capture]
+  ignore_notifications, on by default). KDE and X11 desktops with notification windows (Xfce, MATE, dunst): the
+  spot is covered before reading and recording (verified live on Plasma 6). Cinnamon, GNOME and the portal: lines
+  matching the text of a notification shown in the last few seconds are left out and blacked out in debug
+  recordings (the notification's text is taken from the session bus with dbus-monitor).
+- **The launcher survives a distro Python upgrade:** KDE's private Python copy (for KWin's window capture) could
+  not start after Fedora 45 moved from Python 3.14 to 3.15 - lenslate did not open at all. The launcher now copies
+  the system Python again when it changed. The AppImage's copy gets the same check.
+- **AppImages built and tried as packed files:** the normal one (374 MB) on KDE Plasma 6 Wayland (the distro's Qt
+  for the overlay, the bundled Python for reading and translating; cards on the text) and in a real Cinnamon X11
+  session (bundled Qt), and from a fresh KDE home that never had lenslate (nested KWin: the first start sets up
+  the command and KWin's capture permission itself); the offline one (1.55 GB) with no network: its translators are imported on first start
+  and Japanese was translated. Two starts during that first import (a hotkey pressed meanwhile) imported twice:
+  they now take turns.
+- tests/scripts/cinnamon_session: the AppImage in a real Cinnamon session in a container (Xvfb), checking the
+  cards, `lenslate hotkeys set` with the keys actually pressed, and a notification inside the area.
+  tests/scripts/gnome_session: the same key check on a real GNOME Shell 48. Keys changed inside lenslate are now
+  verified on KDE, Cinnamon and GNOME (the desktop ran lenslate's commands when they were pressed).
+
 ### 2026-11-18
 - **Reading:** ー read for 一 before a kanji is repaired (ー緒 → 一緒, ー人 → 一人; translators made up names for
   them). Kana-only Japanese lines (retro games written without kanji) keep their word spaces, taken from the
