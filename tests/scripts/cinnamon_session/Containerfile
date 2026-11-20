@@ -1,0 +1,10 @@
+FROM docker.io/library/debian:trixie
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends cinnamon xvfb xdotool dbus-x11 dbus-user-session \
+      libglib2.0-bin dconf-cli libnotify-bin x11-utils imagemagick procps ca-certificates fonts-noto-cjk \
+      libegl1 libgl1 libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libxcb-shape0 libxcb-xinerama0 \
+      libxcb-randr0 libxcb-render-util0 libxcb-image0 libfontconfig1 libdbus-1-3 file python3 \
+    && rm -rf /var/lib/apt/lists/*
+RUN useradd -m -u 1000 tester
+USER tester
+WORKDIR /home/tester
