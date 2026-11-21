@@ -85,8 +85,12 @@ done
 if [ "$OFFLINE" = 1 ]; then
   say "offline pack: quickmt ja->en, quickmt zh->en, OPUS en->pt-BR"
   export LENSLATE_MODELS="$WORK/models"
-  for m in quickmt-ja-en quickmt-zh-en opus-en-ptbr; do python3 lenslate.py models get "$m" >/dev/null; done
-  python3 lenslate.py models pack "$DIR/usr/share/lenslate/offline-pack.tar" quickmt-ja-en quickmt-zh-en opus-en-ptbr
+  # the image's own Python (numpy, Qt): the build machine's python3 may have neither (GitHub's runner has not)
+  for m in quickmt-ja-en quickmt-zh-en opus-en-ptbr; do
+    QT_QPA_PLATFORM=offscreen "$PYB" lenslate.py models get "$m" >/dev/null
+  done
+  QT_QPA_PLATFORM=offscreen "$PYB" lenslate.py models pack "$DIR/usr/share/lenslate/offline-pack.tar" \
+    quickmt-ja-en quickmt-zh-en opus-en-ptbr
   unset LENSLATE_MODELS
 fi
 
