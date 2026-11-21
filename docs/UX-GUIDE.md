@@ -21,7 +21,7 @@ All contrast ratios below were computed with the WCAG 2.x relative-luminance for
 - No page titles. Each page opens with a section label that is the same size as body text and only slightly
   bolder ("lenslate", "Preset", "Game", "general"), so nothing tells the eye where a page starts or what is most
   important. The squint test shows one flat grey mass.
-- All buttons look the same. "Start lenslate", "Pick area…", "Use", "Download", "Remove", "Save" and "Compare
+- All buttons look the same. "Start overlay", "Pick area…", "Use", "Download", "Remove", "Save" and "Compare
   all…" share one style, so the main action of a page doesn't stand out, and destructive buttons ("Remove",
   "Delete selected", "Remove hook") look like harmless ones.
 - Selected toggle segments and the selected sidebar item use white text on Breeze blue `#3daee9`: **2.49:1**,
@@ -44,7 +44,7 @@ All contrast ratios below were computed with the WCAG 2.x relative-luminance for
 **Sidebar**: a framed white list with plain text; the selected item fails text contrast (above); no icons, and
 the frame plus the page's own frames make two nested borders.
 
-**Overlay**: the status (grey dot + "Stopped") is at the far left, and its "Start lenslate" button is ~800 px away
+**Overlay**: the status (grey dot + "Overlay: stopped") is at the far left, and its "Start overlay" button is ~800 px away
 at the far right, so the two don't read as one unit. Disabled buttons ("Translate now", "Show / hide", "Forget
 area") look almost like enabled ones and nothing near them says why they are disabled (pick an area first). The
 opacity slider is ~900 px wide. Seven bullet tips form a wall of text at the bottom.
@@ -252,7 +252,7 @@ The "✓ " prefix on checked segments makes the choice readable without colour (
 ### 4.1 Which existing button gets which role
 
 **gui.py, Overlay** (`page_overlay`)
-- `self.run_btn`: "Start lenslate" → `primary`; "Stop lenslate" → `secondary`; "Restart lenslate" → `primary`
+- `self.run_btn`: "Start overlay" → `primary`; "Stop overlay" → `secondary`; "Restart overlay" → `primary`
   (set in `refresh_status`, re-polish when it changes).
 - `b_select` "Pick area…" → `primary` when no area is picked, `secondary` once an area exists (only one primary
   per view). If that is too dynamic, keep it `primary` and make `run_btn` "Start" `secondary`.

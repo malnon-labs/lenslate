@@ -1180,24 +1180,24 @@ class Window(QWidget):
             b = set_role(QPushButton(_("Choose what to share…")), "secondary")
             explain(b, "Ask your desktop again which window or screen lenslate may see (same as `lenslate "
                     "share`). lenslate must be running.", self.flt)
-            b.clicked.connect(lambda: self.say(send("share") or "lenslate is not running: start it first."))
+            b.clicked.connect(lambda: self.say(send("share") or _("The overlay is not running: start it first.")))
             b.setMaximumWidth(220)
             out.append(b)
         return out
 
     def toggle_running(self):
-        if self.run_btn.text() == "Restart lenslate":
+        if self.run_btn.property("restart"):     # (its text is translated: never compare it)
             send("quit")
             QTimer.singleShot(1200, lambda: run_lenslate("translator"))
-            self.run_text.setText(_("Restarting…"))
+            self.run_text.setText(_("Overlay: restarting…"))
             QTimer.singleShot(3500, self.refresh_status)
             return
         if send("status", 400) is None:
             run_lenslate("translator")    # starts the overlay without asking for an area
-            self.run_text.setText(_("Starting…"))
+            self.run_text.setText(_("Overlay: starting…"))
         else:
             send("quit")
-            self.run_text.setText(_("Stopping…"))
+            self.run_text.setText(_("Overlay: stopping…"))
         QTimer.singleShot(1500, self.refresh_status)
 
     def edit_shortcuts(self):
@@ -1221,7 +1221,8 @@ class Window(QWidget):
         self.read_tip.setVisible(running and bool(cfgmod.get("overlay.reading_tip")))
         self.run_dot.setText("●")   # green = running, grey = stopped (the text next to it says it too)
         self.run_dot.setStyleSheet("color: %s; font-size: 16pt;" % theme.color("success_text" if running else "text_muted"))
-        self.run_btn.setText(_("Stop lenslate") if running else _("Start lenslate"))
+        self.run_btn.setText(_("Stop overlay") if running else _("Start overlay"))
+        self.run_btn.setProperty("restart", False)
         set_role(self.run_btn, "secondary" if running else "primary")
         tip = (_("Stop the overlay completely and free its memory, including the language model's GPU memory.")
                if running else _("Start the overlay in the background. Nothing is read until you pick an area."))
@@ -1237,20 +1238,21 @@ class Window(QWidget):
         set_role(self.status_card, state="warning" if (running and st and st.get("stale")) else "")
         self.auto_box.setChecked(bool(st and st.get("auto")) and has_area)
         if running and st and st.get("stale"):
-            self.run_text.setText(_("⚠ Running an older version of lenslate: restart it to use the new one"))
-            self.run_btn.setText(_("Restart lenslate"))
+            self.run_text.setText(_("⚠ Overlay: an older version is running; restart it to use the new one"))
+            self.run_btn.setText(_("Restart overlay"))
+            self.run_btn.setProperty("restart", True)
             set_role(self.run_btn, "primary")
             explain(self.run_btn, "lenslate was updated while it was running. Restart it so it uses the new version "
                     "(an older running version can overwrite newer settings).", self.flt)
             return
         if not running:
-            self.run_text.setText(_("Stopped"))
+            self.run_text.setText(_("Overlay: stopped"))
         elif not st:
-            self.run_text.setText(_("Running (an older version: restart it to see its state)"))
+            self.run_text.setText(_("Overlay: running (an older version: restart it to see its state)"))
         else:
             area = _("no area picked") if not has_area else _("area %d×%d on %s") % (
                 st["region"][2], st["region"][3], st.get("screen") or _("screen"))
-            self.run_text.setText(_("Running · %s · %s · %s%s") % (
+            self.run_text.setText(_("Overlay: running · %s · %s · %s%s") % (
                 area, _("cards hidden") if st.get("hidden") else _("cards shown"),
                 _(TRANSLATOR_NAMES.get(st.get("translator"), st.get("translator") or "")),
                 _(" · working…") if st.get("busy") else ""))
@@ -2592,7 +2594,7 @@ def make_tray(app, win):
         grp.addAction(a)
         sub.addAction(a)
     menu.addSeparator()
-    a = QAction(_("Stop lenslate"), menu)
+    a = QAction(_("Stop the overlay"), menu)
     a.triggered.connect(lambda: send("quit"))
     menu.addAction(a)
     a = QAction(_("Close this window and tray icon"), menu)

@@ -5,7 +5,7 @@ Opens by itself the first time the settings window starts ([general] setup_done 
 user ticking it and pressing Download; nothing is written to config.toml until Finish (except a model that was
 downloaded). Cancel keeps the current settings.
 """
-from PySide6.QtCore import QEvent, QObject, Qt
+from PySide6.QtCore import QEvent, QObject, Qt, QTimer
 from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QFrame, QGridLayout, QHBoxLayout, QLabel,
                                QMessageBox, QProgressBar, QPushButton, QRadioButton, QVBoxLayout, QWizard, QWizardPage)
 
@@ -108,7 +108,8 @@ class Setup(QWizard):
 
     def accept(self):
         if self.page(2).running():
-            QMessageBox.information(self, "Downloading", "Wait for the downloads to finish (or press Cancel on them).")
+            QMessageBox.information(self, _("Downloading"), _("Wait for the downloads to finish (or press Cancel on "
+                                                             "them)."))
             return
         cfgmod.set_many({"translator.sources": self.sources(), "translator.language": self.target(),
                          "translator.llm_model": self.llm()})
@@ -119,8 +120,9 @@ class Setup(QWizard):
 
     def reject(self):
         if self.page(2).running():
-            if QMessageBox.question(self, "Stop downloading?", "A download is still running. Close setup anyway? "
-                                    "(The download stops; it continues where it left off next time.)") != QMessageBox.Yes:
+            if QMessageBox.question(self, _("Stop downloading?"), _("A download is still running. Close setup "
+                                    "anyway? (The download stops; it continues where it left off next time.)")
+                                    ) != QMessageBox.Yes:
                 return
             self.page(2).cancel()
             if self.page(2).job is not None:
@@ -349,16 +351,15 @@ class PresetPage(QWizardPage):
     def validatePage(self):
         if not self.problems:
             return True
-        alt = cfgmod.PRESETS[self.recommended]["label"]
-        text = "%s may not suit this PC:\n\n%s" % (cfgmod.PRESETS[self.chosen]["label"],
-                                                   "\n\n".join("• " + t for t in self.problems))
-        box = QMessageBox(QMessageBox.Warning, "Check this preset", text, parent=self)
-        keep = set_role(box.addButton("Use %s anyway" % cfgmod.PRESETS[self.chosen]["label"], QMessageBox.AcceptRole),
-                        "secondary")
+        alt = _(cfgmod.PRESETS[self.recommended]["label"])
+        mine = _(cfgmod.PRESETS[self.chosen]["label"])
+        text = _("%s may not suit this PC:") % mine + "\n\n" + "\n\n".join("• " + _(t) for t in self.problems)
+        box = QMessageBox(QMessageBox.Warning, _("Check this preset"), text, parent=self)
+        keep = set_role(box.addButton(_("Use %s anyway") % mine, QMessageBox.AcceptRole), "secondary")
         switch = None
         if self.chosen != self.recommended:
-            switch = set_role(box.addButton("Use %s instead" % alt, QMessageBox.ActionRole), "primary")
-        box.addButton("Go back", QMessageBox.RejectRole)
+            switch = set_role(box.addButton(_("Use %s instead") % alt, QMessageBox.ActionRole), "primary")
+        box.addButton(_("Go back"), QMessageBox.RejectRole)
         box.exec()
         if box.clickedButton() is keep:
             return True
@@ -400,6 +401,8 @@ class DownloadsPage(QWizardPage):
         self.items = []
         self.job = None
         self.queue = []
+        self.continue_after = False   # Next started the downloads: go on to the last page when they are done
+        self.warned = False           # Next with no translator at all: said once on the page; a second Next goes on
         self.cancelled = False
 
     def running(self):
@@ -467,8 +470,14 @@ class DownloadsPage(QWizardPage):
             _c("warning_text") if low else "", _("⚠ Not enough disk space. ") if low else "", gb,
             "%.0f GB" % free if free is not None else "?"))
         self.go.setEnabled(bool(gb) and not self.running())
+        # Next downloads what is ticked (pressing Next without downloading left people with no translator)
+        if not hasattr(self, "next_text"):
+            self.next_text = self.wiz.buttonText(QWizard.NextButton)
+        self.setButtonText(QWizard.NextButton, _("Download and continue") if self.selected() else self.next_text)
+        self.warned = False
 
-    def start(self):
+    def start(self, continue_after=False):
+        self.continue_after = bool(continue_after)
         self.queue = self.selected()
         self.cancelled = False
         self.go.setEnabled(False)
@@ -528,8 +537,8 @@ class DownloadsPage(QWizardPage):
             if self.cancelled and not self.isVisible():
                 return
             bar.setVisible(False)
-            it["info"].setText("stopped (continues where it left off next time)" if e == "cancelled" else
-                               "<span style='%s'>⚠ failed: %s</span>" % (_c("danger_text"), e))
+            it["info"].setText(_("stopped (continues where it left off next time)") if e == "cancelled" else
+                               _("<span style='%s'>⚠ failed: %s</span>") % (_c("danger_text"), e))
             it["cb"].setChecked(True)
             self.next_item()
         job.progress.connect(prog)
@@ -547,24 +556,40 @@ class DownloadsPage(QWizardPage):
             if it["installed"]:
                 it["cb"].setChecked(False)
         left = self.selected()
-        self.status.setText("Stopped." if self.cancelled else
-                            "Some downloads failed; press Download selected to try again." if left else
-                            "All downloads are done.")
+        self.status.setText(_("Stopped.") if self.cancelled else
+                            _("Some downloads failed; press Download selected to try again.") if left else
+                            _("All downloads are done."))
         self.update_total()
         self.completeChanged.emit()
+        go_on, self.continue_after = self.continue_after and not self.cancelled and not left, False
+        if go_on and self.wizard() is not None and self.wizard().currentPage() is self:
+            QTimer.singleShot(300, self.wizard().next)
 
     def isComplete(self):
         return not self.running()
 
     def validatePage(self):
-        missing = [it["title"] for it in self.selected()]
-        if not missing:
-            return True
-        r = QMessageBox.question(self, "Not downloaded yet", "These are ticked but not downloaded:\n\n%s\n\n"
-                                 "Continue without them? Until the preset's model is downloaded, lenslate uses the "
-                                 "small processor translator instead (machine-like wording). The Models page can "
-                                 "download them later." % "\n".join("• " + t for t in missing))
-        return r == QMessageBox.Yes
+        if self.running():
+            return False
+        if self.selected():          # Next = download what is ticked, then go on by itself
+            self.start(continue_after=True)
+            return False
+        if not self.has_translator() and not self.warned:
+            self.warned = True
+            self.status.setText(_("<span style='%s'>⚠ Nothing is ticked or installed that can translate your "
+                                  "languages, so lenslate could only read the text. Tick a translator above, or "
+                                  "press Next again to continue anyway (the Models page can download one later, "
+                                  "or pick Online on the Translation page).</span>") % _c("warning_text"))
+            return False
+        return True
+
+    def has_translator(self):
+        """A translator for the chosen languages is installed: a processor one, or the preset's language model."""
+        import models
+        src, tgt = self.wiz.sources(), self.wiz.target()
+        names = [m for m in hwcheck.language_models(src, tgt, "mt") if m]
+        names += hwcheck.preset_needs(self.wiz.preset(), src, tgt, llm=self.wiz.llm())["models"]
+        return any(models.BY_NAME[n].installed() for n in names if n in models.BY_NAME)
 
 
 # ------------------------------------------------------------------------------------------------------- 4. done

@@ -78,5 +78,73 @@ class LanguagesPage(unittest.TestCase):
         self.assertEqual(self.w.llm(), "qwen3.5-4b-uncensored")
 
 
+@unittest.skipIf(QApplication is None, "PySide6 is not installed")
+class DownloadsNext(unittest.TestCase):
+    """Next on the Downloads page downloads what is ticked and goes on; with nothing that can translate it warns on
+    the page first (Next without downloading left people with no translator, 2026-11-20 review)."""
+    @classmethod
+    def setUpClass(cls):
+        cls.app = QApplication.instance() or QApplication([])
+
+    def setUp(self):
+        import models
+        import setup
+        cfgmod.set_many({"translator.sources": "ja", "translator.language": "English",
+                         "translator.llm_model": "gemma-4-e2b"})
+        self.w = setup.Setup()
+        self.p = self.w.page(2)
+        self.w.page(1).chosen = "nogpu"
+        self.p.initializePage()
+        self.models = models
+        self.old = models.download
+
+    def tearDown(self):
+        self.models.download = self.old
+        self.w.close()
+
+    def pump(self, until, limit=5.0):
+        import time
+        end = time.time() + limit
+        while not until() and time.time() < end:
+            self.app.processEvents()
+            time.sleep(0.01)
+        self.assertTrue(until())
+
+    def test_next_downloads_the_ticked_items_then_goes_on(self):
+        import os
+        got = []
+
+        def fake(name, progress=None):      # what a finished download leaves: the model folder with .complete
+            got.append(name)
+            path = self.models.BY_NAME[name].path
+            os.makedirs(path, exist_ok=True)
+            open(os.path.join(path, ".complete"), "w").close()
+        self.models.download = fake
+        self.addCleanup(lambda: [os.remove(os.path.join(self.models.BY_NAME[n].path, ".complete")) for n in got])
+        self.w.setStartId(2)                          # the wizard on the Downloads page
+        self.w.restart()
+        self.assertIs(self.w.currentPage(), self.p)
+        self.assertTrue(self.p.selected())            # quickmt ja-en is ticked for Japanese
+        self.assertNotEqual(self.p.buttonText(setup_wizard().NextButton), self.p.next_text)
+        self.w.next()                                 # Next starts the downloads instead of leaving the page
+        self.assertEqual(self.w.currentId(), 2)
+        self.pump(lambda: self.w.currentId() == 3)    # ... and goes on by itself when they are done
+        self.assertIn("quickmt-ja-en", got)
+
+    def test_nothing_to_translate_with_warns_once(self):
+        for it in self.p.items:
+            it["cb"].setChecked(False)
+        self.assertEqual(self.p.buttonText(setup_wizard().NextButton), self.p.next_text)
+        self.assertFalse(self.p.has_translator())
+        self.assertFalse(self.p.validatePage())       # first Next: the warning on the page
+        self.assertIn("Nothing is ticked", self.p.status.text())
+        self.assertTrue(self.p.validatePage())        # second Next: the user's choice
+
+
+def setup_wizard():
+    from PySide6.QtWidgets import QWizard
+    return QWizard
+
+
 if __name__ == "__main__":
     unittest.main()

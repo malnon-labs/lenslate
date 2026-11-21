@@ -80,6 +80,7 @@ APP_ID = "lenslate"
 SOCK = "lenslate-%d" % os.getuid()
 import config as cfgmod
 import version
+from i18n import _
 
 cfgmod.migrate()   # old config.json -> config.toml, once
 # Settings that need a restart are read once here; the rest are read where used (see config.py for all of them).
@@ -390,6 +391,11 @@ def steady_card(cards, rect):
         if o.get("score", 0.0) >= STEADY_SCORE and o.get("tr") and box_overlap(ob, rb) >= 0.5:
             return o
     return None
+
+
+def CLICK_HINT():
+    """The overlay's message when no window covers the chosen area (the focused window is something else)."""
+    return _("Click the game once, so lenslate knows which window to read")
 
 
 def active_window():
@@ -1219,7 +1225,7 @@ class OcrPipeline(QThread):
                 # the found lines are read directly (no second, slower finding pass); only areas with no found
                 # line, or an extreme number of fragments, are read the full way
                 (fast_rects if 0 < len(inside) <= FAST_LINES_MAX else rest).append((rect, inside))
-            rects = [r for r, _ in rest]
+            rects = [r for r, _w in rest]
             if rects:
                 dbg("fast lines: no known lines in %s (read the full way)" % rects)
             for rect, inside in fast_rects:
@@ -1771,7 +1777,7 @@ class Daemon(QObject):
                 self.show_overlay(refresh=False)
             on = not self.auto.isActive()
             self.auto.start() if on else self.auto.stop()
-            self.badge("auto on" if on else "auto off", 1500)
+            self.badge(_("auto on") if on else _("auto off"), 1500)
             if on:
                 self.run(force=False)   # only what changed; Translate now (Ctrl+Alt+X) is the full re-read
             return "auto on" if on else "auto off"
@@ -1809,7 +1815,7 @@ class Daemon(QObject):
                 cfgmod.set_many(vals)
                 self._cfg_mtime = self._config_mtime()
                 threading.Thread(target=self.cache.warm, daemon=True).start()
-                self.badge("translator: " + self.cache.label(), 1500)
+                self.badge(_("translator: %s") % self.cache.label(), 1500)
             return note or "translator %s" % self.cache.label()
         if cmd == "reset":
             self.close_picker()
@@ -1951,6 +1957,7 @@ class Daemon(QObject):
         self.mem = {}
         self.text_scale = None
         self.target = None
+        self._told_focus = False      # a new area: say again what it needs
         self.hidden = False
         self.cards = []
         self.overlay.set("cards", [])
@@ -1968,11 +1975,11 @@ class Daemon(QObject):
             # remember it; it runs as soon as the current one finishes (a forced request wins)
             self.pending = bool(force or self.pending)
             if force:
-                self.badge("translating…")
+                self.badge(_("translating…"))
             return
         self.overlay.place(self.screen)
         if force:
-            self.badge("translating…")
+            self.badge(_("translating…"))
         self._fresh = True
         # Capture just the window that contains the region (the overlay is never part of it, so the cards stay up).
         # The focused window becomes the target; with KWin direct capture the target keeps being captured when it is
@@ -2011,12 +2018,17 @@ class Daemon(QObject):
             if not getattr(self, "_told_focus", False):
                 # say it once per area: otherwise auto mode looks broken while it waits for the game window
                 self._told_focus = True
-                self.badge("auto needs a shared window, not a whole screen (lenslate share)" if PORTAL
-                           else "auto waits: click the game window", 3000)
+                self.badge(_("auto needs a shared window, not a whole screen (lenslate share)") if PORTAL
+                           else CLICK_HINT(), 6000)
             else:
                 self.clear_badge()
             return
         else:
+            if not PORTAL and not getattr(self, "_told_focus", False):
+                # read once from the whole screen, and say what makes the next reads (and auto) work: the hint
+                # was only in the docs and the settings window (first-run review, 2026-11-20)
+                self._told_focus = True
+                QTimer.singleShot(1200, lambda: self.badge(CLICK_HINT(), 6000))
             self.overlay.set("showCards", False)
             QTimer.singleShot(160, lambda: self._start_worker(force, None, gen))
 
@@ -2170,7 +2182,7 @@ class Daemon(QObject):
         if not self.selecting:
             self.overlay.set("showCards", True)
         if gen == self.gen:
-            self.badge("error: " + msg, 4000)
+            self.badge(_("error: %s") % msg, 4000)
 
     def on_finished(self):
         self.worker = None
@@ -2304,7 +2316,7 @@ def main():
     # two hotkey presses before the daemon is up must not start two daemons
     lock = QLockFile(os.path.join(os.environ.get("XDG_RUNTIME_DIR", tempfile.gettempdir()), SOCK + ".lock"))
     if not lock.tryLock(0):
-        for _ in range(30):
+        for _try in range(30):
             QThread.msleep(100)
             reply = send(cmd)
             if reply is not None:

@@ -102,7 +102,7 @@ def install_qt(app):
 SHOWN = {"_", "N_", "QAction", "explain", "section_label", "note", "hint", "chip", "message", "QPushButton", "QLabel", "QCheckBox",
          "QRadioButton", "setTitle", "setSubTitle", "setWindowTitle", "setText", "setPlaceholderText", "say",
          "_label", "addItem"}
-FILES = ("gui.py", "setup.py", "shortcutsdialog.py", "hwcheck.py")
+FILES = ("gui.py", "setup.py", "shortcutsdialog.py", "hwcheck.py", "lenslate.py")
 TABLES = {"STEPS", "PLAIN"}
 # shown, but kept in tuples and dicts the extractor does not follow: page names and their lines, Advanced's groups
 EXTRA = ["Spanish", "Portuguese (Brazil)", "Chinese (Simplified)", "%s only", "%s (and English)", "Japanese", "Chinese (Simplified and Traditional)", "English", "Korean", "Russian",
