@@ -1,7 +1,7 @@
 # lenslate roadmap
 
 Where lenslate is going, what I've decided along the way, and the numbers behind those decisions. The newest
-release is **0.1.0** (an early preview). Changes per version are in [CHANGELOG.md](../CHANGELOG.md).
+release is **0.2.0** (an early version). Changes per version are in [CHANGELOG.md](../CHANGELOG.md).
 
 ## Goals
 
@@ -18,15 +18,11 @@ release is **0.1.0** (an early preview). Changes per version are in [CHANGELOG.m
 
 ## Next
 
-### 0.2: still to do before the release
-- **The AppImages** (built 2026-11-21 from the finished 0.2 code, both in dist/): tried on real X11 hardware (Linux
-  Mint 22 Cinnamon, 3072x1728 at 2x, fresh home): translators imported, cards on a Japanese RPG Maker screen,
-  automatic translation through a screen change and a moved window, settings window (also with the NVIDIA card
-  off), setup window, tray menu, the overlay's "Click the game once" hint. Setup's "Download and continue" is
-  tested offscreen only.
-- A VirusTotal scan of each new AppImage, linked in the release notes.
-- A native speaker's look at the windows in Portuguese, Chinese, Japanese, Korean and Russian (every text is
-  translated, about 200 of them on 2026-11-21; none has been checked by a native speaker yet).
+### Still open after 0.2
+- A VirusTotal scan of each AppImage, linked in the release notes.
+- A native speaker's look at the windows in Portuguese, Chinese, Japanese, Korean and Russian (none has been
+  checked by a native speaker yet).
+- Setup's "Download and continue" is tested offscreen only, not yet on a real desktop.
 
 ### Clean-ups (from a review of the app against desktop-app practice, 2026-11-20)
 Done for 0.2 (2026-11-21): the README says what was tested; every visible text translated, with a test; settings
@@ -196,7 +192,7 @@ menus. ~0.03 s a line on the processor, 0.36 / 0.41 GB.
 
 ## Done
 
-- **0.2 (in progress, 2026-11-20):** desktop notifications inside the area are no longer read (KDE / X11
+- **0.2.0 (2026-11-21):** desktop notifications inside the area are no longer read (KDE / X11
   notification windows covered before reading and recording; elsewhere their lines are left out by their text);
   the launcher copies KDE's private Python again after a distro Python upgrade (3.14 → 3.15 had stopped lenslate
   from starting). reading fixes from the README screenshots (ー read for 一, word spaces in

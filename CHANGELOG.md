@@ -3,9 +3,13 @@
 Newest first. The version is in `version.py` (`lenslate --version`). Dates are year-month-day.
 Lines marked *(cache)* make lenslate translate cached lines again: the old ones are kept in `<cache file>.old`.
 
-## Unreleased (0.2)
+## 0.2.0 - 2026-11-21
 
 ### 2026-11-21
+- **Window language:** picking another language shows, in red, that lenslate must restart to use it (closing the
+  window only hides it to the tray).
+- **AppImage app menu entry:** setup's last page adds lenslate to the app menu (ticked), the Advanced page adds or
+  removes it. The AppImage itself still needs no install.
 - **AppImage on a real X11 laptop** (Linux Mint 22 Cinnamon, 3072x1728 at 2x, fresh home): the offline AppImage
   started, imported its translators (12 s), read and translated a Japanese RPG Maker screen with the cards on the
   text, followed a screen change with automatic translation, and showed the settings window, setup window and tray

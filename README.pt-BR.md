@@ -120,8 +120,12 @@ remove tudo de novo. Prefere git? `git clone https://github.com/malnon-labs/lens
 Para conferir o download, pegue o arquivo `.sha256` na mesma versão e rode
 `sha256sum -c lenslate-*.tar.gz.sha256` na pasta onde estão os dois.
 
-**Em breve: AppImages.** Um arquivo único que não precisa de instalação, e uma versão offline que já vem com o
-leitor e os tradutores 🇯🇵→🇬🇧, 🇨🇳→🇬🇧 e 🇬🇧→🇧🇷.
+**Sem instalar: AppImages.** A mesma página de versões tem `lenslate-<versão>-x86_64.AppImage` (cerca de 375 MB),
+um arquivo que roda sem instalar, e `lenslate-<versão>-offline-x86_64.AppImage` (cerca de 1,6 GB), que já vem com os
+tradutores 🇯🇵→🇬🇧, 🇨🇳→🇬🇧 e 🇬🇧→🇧🇷, para um PC sem internet. Torne o arquivo executável
+(`chmod +x lenslate-*.AppImage`) e abra; a janela de configuração oferece colocá-lo no menu de aplicativos. No KDE
+Wayland o AppImage precisa dos pacotes Python Qt da sua distribuição para a sobreposição (ele diz quais quando
+faltam).
 
 **Vai rodar no meu sistema?** O lenslate foi testado no **KDE Plasma 6 (Wayland)** e em **desktops X11** (Linux
 Mint 22 Cinnamon). O instalador conhece Fedora, Arch, Debian 13+, Ubuntu 25.04+, openSUSE e Linux Mint 22. O niri foi
@@ -186,7 +190,7 @@ de cada arquivo que alteram, e `lenslate hook remove` devolve tudo como era. Vej
 - **Alguns modelos de IA são só para uso pessoal.** PLaMo e Sugoi são gratuitos para uso pessoal e não
   comercial; o lenslate sempre mostra a licença de um modelo antes de baixá-lo. Todas as licenças:
   [NOTICE.md](NOTICE.md) (em inglês).
-- **Na versão 0.2:** as janelas do lenslate em 🇧🇷 português, 🇨🇳 chinês, 🇯🇵 japonês, 🇰🇷 coreano e 🇷🇺 russo;
+- **Novo na 0.2:** as janelas do lenslate em 🇧🇷 português, 🇨🇳 chinês, 🇯🇵 japonês, 🇰🇷 coreano e 🇷🇺 russo;
   AppImages (inclusive uma offline); atalhos de teclado que você muda dentro do lenslate. **Planejado:** traduzir
   imagens direto do navegador.
 

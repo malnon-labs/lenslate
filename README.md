@@ -118,8 +118,11 @@ removes it again. Prefer git? `git clone https://github.com/malnon-labs/lenslate
 To check the download, get the `.sha256` file from the same release and run
 `sha256sum -c lenslate-*.tar.gz.sha256` in the folder that holds both.
 
-**Coming next: AppImages.** A one-file download that needs no install, and an offline version with the reader
-and the 🇯🇵→🇬🇧, 🇨🇳→🇬🇧 and 🇬🇧→🇧🇷 translators already inside.
+**No install: AppImages.** The same Releases page has `lenslate-<version>-x86_64.AppImage` (about 375 MB), one
+file that runs without installing, and `lenslate-<version>-offline-x86_64.AppImage` (about 1.6 GB) with the 🇯🇵→🇬🇧,
+🇨🇳→🇬🇧 and 🇬🇧→🇧🇷 translators already inside, for a PC without internet. Make it executable
+(`chmod +x lenslate-*.AppImage`) and start it; the setup window offers to add it to your app menu. On KDE Wayland
+the AppImage needs your distribution's Python Qt packages for the overlay (it says which when they are missing).
 
 **Will it run on my system?** lenslate is tested on **KDE Plasma 6 (Wayland)** and **X11 desktops** (Linux Mint
 22 Cinnamon). The installer knows Fedora, Arch, Debian 13+, Ubuntu 25.04+, openSUSE and Linux Mint 22. niri is
@@ -182,7 +185,7 @@ even be translated ahead of time, so nothing runs while you play. The hooks back
   reads well.
 - **Some AI models are for personal use only.** PLaMo and Sugoi are free for personal and non-commercial use;
   lenslate always says which licence a model has before downloading it. All licences: [NOTICE.md](NOTICE.md).
-- **Coming in 0.2:** lenslate's own windows in 🇧🇷 Portuguese, 🇨🇳 Chinese, 🇯🇵 Japanese, 🇰🇷 Korean and 🇷🇺 Russian;
+- **New in 0.2:** lenslate's own windows in 🇧🇷 Portuguese, 🇨🇳 Chinese, 🇯🇵 Japanese, 🇰🇷 Korean and 🇷🇺 Russian;
   AppImages (also an offline one); keyboard shortcuts you can change inside lenslate. **Planned:** translating
   pictures straight from the browser.
 

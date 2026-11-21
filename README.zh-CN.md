@@ -99,7 +99,7 @@ tar xf lenslate-*.tar.gz && cd lenslate-*/
 
 校验下载：从同一个发布页面获取 `.sha256` 文件，在两个文件所在的文件夹中运行 `sha256sum -c lenslate-*.tar.gz.sha256`。
 
-**即将推出：AppImage。** 一个无需安装的单文件版本，以及一个离线版本，内置识别模型和 🇯🇵→🇬🇧、🇨🇳→🇬🇧、🇬🇧→🇧🇷 翻译器。
+**免安装：AppImage。** 同一个发布页面还有 `lenslate-<版本>-x86_64.AppImage`（约 375 MB），一个无需安装即可运行的文件；以及 `lenslate-<版本>-offline-x86_64.AppImage`（约 1.6 GB），内置 🇯🇵→🇬🇧、🇨🇳→🇬🇧、🇬🇧→🇧🇷 翻译器，适合没有网络的电脑。给文件加上执行权限（`chmod +x lenslate-*.AppImage`）后启动即可；设置窗口会询问是否把它加入应用菜单。在 KDE Wayland 上，AppImage 需要发行版自带的 Python Qt 软件包来显示覆盖层（缺少时会提示需要哪些）。
 
 **能在我的系统上运行吗？** lenslate 已在 **KDE Plasma 6（Wayland）** 和 **X11 桌面**（Linux Mint 22 Cinnamon）上测试。安装程序支持 Fedora、Arch、Debian 13+、Ubuntu 25.04+、openSUSE 和 Linux Mint 22。niri 做过部分测试，Hyprland 和 Sway 尚未尝试，GNOME（Wayland）暂时无法显示覆盖层。详见 [docs/CAPTURE.md](docs/CAPTURE.md)（英文）。
 
@@ -142,7 +142,7 @@ lenslate 完全不修改游戏。当引擎不受支持、你不能或不想修�
 - **首次启动需要下载。** 识别模型和翻译器只下载一次（一个语言对约 1 GB）。
 - **装饰性文字**（logo、发光或描边的标题）常常识别错误。普通的菜单和对话文字识别良好。
 - **部分 AI 模型仅限个人使用。** PLaMo 和 Sugoi 可免费用于个人和非商业用途；lenslate 在下载模型前总会说明其许可证。所有许可证见 [NOTICE.md](NOTICE.md)（英文）。
-- **0.2 将带来：** lenslate 界面的 🇧🇷 葡萄牙文、🇨🇳 中文、🇯🇵 日文、🇰🇷 韩文和 🇷🇺 俄文版本；AppImage（含离线版）；可在 lenslate 内修改的键盘快捷键。**计划中：** 直接在浏览器中翻译图片。
+- **0.2 新增：** lenslate 界面的 🇧🇷 葡萄牙文、🇨🇳 中文、🇯🇵 日文、🇰🇷 韩文和 🇷🇺 俄文版本；AppImage（含离线版）；可在 lenslate 内修改的键盘快捷键。**计划中：** 直接在浏览器中翻译图片。
 
 ## 反馈问题
 

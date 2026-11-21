@@ -6,7 +6,7 @@ development copy asks git, an installed copy reads the COMMIT file the installer
 import os
 import subprocess
 
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
