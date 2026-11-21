@@ -5,6 +5,31 @@ Lines marked *(cache)* make lenslate translate cached lines again: the old ones 
 
 ## Unreleased (0.2)
 
+### 2026-11-21
+- **AppImage on a real X11 laptop** (Linux Mint 22 Cinnamon, 3072x1728 at 2x, fresh home): the offline AppImage
+  started, imported its translators (12 s), read and translated a Japanese RPG Maker screen with the cards on the
+  text, followed a screen change with automatic translation, and showed the settings window, setup window and tray
+  menu. Found there: **the settings window did not open on a PC whose NVIDIA card is switched off** (hybrid
+  laptops: nvidia-smi prints an error instead of data) - fixed.
+- **Every visible text is translated** in the five window languages: the tray menu, the sidebar, model and preset
+  descriptions, the capture guide, hardware warnings, the setup window's messages, the overlay's own messages.
+  Dropdowns show names instead of raw values ("Bing", "Picture model (vlm)", the window languages in their own
+  names). A test opens every window in each language and fails on English left over.
+- Fixed in translated windows: the Restart button stopped the overlay instead (it was recognised by its English
+  text), and opening the Translation page after setup's measuring failed (pages were looked up by their English
+  names; also with the sidebar folded).
+- **Settings lenslate switches by itself** are said in a notice above the page that stays until OK, with **Undo**
+  after a language change (before: a help-bar line the next mouse move erased). The default reading is Quick:
+  Careful is retired, and every new config was switched away from it at its first start.
+- **First run:** the overlay itself says "Click the game once, so lenslate knows which window to read" when no
+  window covers the picked area; the background part is called the overlay everywhere ("Overlay: running",
+  Start / Stop overlay); setup's **Next downloads the ticked items** and goes on ("Download and continue"), and
+  warns on the page when nothing could translate the chosen languages.
+- The Names page's "No names for this game yet" no longer stands above a filled list; the list for every game is
+  called "All games".
+- README: a table of what was tested, partly tested and not tried; settings-window screenshots retaken with the
+  default settings.
+
 ### 2026-11-20
 - **Desktop notifications** that pop up inside the area are no longer read and translated ([capture]
   ignore_notifications, on by default). KDE and X11 desktops with notification windows (Xfce, MATE, dunst): the

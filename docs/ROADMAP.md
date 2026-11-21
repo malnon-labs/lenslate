@@ -19,26 +19,23 @@ release is **0.1.0** (an early preview). Changes per version are in [CHANGELOG.m
 ## Next
 
 ### 0.2: still to do before the release
-- **The AppImages on a real X11 machine:** both were built and tried as packed files: KDE Wayland on my PC, a fresh
-  KDE session whose home never had lenslate (the first start set up the command and the capture permission; cards
-  on the text with the offline image), and a real Cinnamon X11 session in a container (the offline one without
-  network). Still to do: real X11 hardware.
-- A VirusTotal scan of each AppImage, linked in the release notes.
-- A native speaker's look at the windows in Portuguese, Chinese, Japanese, Korean and Russian (all texts are
-  translated; none has been checked by a native speaker yet).
+- **Build the AppImages again** with the 2026-11-21 changes (the files in dist/ are older: their settings window
+  does not open on a PC whose NVIDIA card is off) and try the new ones once more on the X11 laptop. The older
+  offline AppImage was tried on real X11 hardware (Linux Mint 22 Cinnamon, 3072x1728 at 2x, fresh home): translators
+  imported, cards on a Japanese RPG Maker screen, automatic translation through a screen change, settings window,
+  setup window and tray menu.
+- A VirusTotal scan of each new AppImage, linked in the release notes.
+- A native speaker's look at the windows in Portuguese, Chinese, Japanese, Korean and Russian (every text is
+  translated, about 200 of them on 2026-11-21; none has been checked by a native speaker yet).
+- **Cards over other windows (seen on the X11 laptop):** when another window covers part of the area (the setup
+  window, a tray menu) or a tiling helper moves and resizes the game window, the old cards stay drawn on top of
+  everything, in the old places, until the game window is back. Hide the cards while the game window is not the one
+  the player sees over the area.
 
 ### Clean-ups (from a review of the app against desktop-app practice, 2026-11-20)
-Small enough for 0.2:
-- **Docs say only what was tested:** a tested / partly tested / not tried table near the top of the README instead of
-  "Everything above works"; Hyprland / Sway named as untried; USAGE's stale lines (keys "planned", the language list)
-  and typos fixed.
-- **Every visible text translated:** the tray menu, the sidebar's fold button and raw values ("bing", "suggestion",
-  "unknown") still show in English. A test that opens the windows in another language and fails on English text left.
-- **Self-changing settings shown properly:** when lenslate switches an option that no longer fits (start-up, preset
-  change), a message on the page with Undo, not a line in the help bar that the next mouse move erases.
-- **First run:** "Click the game once after picking the area" said in the overlay itself; one name for the background
-  part ("Overlay: running / stopped") instead of a second "lenslate"; Next in setup not leaving you without a translator.
-- README screenshots retaken with the default settings; the Names page's "No names yet" above a filled table fixed.
+Done for 0.2 (2026-11-21): the README says what was tested; every visible text translated, with a test; settings
+lenslate switches by itself said in a notice with Undo; the first-run fixes (the click hint in the overlay, one name
+for the overlay, setup's Next downloading); settings-window screenshots retaken; the Names page's empty-list note.
 
 Before 1.0:
 - **Keyboard and screen readers:** help also on keyboard focus, accessible names from the same help text (the folded
