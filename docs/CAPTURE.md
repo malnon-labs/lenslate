@@ -50,8 +50,9 @@ lenslate the picture but never tells it *where* a shared window is on the screen
 - Needs: python3-gobject, GStreamer's PipeWire plugin, xdg-desktop-portal with your desktop's backend
   (install.sh installs them on these desktops).
 
-Status: the portal path was built on KDE and tested up to the desktop's dialog and with a test picture; a real
-shared window or screen, and Hyprland / Sway / niri themselves, have not been tried yet (docs/ROADMAP.md).
+Status: the portal path was tested on KDE with a real shared game window (the dialog, the cards on the text, auto
+refresh, no second dialog after a restart) and in niri nested in KDE with a test picture. A shared whole screen, a
+real niri login, Hyprland and Sway have not been tried yet (docs/ROADMAP.md).
 
 ## Forcing a method
 - `[capture] backend = "portal"` in config.toml (or Advanced > Screen capture method): use screen sharing on KDE too.

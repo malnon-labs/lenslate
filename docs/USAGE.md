@@ -6,8 +6,8 @@ presets, game hooks and how a refresh works.
 ## Hotkeys and commands
 Every action is a button in the settings window (Overlay page) and in the tray icon's menu. The hotkeys are for
 use inside a game. They were Ctrl+Alt+arrows before 0.1.0; those switch workspaces on GNOME, Cinnamon, MATE and
-Xfce. Run `./install.sh` (KDE) or `lenslate hotkeys install` (Cinnamon, GNOME) again to move to the new keys.
-Choosing your own keys inside lenslate is planned.
+Xfce. Run `./install.sh` (KDE) or `lenslate hotkeys install` (Cinnamon, GNOME) again to move to the new keys, or
+choose your own (below).
 
 | Hotkey | Command | What it does |
 | --- | --- | --- |
@@ -61,10 +61,9 @@ The first start of a model compiles GPU code once (~30 s); later starts take ~2 
 Translate from (config [translator] sources): Japanese, Chinese (Simplified and Traditional), English - and, each
 with its own reader model and chosen alone, Korean or Russian (see below). Each line's
 language is recognised from its script (kana = Japanese, Chinese characters without kana = Chinese, Latin = English);
-text already in the target language is left alone. Translate into ([translator] language): English, Spanish,
-Portuguese (Brazil). Chosen from Steam's language statistics (English, Simplified Chinese, Russian on top) and the
-localization industry's priority targets (Spanish, Brazilian Portuguese); Korean and Russian sources need extra OCR
-models and come later.
+text already in the target language is left alone. Translate into ([translator] language): English, Chinese
+(Simplified), Spanish, Portuguese (Brazil). Chosen from Steam's language statistics (English, Simplified Chinese,
+Russian on top) and the localization industry's priority targets (Spanish, Brazilian Portuguese).
 - Language models (Gemma) and online translators translate any pair directly (Gemma writes Brazilian Portuguese).
 - CPU translators: quickmt ja-en, zh-en, en-es and OPUS en-pt (set to Brazilian Portuguese with its >>pob<< tag;
   quickmt's own en-pt writes European Portuguese); other pairs go through English (ja -> en -> es). Sugoi is
@@ -93,6 +92,7 @@ While playing, `lenslate serve` must run (start it yourself, or from your game l
 - Ren'Py (7 and 8): game/zz_lenslate.rpy. Dialogue and menus translated before they are shown; names and buttons
   from the cache; the whole script is queued for background translation when the game starts.
 - Unity: points XUnity.AutoTranslator at lenslate (BepInEx + XUnity are installed first when missing).
+- Tested on test game folders only, not on real games yet.
 - No hook yet (use the screen overlay): Wolf RPG, RPG Maker VX Ace/VX/XP, KiriKiri and others.
 
 ## Presets

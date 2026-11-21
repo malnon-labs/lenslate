@@ -97,6 +97,6 @@ Foundation (CC-BY 3.0, <a href="https://durian.blender.org">durian.blender.org</
 ## Desktops (Linux first)
 - **KDE Plasma 6 (Wayland):** the main platform. The cards sit above fullscreen games.
 - **X11 desktops** (tested on Linux Mint Cinnamon).
-- **Hyprland, Sway, niri:** through screen sharing. Partly tested.
+- **Hyprland, Sway, niri:** through screen sharing. niri partly tested (nested in KDE); Hyprland and Sway not tried yet.
 - **GNOME (Wayland):** not yet (no way to place the overlay there).
 - Details: [CAPTURE.md](CAPTURE.md).

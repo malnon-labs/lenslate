@@ -27,7 +27,7 @@ Draw a box around the text once and lenslate keeps it translated as you play: me
 descriptions show up in your language in the same place, a bit like Google Lens but live.
 
 **Made for Linux first.** Windows already has several tools like this. lenslate is built for Linux desktops
-(KDE Plasma, X11, Hyprland, Sway…) and draws its cards above fullscreen games, also on Wayland.
+(KDE Plasma on Wayland and X11 desktops so far) and draws its cards above fullscreen games, also on Wayland.
 
 - **The translation sits on the text.** No second window and no subtitle bar. Each piece of text gets a card
   with its translation, in the same place and about the same size.
@@ -44,8 +44,15 @@ descriptions show up in your language in the same place, a bit like Google Lens 
   game itself instead of over the screen.
 - **Your languages:** 🇯🇵 🇨🇳 🇬🇧 🇰🇷 🇷🇺 in, 🇬🇧 🇨🇳 🇪🇸 🇧🇷 out. See [Languages](#languages).
 
-> **Status:** early release (0.1). Everything above works, but it has only been tested on a few setups and is
-> not polished yet. Expect rough edges, and please [report what goes wrong](#reporting-problems).
+> **Status:** early release. It has been tested on a few setups only and is not polished yet. Expect rough
+> edges, and please [report what goes wrong](#reporting-problems).
+
+| | Where |
+| --- | --- |
+| **Tested** with real games | KDE Plasma 6 (Wayland) · X11 (Linux Mint 22 Cinnamon) · two monitors and 125% display scale |
+| **Partly tested** | niri (nested in KDE, with a test picture) · screen sharing on other Wayland desktops (tried on KDE only) · game hooks (test game folders, not real games) · the installer (clean Fedora, Debian, Ubuntu, Arch and openSUSE containers) |
+| **Not tried yet** | Hyprland · Sway · games in exclusive fullscreen |
+| **Does not work yet** | GNOME on Wayland (it can't show the cards) |
 
 ## Languages
 
@@ -115,9 +122,9 @@ To check the download, get the `.sha256` file from the same release and run
 and the 🇯🇵→🇬🇧, 🇨🇳→🇬🇧 and 🇬🇧→🇧🇷 translators already inside.
 
 **Will it run on my system?** lenslate is tested on **KDE Plasma 6 (Wayland)** and **X11 desktops** (Linux Mint
-22 Cinnamon). The installer knows Fedora, Arch, Debian 13+, Ubuntu 25.04+, openSUSE and Linux Mint 22. Other
-Wayland desktops (Hyprland, Sway, niri) should work and are only partly tested; GNOME on Wayland can't show the
-overlay yet. What works where: [docs/CAPTURE.md](docs/CAPTURE.md).
+22 Cinnamon). The installer knows Fedora, Arch, Debian 13+, Ubuntu 25.04+, openSUSE and Linux Mint 22. niri is
+partly tested, Hyprland and Sway have not been tried yet, and GNOME on Wayland can't show the overlay yet. What
+works where: [docs/CAPTURE.md](docs/CAPTURE.md).
 
 ## Your first translation
 

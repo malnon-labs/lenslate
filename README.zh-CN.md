@@ -23,7 +23,7 @@
 lenslate 适合那些还没有你的语言版本的游戏：🇯🇵 只有日文的独立游戏和同人游戏、🇨🇳 中文游戏，以及给 🇧🇷 巴西和葡语玩家的英文游戏。
 它也能用于漫画和截图。只要框选一次文字区域，lenslate 就会在你游玩时持续翻译：菜单、对话和物品说明都会以你的语言显示在原来的位置——有点像 Google Lens，但是实时的。
 
-**Linux 优先。** Windows 上已经有不少同类工具。lenslate 是为 Linux 桌面（KDE Plasma、X11、Hyprland、Sway……）打造的，即使在 Wayland 下也能把译文卡片显示在全屏游戏之上。
+**Linux 优先。** Windows 上已经有不少同类工具。lenslate 是为 Linux 桌面（目前是 Wayland 下的 KDE Plasma 和 X11 桌面）打造的，即使在 Wayland 下也能把译文卡片显示在全屏游戏之上。
 
 - **译文就在原文上。** 没有第二个窗口，也没有字幕条。每段文字都会得到一张译文卡片，位置相同、大小相近。
 - **私密，在本机运行。** 识别和翻译都在你自己的电脑上进行，无需账号，设置完成后也不需要联网。如果需要，也可以使用在线翻译（Google、DeepL 等），作为主要翻译器或仅作为备用；它们默认关闭。
@@ -33,7 +33,14 @@ lenslate 适合那些还没有你的语言版本的游戏：🇯🇵 只有日�
 - **可选的游戏钩子。** 对于 Unity、RPG Maker MV/MZ 和 Ren'Py 游戏，lenslate 也可以直接在游戏内部翻译，而不是覆盖在屏幕上。
 - **支持的语言：** 读取 🇯🇵 🇨🇳 🇬🇧 🇰🇷 🇷🇺，翻译成 🇬🇧 🇨🇳 🇪🇸 🇧🇷。详见[语言](#语言)。
 
-> **状态：** 早期版本（0.1）。以上功能都能用，但只在少数环境中测试过，还不够完善。可能会遇到问题，欢迎[反馈](#反馈问题)。
+> **状态：** 早期版本。只在少数环境中测试过，还不够完善。可能会遇到问题，欢迎[反馈](#反馈问题)。
+
+| | 环境 |
+| --- | --- |
+| **已用真实游戏测试** | KDE Plasma 6（Wayland）· X11（Linux Mint 22 Cinnamon）· 双显示器和 125% 显示缩放 |
+| **部分测试** | niri（嵌套在 KDE 中，使用测试图片）· 其他 Wayland 桌面上的屏幕共享（只在 KDE 上试过）· 游戏钩子（测试用的游戏文件夹，不是真实游戏）· 安装程序（干净的 Fedora、Debian、Ubuntu、Arch 和 openSUSE 容器） |
+| **尚未尝试** | Hyprland · Sway · 独占全屏的游戏 |
+| **暂不支持** | GNOME（Wayland）（无法显示卡片） |
 
 ## 语言
 
@@ -94,7 +101,7 @@ tar xf lenslate-*.tar.gz && cd lenslate-*/
 
 **即将推出：AppImage。** 一个无需安装的单文件版本，以及一个离线版本，内置识别模型和 🇯🇵→🇬🇧、🇨🇳→🇬🇧、🇬🇧→🇧🇷 翻译器。
 
-**能在我的系统上运行吗？** lenslate 已在 **KDE Plasma 6（Wayland）** 和 **X11 桌面**（Linux Mint 22 Cinnamon）上测试。安装程序支持 Fedora、Arch、Debian 13+、Ubuntu 25.04+、openSUSE 和 Linux Mint 22。其他 Wayland 桌面（Hyprland、Sway、niri）应该可以使用，但只做过部分测试；GNOME（Wayland）暂时无法显示覆盖层。详见 [docs/CAPTURE.md](docs/CAPTURE.md)（英文）。
+**能在我的系统上运行吗？** lenslate 已在 **KDE Plasma 6（Wayland）** 和 **X11 桌面**（Linux Mint 22 Cinnamon）上测试。安装程序支持 Fedora、Arch、Debian 13+、Ubuntu 25.04+、openSUSE 和 Linux Mint 22。niri 做过部分测试，Hyprland 和 Sway 尚未尝试，GNOME（Wayland）暂时无法显示覆盖层。详见 [docs/CAPTURE.md](docs/CAPTURE.md)（英文）。
 
 ## 第一次翻译
 

@@ -28,8 +28,8 @@ diálogos e descrições de itens aparecem no seu idioma, no mesmo lugar, mais o
 ao vivo.
 
 **Feito primeiro para Linux.** O Windows já tem várias ferramentas assim. O lenslate foi feito para os desktops
-Linux (KDE Plasma, X11, Hyprland, Sway…) e desenha seus cartões por cima de jogos em tela cheia, inclusive no
-Wayland.
+Linux (por enquanto KDE Plasma no Wayland e desktops X11) e desenha seus cartões por cima de jogos em tela
+cheia, inclusive no Wayland.
 
 - **A tradução fica em cima do texto.** Sem segunda janela e sem barra de legendas. Cada trecho de texto ganha um
   cartão com a tradução, no mesmo lugar e mais ou menos do mesmo tamanho.
@@ -46,8 +46,15 @@ Wayland.
   dentro do próprio jogo, em vez de por cima da tela.
 - **Seus idiomas:** lê 🇯🇵 🇨🇳 🇬🇧 🇰🇷 🇷🇺, traduz para 🇬🇧 🇨🇳 🇪🇸 🇧🇷. Veja [Idiomas](#idiomas).
 
-> **Status:** versão inicial (0.1). Tudo acima funciona, mas foi testado em poucas configurações e ainda não
-> está polido. Espere algumas arestas e, por favor, [conte o que der errado](#relatando-problemas).
+> **Status:** versão inicial. Foi testado só em poucas configurações e ainda não está polido. Espere algumas
+> arestas e, por favor, [conte o que der errado](#relatando-problemas).
+
+| | Onde |
+| --- | --- |
+| **Testado** com jogos de verdade | KDE Plasma 6 (Wayland) · X11 (Linux Mint 22 Cinnamon) · dois monitores e escala de tela de 125% |
+| **Testado em parte** | niri (dentro do KDE, com uma imagem de teste) · compartilhamento de tela em outros desktops Wayland (testado só no KDE) · ganchos de jogo (pastas de jogo de teste, não jogos de verdade) · o instalador (contêineres limpos de Fedora, Debian, Ubuntu, Arch e openSUSE) |
+| **Ainda não testado** | Hyprland · Sway · jogos em tela cheia exclusiva |
+| **Ainda não funciona** | GNOME no Wayland (não consegue mostrar os cartões) |
 
 ## Idiomas
 
@@ -117,9 +124,9 @@ Para conferir o download, pegue o arquivo `.sha256` na mesma versão e rode
 leitor e os tradutores 🇯🇵→🇬🇧, 🇨🇳→🇬🇧 e 🇬🇧→🇧🇷.
 
 **Vai rodar no meu sistema?** O lenslate foi testado no **KDE Plasma 6 (Wayland)** e em **desktops X11** (Linux
-Mint 22 Cinnamon). O instalador conhece Fedora, Arch, Debian 13+, Ubuntu 25.04+, openSUSE e Linux Mint 22. Outros
-desktops Wayland (Hyprland, Sway, niri) devem funcionar e foram testados só em parte; o GNOME no Wayland ainda
-não consegue mostrar a sobreposição. O que funciona onde: [docs/CAPTURE.md](docs/CAPTURE.md) (em inglês).
+Mint 22 Cinnamon). O instalador conhece Fedora, Arch, Debian 13+, Ubuntu 25.04+, openSUSE e Linux Mint 22. O niri foi
+testado em parte, Hyprland e Sway ainda não foram testados, e o GNOME no Wayland ainda não consegue mostrar a
+sobreposição. O que funciona onde: [docs/CAPTURE.md](docs/CAPTURE.md) (em inglês).
 
 ## Sua primeira tradução
 
