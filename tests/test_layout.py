@@ -132,6 +132,39 @@ class X11TopWindow(unittest.TestCase):
                 del ls.xb
 
 
+class CardsWhenCovered(unittest.TestCase):
+    """Automatic translation waits while no window holds the area (a dialog or menu on top, the game moved away);
+    its cards were left drawn over the other window (the overlay is above everything). They are put away until the
+    game window holds the area again (X11 laptop, 2026-11-21)."""
+    def test_cards_put_away_and_back(self):
+        import types
+        game = types.SimpleNamespace(uuid="7", rect=QRect(0, 0, 1536, 864))
+        dialog = types.SimpleNamespace(uuid="8", rect=QRect(400, 200, 300, 200))
+        sets, started = [], []
+        d = types.SimpleNamespace(
+            region=QRect(0, 0, 1536, 864), selecting=False, hidden=False, worker=None, pending=None, gen=1,
+            target=game, cards=[{"text": "x"}], _told_focus=True, _fresh=False,
+            screen=types.SimpleNamespace(geometry=lambda: QRect(0, 0, 1536, 864)),
+            overlay=types.SimpleNamespace(place=lambda s: None, set=lambda k, v: sets.append((k, v))),
+            badge=lambda *a: None, clear_badge=lambda: None,
+            cache=types.SimpleNamespace(names=types.SimpleNamespace(game="g"), set_game=lambda g: None),
+            _start_worker=lambda force, win, gen: started.append(win.uuid), follow=lambda cur: None)
+        saved = (ls.active_window, ls.X11, ls.PORTAL, ls.window_game, ls.KWIN_DIRECT[0])
+        try:
+            ls.X11, ls.PORTAL, ls.KWIN_DIRECT[0] = False, False, False
+            ls.window_game = lambda uuid: "g"
+            ls.active_window = lambda: dialog          # a dialog over the game has the focus
+            ls.Daemon.run(d, False)
+            self.assertEqual(sets[-1], ("showCards", False))
+            self.assertEqual(started, [])
+            ls.active_window = lambda: game            # the game is back
+            ls.Daemon.run(d, False)
+            self.assertEqual(sets[-1], ("showCards", True))
+            self.assertEqual(started, ["7"])
+        finally:
+            ls.active_window, ls.X11, ls.PORTAL, ls.window_game, ls.KWIN_DIRECT[0] = saved
+
+
 class X11MixedScales(unittest.TestCase):
     def test_x_pixels_map_through_the_screen_they_are_on(self):
         """KDE XWayland, DP-2 at 100 % and DP-3 at 125 %: X space 2400x1350 + 1280x1024 at 2400,70; Qt: DP-2

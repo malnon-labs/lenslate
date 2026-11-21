@@ -1858,6 +1858,7 @@ class Daemon(QObject):
 
     def show_overlay(self, refresh=True):
         self.hidden = False
+        self._parked = False
         self.overlay.set("showCards", True)
         self.overlay.place(self.screen)
         if self.auto_was:
@@ -1958,6 +1959,7 @@ class Daemon(QObject):
         self.text_scale = None
         self.target = None
         self._told_focus = False      # a new area: say again what it needs
+        self._parked = False
         self.hidden = False
         self.cards = []
         self.overlay.set("cards", [])
@@ -2006,6 +2008,9 @@ class Daemon(QObject):
         gen = self.gen
         if win is not None:
             self._told_focus = False
+            if getattr(self, "_parked", False):     # the game window is back over the area: its cards too
+                self._parked = False
+                self.overlay.set("showCards", True)
             game = window_game(win.uuid)
             if game != self.cache.names.game:
                 dbg("game for names: %s" % game)
@@ -2015,6 +2020,12 @@ class Daemon(QObject):
             # No capturable window for the region. A full-screen capture would have to hide the cards around every
             # shot (they flashed on and off each interval), so auto-refresh waits instead.
             dbg("target window not capturable/focused: auto refresh skipped")
+            if self.cards and not getattr(self, "_parked", False):
+                # another window sits over the area (a dialog, a menu) or the game moved away: the overlay is
+                # above every window, so its old cards were drawn over the other window, in the old places
+                # (seen on the X11 laptop with a tiling helper, 2026-11-21). Put them away until the game is back.
+                self._parked = True
+                self.overlay.set("showCards", False)
             if not getattr(self, "_told_focus", False):
                 # say it once per area: otherwise auto mode looks broken while it waits for the game window
                 self._told_focus = True
