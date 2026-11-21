@@ -19,7 +19,6 @@ release is **0.2.0** (an early version). Changes per version are in [CHANGELOG.m
 ## Next
 
 ### Still open after 0.2
-- A VirusTotal scan of each AppImage, linked in the release notes.
 - A native speaker's look at the windows in Portuguese, Chinese, Japanese, Korean and Russian (none has been
   checked by a native speaker yet).
 - Setup's "Download and continue" is tested offscreen only, not yet on a real desktop.
@@ -35,8 +34,9 @@ Before 1.0:
   the permanent hover bar; help bars that grow with large fonts. Release check: every control usable without a mouse.
 - **A calmer settings window:** theme icons instead of emoji, radio buttons / dropdowns where KDE uses them, the
   typewriter timings and timing tables under an "Advanced" fold, one way of applying settings on every page.
-- **Packaging:** a final app ID (reverse-DNS) with AppStream metadata checked in CI; update information inside the
-  AppImage and an opt-in "check for updates" (off by default); AUR / COPR packages for KDE.
+- **Packaging:** one VirusTotal scan of the AppImages for 1.0 (not for every version); a final app ID (reverse-DNS)
+  with AppStream metadata checked in CI; update information inside the AppImage and an opt-in "check for updates"
+  (off by default); AUR / COPR packages for KDE.
 - **Code:** the old *.bak copies out of the project folder; the first-run window renamed from setup.py (packaging tools
   treat that name as an install script); a package with pyproject.toml; gui.py split per page and lenslate.py into
   daemon / capture / layout parts; one place for the pinned versions.
