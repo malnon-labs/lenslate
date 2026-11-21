@@ -166,5 +166,25 @@ class SelfChangedSettings(unittest.TestCase):
         win.close()
 
 
+@unittest.skipIf(QApplication is None, "PySide6 is not installed")
+class LanguagePicker(unittest.TestCase):
+    def test_another_language_says_in_red_that_lenslate_must_restart(self):
+        import gui
+        import i18n
+        app = QApplication.instance() or QApplication(["test"])
+        win = gui.MainWindow()
+        win.show_page("Advanced")
+        app.processEvents()
+        box = next(w for w in win.findChildren(gui.QWidget) if hasattr(w, "note") and hasattr(w, "combo"))
+        self.assertTrue(box.note.isHidden())                 # the language in use: nothing to say
+        box.combo.setCurrentIndex(box.combo.findData("pt"))
+        self.assertFalse(box.note.isHidden())
+        self.assertIn("Restart lenslate", box.note.text())
+        self.assertIn(i18n.catalog("pt")[gui.RESTART_TEXT], box.note.text())   # also in the picked language
+        box.combo.setCurrentIndex(box.combo.findData("en"))
+        self.assertTrue(box.note.isHidden())
+        win.close()
+
+
 if __name__ == "__main__":
     unittest.main()

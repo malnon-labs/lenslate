@@ -215,7 +215,46 @@ def setting_widget(key, flt, on_error):
     if cfgmod.overridden(key):
         w.setEnabled(False)
         help_text += " (Locked: set by the environment variable %s.)" % s.env
-    return explain(w, help_text, flt)
+    explain(w, help_text, flt)
+    if key == "general.ui_language":
+        return language_picker(w)
+    return w
+
+
+RESTART_TEXT = N_("Restart lenslate to use the new language: close it from the tray menu (Close this window and "
+                  "tray icon) and start it again.")
+
+
+def language_picker(combo):
+    """The window language list with a red note under it once another language is picked: the windows are built in
+    one language and only a restart shows the new one (people changed it and saw nothing happen)."""
+    box = QWidget()
+    lay = QVBoxLayout(box)
+    lay.setContentsMargins(0, 0, 0, 0)
+    lay.setSpacing(4)
+    lay.addWidget(combo)
+    note = QLabel()
+    note.setWordWrap(True)
+    note.setFixedWidth(420)
+    lay.addWidget(note)
+
+    def update(_i=None):
+        want = combo.currentData()
+        code = want if want in i18n.LANGS and want != "auto" else i18n.system_language()
+        if code == i18n.language():
+            note.setVisible(False)
+            return
+        lines = [_(RESTART_TEXT)]
+        other = i18n.catalog(code).get(RESTART_TEXT, RESTART_TEXT)
+        if other not in lines:                  # also in the picked language: that is the one the user reads
+            lines.append(other)
+        note.setText("<span style='color:%s'>%s</span>" % (theme.color("danger_text"), "<br>".join(lines)))
+        note.setFixedHeight(note.heightForWidth(420))   # the form does not grow by itself for a wrapped label
+        note.setVisible(True)
+    combo.currentIndexChanged.connect(update)
+    update()
+    box.combo, box.note = combo, note
+    return box
 
 
 def save(key, value, on_error):
@@ -812,6 +851,19 @@ class Window(QWidget):
         self.timer.timeout.connect(self.refresh_status)
         self.timer.start(2000)
         self.refresh_status()
+
+    def toggle_app_menu(self):
+        import appmenu
+        try:
+            if appmenu.state() == "ours":
+                appmenu.remove()
+                self.say(_("lenslate is no longer in the app menu."))
+            else:
+                appmenu.install()
+                self.say(_("lenslate is in the app menu now."))
+        except (OSError, RuntimeError) as e:
+            self.error(_("Could not change the app menu entry: %s") % e)
+        self.rebuild_pages()
 
     def show_page(self, name):
         """Open a page by its English name ("Translation"). The sidebar shows the names translated, or only icons
@@ -2549,6 +2601,14 @@ class Window(QWidget):
         ver.setTextInteractionFlags(Qt.TextSelectableByMouse)
         top.addWidget(set_role(ver, "hint"))
         top.addStretch(1)
+        import appmenu
+        if appmenu.appimage() and appmenu.state() != "installed":   # the AppImage: its own app menu entry
+            has = appmenu.state() == "ours"
+            menu = explain(QPushButton(_("Remove from app menu") if has else _("Add to app menu")),
+                           "lenslate's entry in your desktop's app menu, for this AppImage. The entry starts the "
+                           "AppImage file where it is now: after moving the file, add it again.", f)
+            menu.clicked.connect(self.toggle_app_menu)
+            top.addWidget(set_role(menu, "quiet"))
         top.addWidget(set_role(cfg, "quiet"))
         out = [top]
         for sec, about in cfgmod.SECTIONS.items():

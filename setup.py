@@ -116,6 +116,13 @@ class Setup(QWizard):
         cfgmod.apply_preset(self.preset())
         cfgmod.set("general.setup_done", True)
         self.measure = self.page(3).measure.isChecked()
+        menu = self.page(3).menu
+        if menu.isVisibleTo(self.page(3)) and menu.isChecked():
+            import appmenu
+            try:
+                appmenu.install()
+            except (OSError, RuntimeError) as e:
+                QMessageBox.warning(self, _("App menu"), _("Could not add lenslate to the app menu: %s") % e)
         super().accept()
 
     def reject(self):
@@ -607,6 +614,14 @@ class DonePage(QWizardPage):
                     "Translation page can show real numbers for your processor and graphics card. The processor is busy "
                     "for a moment.")
         self.lay.addWidget(self.measure)
+        import appmenu
+        # the AppImage adds nothing to the app menu by itself (install.sh makes its own entry)
+        self.menu = QCheckBox(_("Add lenslate to the app menu"))
+        self.menu.setChecked(True)
+        self.menu.setVisible(bool(appmenu.appimage()) and appmenu.state() is None)
+        wiz.explain(self.menu, "Puts lenslate in your desktop's app menu, with its icon. The entry starts this "
+                    "AppImage file where it is now: after moving the file, add it again (Advanced page).")
+        self.lay.addWidget(self.menu)
         keys = set_role(QPushButton(_("Keyboard shortcuts…")), "secondary")
         wiz.explain(keys, "See and change the four hotkeys. lenslate checks that a key is free before it uses it.")
         keys.clicked.connect(lambda: (shortcutsdialog.ShortcutsDialog(self).exec(), self.initializePage()))
