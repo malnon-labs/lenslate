@@ -28,10 +28,6 @@ release is **0.1.0** (an early preview). Changes per version are in [CHANGELOG.m
 - A VirusTotal scan of each new AppImage, linked in the release notes.
 - A native speaker's look at the windows in Portuguese, Chinese, Japanese, Korean and Russian (every text is
   translated, about 200 of them on 2026-11-21; none has been checked by a native speaker yet).
-- **Cards over other windows (seen on the X11 laptop):** when another window covers part of the area (the setup
-  window, a tray menu) or a tiling helper moves and resizes the game window, the old cards stay drawn on top of
-  everything, in the old places, until the game window is back. Hide the cards while the game window is not the one
-  the player sees over the area.
 
 ### Clean-ups (from a review of the app against desktop-app practice, 2026-11-20)
 Done for 0.2 (2026-11-21): the README says what was tested; every visible text translated, with a test; settings

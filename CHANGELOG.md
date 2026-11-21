@@ -25,6 +25,9 @@ Lines marked *(cache)* make lenslate translate cached lines again: the old ones 
   window covers the picked area; the background part is called the overlay everywhere ("Overlay: running",
   Start / Stop overlay); setup's **Next downloads the ticked items** and goes on ("Download and continue"), and
   warns on the page when nothing could translate the chosen languages.
+- **Cards no longer stay over other windows:** while a dialog or menu sits over the area, or the game window moved
+  away, automatic translation waits and the cards are put away; they come back with the game window (seen on the X11
+  laptop, where they stayed drawn over the setup window and the tray menu).
 - The Names page's "No names for this game yet" no longer stands above a filled list; the list for every game is
   called "All games".
 - README: a table of what was tested, partly tested and not tried; settings-window screenshots retaken with the
