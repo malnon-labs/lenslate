@@ -19,12 +19,11 @@ release is **0.1.0** (an early preview). Changes per version are in [CHANGELOG.m
 ## Next
 
 ### 0.2: still to do before the release
-- **Build the offline AppImage again** with the 2026-11-21 changes (the normal one is rebuilt; on the X11 laptop
-  its settings and setup windows now open with the NVIDIA card off, and the overlay's "Click the game once" hint
-  shows when no window covers the area). Setup's "Download and continue" is tested offscreen only. The older
-  offline AppImage was tried on real X11 hardware (Linux Mint 22 Cinnamon, 3072x1728 at 2x, fresh home): translators
-  imported, cards on a Japanese RPG Maker screen, automatic translation through a screen change, settings window,
-  setup window and tray menu.
+- **The AppImages** (built 2026-11-21 from the finished 0.2 code, both in dist/): tried on real X11 hardware (Linux
+  Mint 22 Cinnamon, 3072x1728 at 2x, fresh home): translators imported, cards on a Japanese RPG Maker screen,
+  automatic translation through a screen change and a moved window, settings window (also with the NVIDIA card
+  off), setup window, tray menu, the overlay's "Click the game once" hint. Setup's "Download and continue" is
+  tested offscreen only.
 - A VirusTotal scan of each new AppImage, linked in the release notes.
 - A native speaker's look at the windows in Portuguese, Chinese, Japanese, Korean and Russian (every text is
   translated, about 200 of them on 2026-11-21; none has been checked by a native speaker yet).
