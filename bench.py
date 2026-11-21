@@ -44,10 +44,13 @@ def _hardware():
         pass
     gpu, vram = None, 0
     try:
-        out = subprocess.run(["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader,nounits"],
-                             capture_output=True, text=True, timeout=5).stdout.strip().splitlines()
+        run = subprocess.run(["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader,nounits"],
+                             capture_output=True, text=True, timeout=5)
+        # a switched-off card (hybrid laptops) or a missing driver: nvidia-smi prints an error message, not data
+        out = run.stdout.strip().splitlines() if run.returncode == 0 else []
         if out:
-            gpu, vram = out[0].split(",")[0].strip(), int(out[0].split(",")[1])
+            name, mb = out[0].rsplit(",", 1)
+            gpu, vram = name.strip(), int(mb)
     except (OSError, ValueError, subprocess.SubprocessError):
         pass
     return {"cpu": cpu, "gpu": gpu, "vram_mb": vram}
