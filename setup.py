@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QFrame, QGrid
                                QMessageBox, QProgressBar, QPushButton, QRadioButton, QVBoxLayout, QWizard, QWizardPage)
 
 import config as cfgmod
-from i18n import _
+from i18n import N_, _
 import hwcheck
 import langs
 import shortcutsdialog
@@ -72,7 +72,7 @@ class Setup(QWizard):
         self.addPage(PresetPage(self))
         self.addPage(DownloadsPage(self))
         self.addPage(DonePage(self))
-        self.setButtonText(QWizard.FinishButton, "Finish")
+        self.setButtonText(QWizard.FinishButton, _("Finish"))
         for b in (QWizard.NextButton, QWizard.FinishButton):
             set_role(self.button(b), "primary")
 
@@ -131,15 +131,15 @@ class Setup(QWizard):
 
 # ------------------------------------------------------------------------------------------------ 1. languages
 LANG_HELP = {
-    "ja": "Japanese games, visual novels, manga, video subtitles.",
-    "zh": "Chinese games and text, Simplified and Traditional characters.",
-    "en": "English games and text (useful when you translate into Spanish, Portuguese or Chinese).",
-    "ko": "Korean. Read by its own reader model, so it goes together with English only (not with Japanese, "
-          "Chinese or Russian). Its processor translator is literal and weak on lone words (menus come from a "
-          "ready-made list); the language model translates it better.",
-    "ru": "Russian. Read by its own reader model, so it goes together with English only (not with Japanese, "
-          "Chinese or Korean). Its processor translator is literal and weak on lone words (menus come from a "
-          "ready-made list); the language model translates it better.",
+    "ja": N_("Japanese games, visual novels, manga, video subtitles."),
+    "zh": N_("Chinese games and text, Simplified and Traditional characters."),
+    "en": N_("English games and text (useful when you translate into Spanish, Portuguese or Chinese)."),
+    "ko": N_("Korean. Read by its own reader model, so it goes together with English only (not with Japanese, "
+             "Chinese or Russian). Its processor translator is literal and weak on lone words (menus come from a "
+             "ready-made list); the language model translates it better."),
+    "ru": N_("Russian. Read by its own reader model, so it goes together with English only (not with Japanese, "
+             "Chinese or Korean). Its processor translator is literal and weak on lone words (menus come from a "
+             "ready-made list); the language model translates it better."),
 }
 
 
@@ -218,11 +218,11 @@ class LanguagesPage(QWizardPage):
         tgt = self.tgt.currentData()
         en = self.boxes["en"]
         en.setEnabled(tgt != "English")
-        en.setToolTip("" if tgt != "English" else "Text already in English is left as it is.")
+        en.setToolTip("" if tgt != "English" else _("Text already in English is left as it is."))
         codes = self.codes()
         if not codes:
             self.plan.setText(_("<span style='%s'>Tick at least one language%s.</span>") % (
-                _c("warning_text"), " other than English" if tgt == "English" else ""))
+                _c("warning_text"), _(" other than English") if tgt == "English" else ""))
         else:
             src = ",".join(codes)
             base = sorted((models.BY_NAME[m] for m in hwcheck.language_models(src, tgt) if m),
@@ -232,15 +232,15 @@ class LanguagesPage(QWizardPage):
             lines = []
             if base:
                 lines.append(_("<b>Always installed</b> (processor, %.1f GB): %s") % (
-                    sum(m.size_gb for m in base), ", ".join(m.can for m in base)))
+                    sum(m.size_gb for m in base), ", ".join(_(m.can) for m in base)))
             else:
                 lines.append(_("<b>No processor translator</b> is needed for these languages: only the language "
                              "model below or an online service."))
             lines.append(_("<b>Language model</b> (%.1f GB download, %.1f GB of graphics-card memory; only with a "
-                         "preset that uses the graphics card): %s%s") % (llm.size_gb, llm.vram_gb or 0, llm.title,
-                                                                         " - %s" % why if llm.name == name else _(" (your own choice)")))
+                         "preset that uses the graphics card): %s%s") % (llm.size_gb, llm.vram_gb or 0, _(llm.title),
+                                                                         " - %s" % _(why) if llm.name == name else _(" (your own choice)")))
             if llm.name.startswith("plamo"):
-                lines.append("<span style='%s'>PLaMo's licence allows personal and non-commercial use only.</span>"
+                lines.append(_("<span style='%s'>PLaMo's licence allows personal and non-commercial use only.</span>")
                              % _c("text_muted"))
             self.plan.setText("<br>".join(lines))
         self.completeChanged.emit()
@@ -273,13 +273,13 @@ class PresetPage(QWizardPage):
         self.rec_chips = {}
         for i, name in enumerate(cfgmod.PRESET_ORDER):
             p = cfgmod.PRESETS[name]
-            r = QRadioButton(p["label"])
-            wiz.explain(r, "%s Trade-off: %s" % (p["summary"], p["tradeoff"]))
+            r = QRadioButton(_(p["label"]))
+            wiz.explain(r, _("%s Trade-off: %s") % (_(p["summary"]), _(p["tradeoff"])))
             r.toggled.connect(lambda on, n=name: on and self.pick(n))
             self.group.addButton(r)
             self.radios[name] = r
-            desc = set_role(_label(p["summary"]), "muted")
-            wiz.explain(desc, "%s Trade-off: %s" % (p["summary"], p["tradeoff"]))
+            desc = set_role(_label(_(p["summary"])), "muted")
+            wiz.explain(desc, _("%s Trade-off: %s") % (_(p["summary"]), _(p["tradeoff"])))
             chip = set_role(QLabel(_("★ Recommended")), "chip", kind="accent")
             chip.setVisible(False)
             self.rec_chips[name] = chip
@@ -312,16 +312,16 @@ class PresetPage(QWizardPage):
     def initializePage(self):
         i = self.wiz.info
         g = hwcheck.best_gpu(i)
-        gpu = ("%s, %.0f GB of its own memory%s" % (g["name"], g["vram_mb"] / 1024,
-                                                   (", %.1f GB free now" % ((g["vram_mb"] - g["used_mb"]) / 1024))
-                                                   if g["used_mb"] is not None else "")
-               if g and g["dedicated"] else ("integrated %s graphics (no memory of its own)" % g["vendor"]) if g
-               else "no graphics card found")
+        gpu = (_("%s, %.0f GB of its own memory%s") % (g["name"], g["vram_mb"] / 1024,
+                                                      (_(", %.1f GB free now") % ((g["vram_mb"] - g["used_mb"]) / 1024))
+                                                      if g["used_mb"] is not None else "")
+               if g and g["dedicated"] else (_("integrated %s graphics (no memory of its own)") % g["vendor"]) if g
+               else _("no graphics card found"))
         self.pc.setText(_("<b>Your PC</b><br>Processor: %s (%d threads)<br>Graphics: %s<br>Memory: %.0f GB · "
                         "Free disk space: %s") % (i["cpu"], i["threads"], gpu, i["ram_gb"],
                                                  "%.0f GB" % i["disk_free_gb"] if i["disk_free_gb"] is not None else "?"))
         self.recommended, why = hwcheck.recommend(i, self.wiz.sources(), self.wiz.target(), llm=self.wiz.llm())
-        self.rec.setText(_("Recommended: <b>%s</b> (%s).") % (cfgmod.PRESETS[self.recommended]["label"], why))
+        self.rec.setText(_("Recommended: <b>%s</b> (%s).") % (_(cfgmod.PRESETS[self.recommended]["label"]), _(why)))
         for n, r in self.radios.items():
             self.rec_chips[n].setVisible(n == self.recommended)
         start = self.chosen or self.recommended
@@ -335,15 +335,16 @@ class PresetPage(QWizardPage):
         uses = ""
         if p["values"].get("translator.kind") == "llm":
             m = models.BY_NAME[self.wiz.llm()]
-            uses = "<br>Language model for your languages: <b>%s</b> (%.1f GB of graphics-card memory)." % (
-                m.title, m.vram_gb or 0)
-        self.trade.setText(_("<b>%s</b>: %s<br>Trade-off: %s%s") % (p["label"], p["summary"], p["tradeoff"], uses))
+            uses = _("<br>Language model for your languages: <b>%s</b> (%.1f GB of graphics-card memory).") % (
+                _(m.title), m.vram_gb or 0)
+        self.trade.setText(_("<b>%s</b>: %s<br>Trade-off: %s%s") % (_(p["label"]), _(p["summary"]), _(p["tradeoff"]),
+                                                                    uses))
         self.problems = hwcheck.check(name, self.wiz.info, self.wiz.sources(), self.wiz.target(), llm=self.wiz.llm())
-        self.warn.setText("<br>".join("⚠ " + t for t in self.problems))
+        self.warn.setText("<br>".join("⚠ " + _(t) for t in self.problems))
         self.warn.setVisible(bool(self.problems))
         other = name != self.recommended
         self.use_rec.setVisible(bool(self.problems) and other)
-        self.use_rec.setText(_("Use %s instead") % cfgmod.PRESETS[self.recommended]["label"])
+        self.use_rec.setText(_("Use %s instead") % _(cfgmod.PRESETS[self.recommended]["label"]))
 
     def validatePage(self):
         if not self.problems:
@@ -413,35 +414,35 @@ class DownloadsPage(QWizardPage):
                 w.deleteLater()
         self.items = []
         preset, src, tgt = self.wiz.preset(), self.wiz.sources(), self.wiz.target()
-        plabel = cfgmod.PRESETS[preset]["label"]
+        plabel = _(cfgmod.PRESETS[preset]["label"])
         need = hwcheck.preset_needs(preset, src, tgt, llm=self.wiz.llm())
         rows = []   # (key, title, GB, licence, why, checked, installed)
         for m in need["models"]:
             mm = models.BY_NAME[m]
-            rows.append((m, mm.title, mm.size_gb, mm.license, "needed by %s" % plabel, True, mm.installed()))
+            rows.append((m, _(mm.title), mm.size_gb, _(mm.license), _("needed by %s") % plabel, True, mm.installed()))
         if need["ocr_gpu"]:
-            rows.append(("ocr-gpu", "Reading on the graphics card (CUDA runtime)", hwcheck.OCR_GPU_DL_GB,
-                         "NVIDIA CUDA EULA", "needed by %s" % plabel, True, ocrgpu.installed()))
+            rows.append(("ocr-gpu", _("Reading on the graphics card (CUDA runtime)"), hwcheck.OCR_GPU_DL_GB,
+                         "NVIDIA CUDA EULA", _("needed by %s") % plabel, True, ocrgpu.installed()))
         for m in hwcheck.language_models(src, tgt, "mt"):   # processor models: menus, and the fallback
             if m not in need["models"]:
                 mm = models.BY_NAME[m]
-                rows.append((m, mm.title, mm.size_gb, mm.license, "always installed for your languages: small, on "
-                             "the processor, and the backup when the language model is missing or busy", True,
-                             mm.installed()))
+                rows.append((m, _(mm.title), mm.size_gb, _(mm.license), _("always installed for your languages: "
+                             "small, on the processor, and the backup when the language model is missing or busy"),
+                             True, mm.installed()))
         if "ja" in langs.sources(src) and "sugoi-v4-ja-en" not in need["models"]:
             mm = models.BY_NAME["sugoi-v4-ja-en"]
-            rows.append((mm.name, mm.title, mm.size_gb, mm.license, "optional: the Visual novel translator on the "
-                         "processor (Visual novel translator)", False, mm.installed()))
+            rows.append((mm.name, _(mm.title), mm.size_gb, _(mm.license), _("optional: the Visual novel translator "
+                         "on the processor (Visual novel translator)"), False, mm.installed()))
         for i, (key, title, gb, lic, why, checked, installed) in enumerate(rows):
             cb = QCheckBox(title)
             cb.setChecked(checked and not installed)
             cb.setEnabled(not installed)
             cb.toggled.connect(self.update_total)
             can = getattr(models.BY_NAME.get(key), "can", "")
-            self.wiz.explain(cb, "%s. %s%.1f GB download, licence: %s." % (
-                why[0].upper() + why[1:], ("Translates: %s. " % can) if can else "", gb, lic))
-            info = _label(_("%.1f GB · %s%s · %s") % (gb, ("<b>%s</b> · " % can) if can else "", lic,
-                                                  "<span style='%s'>✓ installed</span>" % _c("success_text")
+            self.wiz.explain(cb, _("%s. %s%.1f GB download, licence: %s.") % (
+                why[0].upper() + why[1:], (_("Translates: %s. ") % _(can)) if can else "", gb, lic))
+            info = _label(_("%.1f GB · %s%s · %s") % (gb, ("<b>%s</b> · " % _(can)) if can else "", lic,
+                                                  _("<span style='%s'>✓ installed</span>") % _c("success_text")
                                                   if installed else why))
             bar = QProgressBar()
             bar.setVisible(False)
@@ -463,7 +464,7 @@ class DownloadsPage(QWizardPage):
         free = self.wiz.info.get("disk_free_gb")
         low = free is not None and gb + 1 > free
         self.total.setText(_("<b><span style='%s'>%sSelected: %.1f GB · free disk space: %s</span></b>") % (
-            _c("warning_text") if low else "", "⚠ Not enough disk space. " if low else "", gb,
+            _c("warning_text") if low else "", _("⚠ Not enough disk space. ") if low else "", gb,
             "%.0f GB" % free if free is not None else "?"))
         self.go.setEnabled(bool(gb) and not self.running())
 

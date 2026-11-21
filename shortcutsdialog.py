@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (QApplication, QDialog, QGridLayout, QHBoxLayout, 
                                QPlainTextEdit, QPushButton, QVBoxLayout)
 
 import hotkeys as hk
-from i18n import _
+from i18n import N_, _
 
 
 def _role(w, role):
@@ -35,6 +35,11 @@ def key_text(action, keys=None):
     return k or "none"
 
 
+# each command as the dialog names it (hotkeys.ACTIONS keeps the lower-case English the desktops' lists show)
+LABELS = {"select": N_("Pick the area to translate"), "now": N_("Translate the area again"),
+          "auto": N_("Auto refresh on / off"), "toggle": N_("Hide / show the translations")}
+
+
 class ShortcutsDialog(QDialog):
     def __init__(self, parent=None, desk=None, on_saved=None):
         super().__init__(parent)
@@ -44,10 +49,10 @@ class ShortcutsDialog(QDialog):
         self.setWindowTitle(_("Keyboard shortcuts"))
         self.setMinimumWidth(560)
         lay = QVBoxLayout(self)
-        intro = QLabel(("Press a new key combination for a command, then Save. lenslate checks first that nothing "
-                        "else on %s uses it." % hk.NAMES.get(self.desk, self.desk)) if self.can_write else
-                       ("lenslate cannot change shortcuts on %s itself. Choose keys here, then add the lines "
-                        "below to your desktop's settings." % hk.NAMES.get(self.desk, self.desk)))
+        intro = QLabel((_("Press a new key combination for a command, then Save. lenslate checks first that "
+                          "nothing else on %s uses it.") if self.can_write else
+                        _("lenslate cannot change shortcuts on %s itself. Choose keys here, then add the lines "
+                          "below to your desktop's settings.")) % hk.NAMES.get(self.desk, self.desk))
         intro.setWordWrap(True)
         lay.addWidget(intro)
         grid = QGridLayout()
@@ -55,7 +60,7 @@ class ShortcutsDialog(QDialog):
         self.edits, self.notes = {}, {}
         start = keys_now(self.desk)
         for row, (action, what) in enumerate(hk.ACTIONS):
-            grid.addWidget(QLabel(what[:1].upper() + what[1:]), row, 0)
+            grid.addWidget(QLabel(_(LABELS.get(action, what))), row, 0)
             e = QKeySequenceEdit()
             if hasattr(e, "setMaximumSequenceLength"):
                 e.setMaximumSequenceLength(1)
@@ -64,7 +69,7 @@ class ShortcutsDialog(QDialog):
             e.setMinimumWidth(170)
             e.keySequenceChanged.connect(lambda _s: self.check())
             clear = _role(QPushButton(_("No key")), "quiet")
-            clear.setToolTip("Take the key away from this command")
+            clear.setToolTip(_("Take the key away from this command"))
             clear.clicked.connect(lambda _c=False, e=e: e.clear())
             note = QLabel()
             note.setWordWrap(True)
@@ -84,7 +89,8 @@ class ShortcutsDialog(QDialog):
         lay.addWidget(self.status)
         buttons = QHBoxLayout()
         defaults = _role(QPushButton(_("Defaults")), "secondary")
-        defaults.setToolTip("Ctrl+Alt+Z, X, C and V: free in the default shortcuts of every desktop lenslate knows")
+        defaults.setToolTip(_("Ctrl+Alt+Z, X, C and V: free in the default shortcuts of every desktop lenslate "
+                              "knows"))
         defaults.clicked.connect(self.defaults)
         buttons.addWidget(defaults)
         buttons.addStretch(1)
@@ -126,7 +132,7 @@ class ShortcutsDialog(QDialog):
                 note.setText(w if w.startswith(("needs", "also", "unknown", "empty")) else "taken by " + w)
                 note.setProperty("state", "error")
             else:
-                note.setText("" if keys[a] else "no key")
+                note.setText("" if keys[a] else _("no key"))
                 note.setProperty("state", "")
             note.style().unpolish(note)
             note.style().polish(note)

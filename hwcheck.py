@@ -15,6 +15,7 @@ import shutil
 import subprocess
 
 import config as cfgmod
+from i18n import _
 
 VENDORS = {"0x10de": "NVIDIA", "0x1002": "AMD", "0x8086": "Intel"}
 GAME_ROOM_GB = 2.5      # GPU memory a typical game keeps for itself next to lenslate (rule of thumb, not measured)
@@ -158,8 +159,8 @@ def pick_llm(sources=None, target=None):
     src = langs.sources(sources if sources is not None else cfgmod.get("translator.sources"))
     tgt = langs.TARGET_CODES.get((target or cfgmod.get("translator.language")).lower(), "en")
     if tgt == "en" and src - {"en"} == {"ja"}:
-        return "plamo-3-translate-0.8b", "Japanese into English: the most natural dialogue, little GPU memory"
-    return "gemma-4-e2b", "handles every language you chose"
+        return "plamo-3-translate-0.8b", _("Japanese into English: the most natural dialogue, little GPU memory")
+    return "gemma-4-e2b", _("handles every language you chose")
 
 
 def preset_needs(name, sources=None, target=None, llm=None):
@@ -211,50 +212,50 @@ def check(name, info=None, sources=None, target=None, downloads=True, llm=None):
     out = []
     src = langs.sources(sources if sources is not None else cfgmod.get("translator.sources"))
     if cfgmod.PRESETS.get(name, {}).get("values", {}).get("translator.kind") == "mt" and src & set(langs.OWN_READER):
-        out.append("It translates on the processor: for Korean and Russian that translator is literal and weak on "
-                   "lone words (menus come from the ready-made lists); the language model reads more naturally.")
+        out.append(_("It translates on the processor: for Korean and Russian that translator is literal and weak on "
+                   "lone words (menus come from the ready-made lists); the language model reads more naturally."))
     if need["nvidia"] and not (g and g["vendor"] == "NVIDIA"):
-        out.append("It reads text on the graphics card, which needs an NVIDIA card; none was found (the processor would read instead).")
+        out.append(_("It reads text on the graphics card, which needs an NVIDIA card; none was found (the processor would read instead)."))
     if need["vram_gb"]:
         if not g or not g["dedicated"]:
-            out.append("It needs a graphics card with its own memory (about %.1f GB). This PC has %s: the language "
-                       "model would run on the processor instead, about 1-3 s per line."
-                       % (need["vram_gb"], ("only integrated %s graphics" % g["vendor"]) if g else "no graphics card"))
+            out.append(_("It needs a graphics card with its own memory (about %.1f GB). This PC has %s: the language "
+                       "model would run on the processor instead, about 1-3 s per line.")
+                       % (need["vram_gb"], (_("only integrated %s graphics") % g["vendor"]) if g else _("no graphics card")))
         else:
             total = g["vram_mb"] / 1024
             if total < need["vram_gb"] + GAME_ROOM_GB:
-                out.append("It needs about %.1f GB of GPU memory; your %s has %.1f GB in total, which leaves little "
+                out.append(_("It needs about %.1f GB of GPU memory; your %s has %.1f GB in total, which leaves little "
                            "for a game (games often need %.1f GB or more). A game may stutter, or lenslate may be "
-                           "pushed onto the processor (slow)." % (need["vram_gb"], g["name"], total, GAME_ROOM_GB))
+                           "pushed onto the processor (slow).") % (need["vram_gb"], g["name"], total, GAME_ROOM_GB))
             elif g["used_mb"] is not None and (g["vram_mb"] - g["used_mb"]) / 1024 < need["vram_gb"] + 0.3:
-                out.append("Right now only %.1f GB of GPU memory is free (another program, maybe a game, is using "
-                           "it); this preset needs about %.1f GB. It will work once that program is closed."
+                out.append(_("Right now only %.1f GB of GPU memory is free (another program, maybe a game, is using "
+                           "it); this preset needs about %.1f GB. It will work once that program is closed.")
                            % ((g["vram_mb"] - g["used_mb"]) / 1024, need["vram_gb"]))
     if info["ram_gb"] and info["ram_gb"] < need["ram_gb"] + 4:
-        out.append("It uses about %.1f GB of memory (RAM); this PC has %.0f GB in total, so a game and lenslate "
-                   "together may run short." % (need["ram_gb"], info["ram_gb"]))
+        out.append(_("It uses about %.1f GB of memory (RAM); this PC has %.0f GB in total, so a game and lenslate "
+                   "together may run short.") % (need["ram_gb"], info["ram_gb"]))
     if downloads:
         dl = sum(gb for _t, gb in missing_downloads(name, sources, target, llm))
         free = info.get("disk_free_gb")
         if dl and free is not None and free < dl + 1:
-            out.append("It needs %.1f GB of downloads, but only %.1f GB of disk space is free." % (dl, free))
+            out.append(_("It needs %.1f GB of downloads, but only %.1f GB of disk space is free.") % (dl, free))
     if cfgmod.values_of(name).get("ocr.reading") == "ultrafast":
         src = langs.sources(sources if sources is not None else cfgmod.get("translator.sources"))
         if "ja" not in src:
-            out.append("Its reader (meikiocr) only reads Japanese; your source languages would be read badly. "
-                       "Light reads every language.")
+            out.append(_("Its reader (meikiocr) only reads Japanese; your source languages would be read badly. "
+                       "Quick reading reads every language."))
         elif "zh" in src:
-            out.append("Its reader (meikiocr) only reads Japanese: Chinese text is read wrong (English is read by "
-                       "the normal reader). Light reads every language.")
+            out.append(_("Its reader (meikiocr) only reads Japanese: Chinese text is read wrong (English is read by "
+                       "the normal reader). Quick reading reads every language."))
     if cfgmod.values_of(name)["translator.kind"] == "sugoi":
         src = langs.sources(sources if sources is not None else cfgmod.get("translator.sources"))
         tgt = (target or cfgmod.get("translator.language"))
         if "ja" not in src:
-            out.append("Its dialogue translator (Sugoi) only knows Japanese; your languages would all use the "
-                       "plain processor translator, the same as Light.")
+            out.append(_("Its dialogue translator (Sugoi) only knows Japanese; your languages would all use the "
+                       "plain processor translator, the same as No GPU."))
         elif tgt != "English":
-            out.append("Sugoi translates Japanese into English only; for %s each line is then translated again "
-                       "on the processor (a little slower, wording a bit stiffer)." % tgt)
+            out.append(_("Sugoi translates Japanese into English only; for %s each line is then translated again "
+                       "on the processor (a little slower, wording a bit stiffer).") % tgt)
     return out
 
 
@@ -267,11 +268,11 @@ def recommend(info=None, sources=None, target=None, llm=None):
     m = models.find(llm) if llm else None
     vram = (m.vram_gb if m is not None and m.vram_gb else 1.7)
     if g and g["dedicated"] and g["vram_mb"] / 1024 >= vram + GAME_ROOM_GB + 1.5:
-        return "balanced", ("your %s has %.0f GB of memory: enough for the language model next to a game"
+        return "balanced", (_("your %s has %.0f GB of memory: enough for the language model next to a game")
                             % (g["name"], g["vram_mb"] / 1024))
-    why = ("your %s has only %.0f GB of memory, which a game needs" % (g["name"], g["vram_mb"] / 1024)
-           if g and g["dedicated"] else "no graphics card with its own memory was found")
-    return "nogpu", why + "; No GPU runs everything on the processor"
+    why = (_("your %s has only %.0f GB of memory, which a game needs") % (g["name"], g["vram_mb"] / 1024)
+           if g and g["dedicated"] else _("no graphics card with its own memory was found"))
+    return "nogpu", why + _("; No GPU runs everything on the processor")
 
 
 if __name__ == "__main__":   # quick look: python3 hwcheck.py

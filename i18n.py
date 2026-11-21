@@ -76,6 +76,11 @@ def _(text):
     return catalog().get(text, text)
 
 
+def N_(text):
+    """Marks a text that is translated later, where it is shown (kept in a table: page names, tray entries)."""
+    return text
+
+
 def install_qt(app):
     """Load Qt's own translations (wizard and dialog buttons: Back, Next, Cancel ...) for the window language."""
     code = language()
@@ -94,10 +99,10 @@ def install_qt(app):
 
 # ------------------------------------------------------------------------------------------------- tools
 # functions whose first text argument is shown in a window (besides _ itself)
-SHOWN = {"_", "QAction", "explain", "section_label", "note", "hint", "chip", "message", "QPushButton", "QLabel", "QCheckBox",
+SHOWN = {"_", "N_", "QAction", "explain", "section_label", "note", "hint", "chip", "message", "QPushButton", "QLabel", "QCheckBox",
          "QRadioButton", "setTitle", "setSubTitle", "setWindowTitle", "setText", "setPlaceholderText", "say",
          "_label", "addItem"}
-FILES = ("gui.py", "setup.py", "shortcutsdialog.py")
+FILES = ("gui.py", "setup.py", "shortcutsdialog.py", "hwcheck.py")
 TABLES = {"STEPS", "PLAIN"}
 # shown, but kept in tuples and dicts the extractor does not follow: page names and their lines, Advanced's groups
 EXTRA = ["Spanish", "Portuguese (Brazil)", "Chinese (Simplified)", "%s only", "%s (and English)", "Japanese", "Chinese (Simplified and Traditional)", "English", "Korean", "Russian",
@@ -146,20 +151,38 @@ def extract():
     for t in EXTRA:
         if t not in out:
             out.append(t)
-    import config as cfgmod
-    for p in cfgmod.PRESETS.values():
-        if p.get("label") and p["label"] not in out:
-            out.append(p["label"])
-    import config as cfgmod
-    for s in cfgmod.SCHEMA:
-        for t in (s.label, s.help):
-            if t and t not in out:
-                out.append(t)
+    for t in data_texts():
+        if t and t not in out:
+            out.append(t)
     return out
 
 
+def data_texts():
+    """Texts the windows take from lenslate's tables: settings, presets, models, capture guides."""
+    import re
+    import captureinfo
+    import config as cfgmod
+    import models
+    out = list(cfgmod.SECTIONS.values())
+    for p in cfgmod.PRESETS.values():
+        out += [p.get("label"), p.get("summary"), p.get("tradeoff")]
+    for s in cfgmod.SCHEMA:
+        out += [s.label, s.help]
+    for m in models.CATALOG:
+        out += [m.title, re.sub(r" \(language model\)$", "", m.title),
+                re.sub(r"\s*\((?:language|translation|language \+ image) model\)$", "", m.title),
+                m.about, m.license, m.license.split(" (")[0], getattr(m, "can", "")]
+    for g in captureinfo.GUIDES.values():
+        out += [g["title"], g["summary"]] + list(g["tips"])
+    return [t for t in out if t and needs_words(t)]
+
+
 NOT_TEXT = {"warning", "success", "__other__", "lenslate", "lenslate %s",
-            "(described for the chosen model: llm_description)"}   # markers and names, not words to translate
+            "(described for the chosen model: llm_description)",    # markers and names, not words to translate
+            # model and licence names: the same in every language
+            "CC-BY-4.0", "Apache-2.0", "Gemma 4 E2B", "Qwen3.5 4B uncensored", "PLaMo 3 Translate 0.8B",
+            "PLaMo 3 Translate 2B", "Hy-MT2 1.8B", "LFM2 350M EN-JP", "Qwen3-VL 4B", "PLaMo Community License",
+            "LFM Open License"}
 
 
 def needs_words(t):

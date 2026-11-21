@@ -8,7 +8,6 @@ from tests import SCRATCH  # noqa: F401 - sets the private config and cache fold
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 try:
-    from PySide6.QtCore import Qt
     from PySide6.QtWidgets import QApplication
 except ImportError:      # the GUI toolkit is a system package: skip where it is missing
     QApplication = None
@@ -36,7 +35,7 @@ class TaskBars(unittest.TestCase):
     def test_download_survives_a_page_rebuild(self):
         import models
         win = self.win
-        win.nav.setCurrentItem(win.nav.findItems("Models", Qt.MatchFixedString)[0])
+        win.show_page("Models")
         self.app.processEvents()
         m = next(x for x in models.CATALOG if not os.path.exists(os.path.join(x.path, ".complete")))
         gate, calls = threading.Event(), []
@@ -68,6 +67,48 @@ class TaskBars(unittest.TestCase):
         finally:
             gate.set()
             models.download = old
+
+
+@unittest.skipIf(QApplication is None, "PySide6 is not installed")
+class Pages(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        import gui
+        import theme
+        cls.app = QApplication.instance() or QApplication(["test"])
+        theme.install(cls.app)
+        cls.gui = gui
+
+    def test_a_page_opens_by_name_with_the_sidebar_folded(self):
+        # the sidebar's texts are translated, or empty when folded: pages were looked up by their English text
+        win = self.gui.MainWindow()
+        win.set_nav_collapsed(True)
+        win.show_page("Translation")
+        self.assertEqual(win.nav.currentRow(), 1)
+        win.show_page("names & fixes")
+        self.assertEqual(win.nav.currentRow(), 4)
+        win.close()
+
+    def test_no_names_note_only_for_an_empty_list(self):
+        import names as nm
+        os.makedirs(nm.NAMES_DIR, exist_ok=True)
+        path = os.path.join(nm.NAMES_DIR, "zz-test-game.tsv")
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(nm.HEADER.format(game="zz-test-game") + "リゲル\tRigel\n")
+        try:
+            win = self.gui.MainWindow()
+            win.show_page("Names & fixes")
+            self.app.processEvents()
+            win.name_game.setCurrentIndex(win.name_game.findData("zz-test-game"))
+            self.assertEqual(win.name_table.rowCount(), 1)
+            self.assertTrue(win.names_empty.isHidden())        # it stood above a filled table before
+            win.name_game.setCurrentIndex(win.name_game.findData("global"))
+            self.assertEqual(win.name_table.rowCount(), 0)
+            self.assertFalse(win.names_empty.isHidden())
+            self.assertEqual(win.name_game.currentText(), "All games")
+            win.close()
+        finally:
+            os.remove(path)
 
 
 if __name__ == "__main__":
