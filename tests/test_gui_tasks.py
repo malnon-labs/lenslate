@@ -111,5 +111,60 @@ class Pages(unittest.TestCase):
             os.remove(path)
 
 
+@unittest.skipIf(QApplication is None, "PySide6 is not installed")
+class SelfChangedSettings(unittest.TestCase):
+    """When lenslate switches a setting by itself, a notice above the page says so and stays (it was a help-bar
+    line that the next mouse move erased); after a language change, Undo puts the languages and steps back."""
+    @classmethod
+    def setUpClass(cls):
+        import gui
+        import theme
+        cls.app = QApplication.instance() or QApplication(["test"])
+        theme.install(cls.app)
+        cls.gui = gui
+
+    def setUp(self):
+        import config as cfgmod
+        self.cfg = cfgmod
+        self.keep = {k: cfgmod.get(k) for k in self.gui.STEP_KEYS}
+
+    def tearDown(self):
+        self.cfg.set_many(self.keep)
+
+    def test_a_new_config_is_not_switched(self):
+        self.assertEqual(self.cfg.BY_KEY["ocr.reading"].default, "fast")   # Careful is retired: never the default
+        win = self.gui.MainWindow()
+        self.assertTrue(win.notice_bar.isHidden())
+        win.close()
+
+    def test_a_retired_choice_is_switched_with_a_notice_that_stays(self):
+        self.cfg.set("ocr.reading", "accurate")
+        win = self.gui.MainWindow()
+        self.assertEqual(self.cfg.get("ocr.reading"), "fast")
+        self.assertFalse(win.notice_bar.isHidden())
+        self.assertIn("Careful", win.notice_text.text())
+        self.assertTrue(win.notice_undo.isHidden())      # nothing to go back to: Careful is not offered
+        win.say("something else")                        # a help-bar message does not remove it
+        self.assertFalse(win.notice_bar.isHidden())
+        win.close()
+
+    def test_undo_after_a_language_change(self):
+        self.cfg.set_many({"translator.sources": "ja", "translator.language": "English", "ocr.reading": "ultrafast"})
+        win = self.gui.MainWindow()
+        win.show_page("Translation")
+        self.app.processEvents()
+        self.assertTrue(win.notice_bar.isHidden())
+        self.cfg.set("translator.sources", "zh")         # what the Translate from list does, then:
+        win.languages_changed()
+        self.assertEqual(self.cfg.get("ocr.reading"), "fast")     # Ultrafast reads Japanese only
+        self.assertFalse(win.notice_bar.isHidden())
+        self.assertFalse(win.notice_undo.isHidden())
+        win.notice_undo.click()
+        self.assertEqual(self.cfg.get("translator.sources"), "ja")
+        self.assertEqual(self.cfg.get("ocr.reading"), "ultrafast")
+        self.assertTrue(win.notice_bar.isHidden())
+        win.close()
+
+
 if __name__ == "__main__":
     unittest.main()

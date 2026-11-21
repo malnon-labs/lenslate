@@ -489,7 +489,8 @@ OPTION_LIMITS = {
         _("Only Japanese to English (pick Japanese and English above)."),
     ("ocr.gpu", "all"): lambda src, tgt, nv: None if nv else _("Needs an NVIDIA graphics card; none was found."),
     # retired from the window 2026-11-10: on 18 test screens Careful found nothing Quick missed and was 2-3x slower.
-    # The code stays (config.toml `[ocr] reading = "accurate"` is switched to Quick when the window opens).
+    # The code stays (config.toml `[ocr] reading = "accurate"` is switched to Quick when the window opens); the
+    # default is Quick since 2026-11-21, so a new config.toml is never switched at its first start.
     ("ocr.reading", "accurate"): lambda src, tgt, nv: _("Careful reading is no longer offered (it found nothing "
                                                         "Quick missed in tests, and was 2-3x slower)."),
 }
@@ -513,6 +514,14 @@ def option_blocks():
     return out
 
 
+STEP_KEYS = ("translator.sources", "translator.language", "ocr.reading", "ocr.gpu", "translator.kind")
+
+
+def steps_snapshot():
+    """The languages and the steps as they are now (what Undo puts back after a switch)."""
+    return {k: cfgmod.get(k) for k in STEP_KEYS}
+
+
 def enforce_steps():
     """Switch any step whose current choice no longer fits to its fallback. Returns what changed, as text."""
     blocked = option_blocks()
@@ -525,7 +534,8 @@ def enforce_steps():
         if new is None:
             continue
         cfgmod.set(key, new)
-        changed.append("%s → %s: %s" % (_(labels[key].get(val, val)), _(labels[key].get(new, new)), why))
+        changed.append("%s → %s: %s" % (_(labels[key].get(val, val)), _(labels[key].get(new, new)),
+                                         why.rstrip(".。")))     # (the message around it ends the sentence)
     return changed
 
 
@@ -738,10 +748,9 @@ class Window(QWidget):
         self.nav_collapsed = False
         self.pages = QStackedWidget()
         # options that no longer fit (or were retired, like Careful reading) switch to their fallback before the
-        # pages are built, and the help bar says what changed
+        # pages are built; a notice above the page says what changed and stays until it is closed
         startup_changes = enforce_steps()
-        if startup_changes:
-            QTimer.singleShot(500, lambda: self.say(_("Changed: %s.") % "; ".join(startup_changes)))
+        self.notice_bar = self._make_notice_bar()
         self.page_specs = (
                 (N_("Overlay"), self.page_overlay, N_("Translate text anywhere on screen: games, browsers, videos, "
                                                       "documents.")),
@@ -778,7 +787,13 @@ class Window(QWidget):
         self.split.setChildrenCollapsible(False)
         self.split.setHandleWidth(4)
         self.split.addWidget(self.nav_side)
-        self.split.addWidget(self.pages)
+        right = QWidget()
+        rlay = QVBoxLayout(right)
+        rlay.setContentsMargins(0, 0, 0, 0)
+        rlay.setSpacing(0)
+        rlay.addWidget(self.notice_bar)
+        rlay.addWidget(self.pages, 1)
+        self.split.addWidget(right)
         self.split.setStretchFactor(0, 0)
         self.split.setStretchFactor(1, 1)
         self.split.splitterMoved.connect(self._nav_dragged)
@@ -790,6 +805,9 @@ class Window(QWidget):
         lay.addLayout(top, 1)
         lay.addWidget(self.helpbar)
 
+        self.settled = steps_snapshot()
+        if startup_changes:
+            self.notice(_("lenslate changed a setting that no longer fits: %s.") % "; ".join(startup_changes))
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.refresh_status)
         self.timer.start(2000)
@@ -868,6 +886,7 @@ class Window(QWidget):
         self.stale = set(range(self.pages.count()))
         self._rebuild_page(self.pages.currentIndex())
         self.refresh_status()
+        self.settled = steps_snapshot()
 
     def _page_shown(self, i):
         if i in getattr(self, "stale", set()):
@@ -961,8 +980,10 @@ class Window(QWidget):
     def run_setup(self):
         import setup
         ok, measure = setup.run(self)
-        enforce_steps()     # the setup may have changed the languages
+        changed = enforce_steps()     # the setup may have changed the languages
         self.rebuild_pages()
+        if changed:
+            self.notice(_("lenslate changed a setting that no longer fits: %s.") % "; ".join(changed))
         if ok:
             p = cfgmod.PRESETS.get(cfgmod.current_preset())
             self.say(_("Setup done: %s preset.") % _(p["label"]) if p else _("Setup done."))
@@ -1001,6 +1022,43 @@ class Window(QWidget):
     def error(self, text):
         self.flt.show(text, "error")
 
+    def _make_notice_bar(self):
+        outer = QWidget()       # the page's own margins around the box (it sits above the page title)
+        ol = QVBoxLayout(outer)
+        ol.setContentsMargins(16, 12, 16, 0)
+        box = set_role(QFrame(), "tip")     # the look of the Overlay page's tip
+        box.setMaximumWidth(CONTENT_W)
+        ol.addWidget(box)
+        bar = outer
+        lay = QHBoxLayout(box)
+        lay.setContentsMargins(12, 8, 8, 8)
+        self.notice_text = QLabel()
+        self.notice_text.setWordWrap(True)
+        self.notice_undo = set_role(QPushButton(_("Undo")), "secondary")
+        self.notice_undo.clicked.connect(self._notice_undo)
+        close = set_role(QPushButton(_("OK")), "quiet")
+        close.clicked.connect(lambda: self.notice(None))
+        lay.addWidget(self.notice_text, 1)
+        lay.addWidget(self.notice_undo, 0, Qt.AlignTop)
+        lay.addWidget(close, 0, Qt.AlignTop)
+        bar.setVisible(False)
+        self._undo = None
+        return bar
+
+    def notice(self, text, undo=None):
+        """Something lenslate did by itself (a setting switched because it no longer fits): said above the page,
+        where it stays until OK (or Undo, when the change can be taken back). None hides it."""
+        self._undo = undo
+        self.notice_text.setText(text or "")
+        self.notice_undo.setVisible(undo is not None)
+        self.notice_bar.setVisible(bool(text))
+
+    def _notice_undo(self):
+        undo, self._undo = self._undo, None
+        self.notice(None)
+        if undo:
+            undo()
+
     def say(self, text):
         """A status message in the help bar (normal text)."""
         self.flt.pending = None
@@ -1011,7 +1069,7 @@ class Window(QWidget):
         f = self.flt
         import shortcutsdialog
         keys = shortcutsdialog.keys_now()
-        hot = lambda a: "Hotkey: %s." % shortcutsdialog.key_text(a, keys)   # noqa: E731
+        hot = lambda a: _("Hotkey: %s.") % shortcutsdialog.key_text(a, keys)   # noqa: E731
         # one indicator + one button: the button always says what it will do
         self.run_dot = QLabel()
         self.run_text = QLabel()
@@ -1280,13 +1338,20 @@ class Window(QWidget):
         cfgmod.set_many(d)
         changed = enforce_steps()     # e.g. the languages changed since: an option that no longer fits
         self.rebuild_pages()
-        self.say(_("Custom: %s.%s") % (self._describe_steps(d), (_(" Switched: %s") % "; ".join(changed)) if changed else ""))
+        self.say(_("Custom: %s.") % self._describe_steps(d))
+        if changed:
+            self.notice(_("Some of your combination no longer fits, so lenslate switched it: %s.") % "; ".join(changed))
 
     def languages_changed(self):
+        before = dict(self.settled)     # the languages and steps as they were before this change
         changed = enforce_steps()
         self.rebuild_pages()
         if changed:
-            self.say(_("Switched because of the languages: %s.") % "; ".join(changed))
+            def undo():
+                cfgmod.set_many(before)
+                self.rebuild_pages()
+                self.say(_("Undone: the languages and steps are as they were."))
+            self.notice(_("Switched because of the languages: %s.") % "; ".join(changed), undo)
 
     def _steps_box(self, extra=None):
         """The three steps. Each title has a "?" that shows how the chosen option works (hovering any option

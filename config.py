@@ -165,7 +165,7 @@ SCHEMA = [
       "needs a lot of GPU memory).", choices=("ocr", "vlm")),
     S("ocr.threads", 6, "LENSLATE_OCR_THREADS", "OCR threads",
       "Processor threads used for reading text from the screen. 6 was as fast as 12 in tests.", lo=1, hi=64),
-    S("ocr.reading", "accurate", "LENSLATE_READING", "Reading",
+    S("ocr.reading", "fast", "LENSLATE_READING", "Reading",
       "accurate = the text finder looks at every area at full size and small text is read again enlarged: finds "
       "small and faint text (version numbers, hints, small UI). fast = the finder looks once (shrunk to at most "
       "1920 px) and its lines go straight to the reader: 2-3x faster, but small or faint text can be missed. "
